@@ -1,0 +1,66 @@
+body {
+  color: rgb(20, 20, 20);
+  font-size: 15px;
+  line-height: 1.7rem;
+  letter-spacing: 0.04rem;
+  font-family: "Helvetica Neue",
+    Arial,
+    "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans",
+    Meiryo,
+    sans-serif;
+}
+
+h1 {
+  font-size: 26px;
+  margin-top: 10px;
+  margin-bottom: 40px;
+  letter-spacing: 0.15rem;
+  line-height: 2.2rem;
+}
+
+h2 {
+  font-size: 24px;
+  margin-top: 80px;
+}
+
+h3 {
+  font-size: 20px;
+  margin-top: 40px;
+}
+
+h4 {
+  font-size: 18px;
+  margin-top: 30px;
+}
+
+p {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  padding-right: 20px;
+}
+
+pre {
+  border-radius: 4px;
+  background-color: rgb(255, 255, 255, 0.7) !important;
+  border: 1px solid rgb(210, 210, 210);
+  font-size: 0.8rem;
+  letter-spacing: 0;
+}
+
+blockquote {
+  margin-left: 4px;
+  margin-right: 0;
+  border-left: 4px solid #D1E0EA;
+  padding-left: 14px;
+  color: rgb(100, 100, 100);
+  font-size: 0.9rem;
+}
+
+.fa-link {
+  font-size: 1rem;
+  color: rgb(0, 0, 0, 0.15);
+  position: relative;
+  left: -6px;
+  padding-bottom: 4px;
+}

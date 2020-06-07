@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.md": "mdx"
+  },
+  "files.enableTrash": false
+}
