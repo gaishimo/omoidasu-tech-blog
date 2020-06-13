@@ -34,6 +34,10 @@ export function BaseLayout(props: Props) {
         <meta name="og:site_name" content="Omoidasu Tech Blog" />
         <meta name="og:description" content={props.description} />
         <meta name="og:image" content="/ogImage.png" />
+        <script
+          src="https://kit.fontawesome.com/d0cfd959a8.js"
+          crossOrigin="anonymous"
+        ></script>
         <link rel="icon" href="/favicon.png" />
         {/* render-blockingを防ぐため2つ記述する */}
         {/* https://qiita.com/rana_kualu/items/95a7adf8420ea2b9f657 */}
@@ -48,10 +52,6 @@ export function BaseLayout(props: Props) {
         <link
           href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css"
           rel="stylesheet"
-        />
-        <script
-          src="https://kit.fontawesome.com/d0cfd959a8.js"
-          crossOrigin="anonymous"
         />
       </Head>
       <Header />
