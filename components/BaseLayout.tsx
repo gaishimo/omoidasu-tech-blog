@@ -21,6 +21,8 @@ const DEFAULT_TITLE = "Omoidasu Tech Blog"
 
 const WEB_FONT_URL =
   "https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;700&display=swap"
+const PRISM_CSS_URL =
+  "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css"
 
 export function BaseLayout(props: Props) {
   return (
@@ -35,6 +37,7 @@ export function BaseLayout(props: Props) {
         <meta name="og:description" content={props.description} />
         <meta name="og:image" content="/ogImage.png" />
         <script
+          async
           src="https://kit.fontawesome.com/d0cfd959a8.js"
           crossOrigin="anonymous"
         ></script>
@@ -49,9 +52,14 @@ export function BaseLayout(props: Props) {
           // @ts-ignore
           onLoad="this.media = 'all'"
         />
+
+        <link href={PRISM_CSS_URL} rel="preload" as="style" />
         <link
-          href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css"
           rel="stylesheet"
+          href={PRISM_CSS_URL}
+          media="print"
+          // @ts-ignore
+          onLoad="this.media = 'all'"
         />
       </Head>
       <Header />
