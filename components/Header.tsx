@@ -13,7 +13,7 @@ export function Header(props: Props) {
       {props.useH1 ? (
         <h1 css={styles.title}>
           <img css={styles.logo} src="/omoidasuLogo.png" />
-          <img alt="omoidasu" css={styles.titleLogo} src="/titleLogo.png" />>
+          <img alt="omoidasu" css={styles.titleLogo} src="/titleLogo.png" />
         </h1>
       ) : (
         <Link href={"/"}>
