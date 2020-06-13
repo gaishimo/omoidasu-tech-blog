@@ -16,6 +16,7 @@ const styles = {
     borderRadius: 14,
     backgroundColor: "rgba(250, 250, 250, 0.5)",
     color: "rgb(120, 120, 120)",
-    fontSize: "0.85rem",
+    fontSize: "0.8rem",
+    lineHeight: 1.7,
   }),
 }

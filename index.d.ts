@@ -1,0 +1,16 @@
+type PostMeta = {
+  title: string
+  tagNames: string[]
+  color1: string
+  color2: string
+  author: string
+  description: string
+  createdAt: Date
+  lastUpdatedAt: Date
+}
+
+type Post = PostMeta & {
+  id: string
+  createdAt: string
+  lastUpdatedAt: string
+}

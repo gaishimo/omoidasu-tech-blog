@@ -2,7 +2,7 @@ body {
   color: rgb(20, 20, 20);
   font-size: 15px;
   line-height: 1.7rem;
-  letter-spacing: 0.04rem;
+  letter-spacing: 0.035rem;
   font-family: "Helvetica Neue",
     Arial,
     "Hiragino Kaku Gothic ProN",
@@ -24,6 +24,7 @@ h1 {
   margin-bottom: 40px;
   letter-spacing: 0.1rem;
   line-height: 2.2rem;
+  color: rgb(30, 30, 30);
 }
 @media screen and (max-width: 700px) {
   h1 {
@@ -65,7 +66,7 @@ h4 {
 
 p {
   margin-top: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
   padding-right: 20px;
   @media screen and (max-width: 700px) {
     padding-right: 0;
@@ -77,9 +78,30 @@ pre {
   background-color: rgb(255, 255, 255, 0.7) !important;
   border: 1px solid rgb(210, 210, 210);
   white-space: pre-wrap;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   letter-spacing: 0;
   width: 92%;
+  margin-bottom: 40px;
+}
+
+
+pre code {
+  padding: 0;
+  font-size: 0.8rem;
+  border: none;
+}
+
+pre[class*=language-] {
+  margin-bottom: 40px;
+}
+
+code {
+  margin: 1px;
+  color: rgb(100, 20, 30);
+  border: 1px solid rgb(230, 230, 230);
+  border-radius: 4px;
+  padding: 4px 5px;
+  font-size: 0.9rem;
 }
 
 blockquote {
@@ -89,6 +111,13 @@ blockquote {
   padding-left: 14px;
   color: rgb(100, 100, 100);
   font-size: 0.8rem;
+
+}
+
+ul, ol {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-left: 20px;
 }
 
 dt {
@@ -96,10 +125,19 @@ dt {
   margin-right: 8px;
 }
 
+
+
+
+
 .fa-link {
   font-size: 1rem;
   color: rgb(0, 0, 0, 0.15);
   position: relative;
   left: -6px;
   padding-bottom: 4px;
+}
+@media screen and (max-width: 700px) {
+  .fa-link {
+    padding-bottom: 0;
+  }
 }

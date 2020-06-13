@@ -9,7 +9,7 @@ type Props = {
 export function Header(props: Props) {
   return (
     <header css={styles.header}>
-      <div />
+      <div css={styles.headerEdge} />
       {props.useH1 ? (
         <h1 css={styles.title}>
           <img css={styles.logo} src="/omoidasuLogo.png" />
@@ -23,10 +23,18 @@ export function Header(props: Props) {
           </div>
         </Link>
       )}
-      <div css={styles.links}>
-        {/* <Link css={styles.link} to={"/"}>
-          お問い合わせ
-        </Link> */}
+      <div css={[styles.links, styles.headerEdge]}>
+        <a css={styles.link} href="/">
+          記事一覧
+        </a>
+        <a
+          css={styles.link}
+          href="https://omoidasu.app"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          Omoidasu
+        </a>
       </div>
     </header>
   )
@@ -37,8 +45,12 @@ const styles = {
     position: "relative",
     paddingTop: 12,
     display: "flex",
-    flexDirection: "column",
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-evenly",
+  }),
+  headerEdge: css({
+    width: 200,
   }),
   logo: css({
     marginRight: 10,
@@ -62,14 +74,19 @@ const styles = {
     },
   }),
   links: css({
-    position: "absolute",
-    top: 12,
-    right: 20,
-    paddingRight: 20,
+    // position: "absolute",
+    // top: 16,
+    // right: 20,
+    // paddingRight: 20,
   }),
   link: css({
+    marginRight: 12,
+    marginLeft: 12,
+    textDecoration: "none",
+    fontSize: "0.8rem",
+    color: "rgb(70, 70, 70)",
     "&:hover": {
-      fontWeight: "bold",
+      color: "black",
     },
   }),
 }

@@ -7,28 +7,13 @@ import { PostHeader } from "./PostHeader"
 import { format } from "date-fns"
 import { mq } from "../libs/mediaQuery"
 
-/*
-<ul>
-  <li>単独の Lambda Function を作成してみる</li>
-  <li></li>
-</ul>
-*/
-
 type Headline = { title: string; children: Headline[] }
 
 type Props = {
   children: ReactNode
   // description?: string
   headlines: Headline[]
-  meta: {
-    title: string
-    tagNames: string[]
-    color1: string
-    color2: string
-    author: string
-    createdAt: Date
-    lastUpdatedAt: Date
-  }
+  meta: PostMeta
 }
 
 function parseTitleToLinkId(s: string) {
@@ -105,8 +90,8 @@ const styles = {
     },
   }),
   articleWrapper: css({
-    width: 820,
-    paddingLeft: 100,
+    width: 760,
+    paddingLeft: 160,
     [mq.sp]: {
       width: "100%",
       paddingLeft: 0,
