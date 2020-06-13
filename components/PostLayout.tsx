@@ -1,29 +1,91 @@
-import { ReactNode } from "react"
+import { ReactNode, Fragment } from "react"
 import { MDXProvider } from "@mdx-js/react"
 import { motion } from "framer-motion"
 import { BaseLayout } from "./BaseLayout"
 import { css } from "@emotion/core"
+import { PostHeader } from "./PostHeader"
+import { format } from "date-fns"
+import { mq } from "../libs/mediaQuery"
+
+/*
+<ul>
+  <li>単独の Lambda Function を作成してみる</li>
+  <li></li>
+</ul>
+*/
+
+type Headline = { title: string; children: Headline[] }
 
 type Props = {
   children: ReactNode
-  description?: string
-  title?: string
+  // description?: string
+  headlines: Headline[]
+  meta: {
+    title: string
+    tagNames: string[]
+    color1: string
+    color2: string
+    author: string
+    createdAt: Date
+    lastUpdatedAt: Date
+  }
+}
+
+function parseTitleToLinkId(s: string) {
+  const parsed = s.toLowerCase().replace(/\s/g, "-").replace(".", "")
+  return `#${parsed}`
 }
 
 export function PostLayout(props: Props) {
+  const renderHeadline = (headline: Headline) => (
+    <Fragment key={headline.title}>
+      <li css={styles.headlineItem}>
+        <a css={styles.headlineLink} href={parseTitleToLinkId(headline.title)}>
+          {headline.title}
+        </a>
+      </li>
+      {(headline.children || []).length > 0 ? (
+        <ul css={styles.headlineList}>
+          {(headline.children || []).map(child => renderHeadline(child))}
+        </ul>
+      ) : null}
+    </Fragment>
+  )
+
   return (
     <MDXProvider>
       <BaseLayout>
-        <div css={styles.container}>
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-            transition={{ duration: 1.2 }}
-          >
-            {props.children}
-          </motion.div>
-        </div>
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+          transition={{ duration: 1.2 }}
+          css={styles.container}
+        >
+          <article css={styles.articleWrapper}>
+            <div css={styles.article}>
+              <PostHeader {...props.meta} />
+              {props.children}
+            </div>
+            <div css={styles.articleFooter}>
+              <dl>
+                <dt>作者:</dt>
+                <dd>{props.meta.author}</dd>
+                <dt>最終更新:</dt>
+                <dd>{format(props.meta.lastUpdatedAt, "yyyy-MM-dd HH:mm")}</dd>
+              </dl>
+            </div>
+          </article>
+          <div css={styles.sidebar}>
+            <div css={styles.headlinesPanel}>
+              <ul css={styles.headlineList}>
+                {props.headlines.map((headline: Headline) =>
+                  renderHeadline(headline),
+                )}
+              </ul>
+            </div>
+          </div>
+        </motion.div>
       </BaseLayout>
     </MDXProvider>
   )
@@ -31,13 +93,72 @@ export function PostLayout(props: Props) {
 
 const styles = {
   container: css({
-    width: 720,
+    width: 1160,
     marginLeft: "auto",
     marginRight: "auto",
     paddingTop: 80,
     paddingBottom: 200,
+    display: "flex",
+    flexDirection: "row",
+    [mq.sp]: {
+      width: "100%",
+    },
   }),
-  content: css({
-    opacity: 0,
+  articleWrapper: css({
+    width: 820,
+    paddingLeft: 100,
+    [mq.sp]: {
+      width: "100%",
+      paddingLeft: 0,
+      padding: 10,
+    },
+  }),
+  article: css({
+    width: "100%",
+  }),
+  articleFooter: css({
+    marginTop: 30,
+    paddingTop: 16,
+    borderTop: "1px solid #DCDCDC",
+    color: "#646464",
+    fontSize: "0.8rem",
+  }),
+  sidebar: css({
+    width: 340,
+    paddingLeft: 30,
+    position: "relative",
+    [mq.sp]: {
+      display: "none",
+      width: 0,
+    },
+  }),
+  headlinesPanel: css({
+    [mq.sp]: {
+      display: "none",
+    },
+    border: "1px solid rgba(210, 210, 210, 0.5)",
+    borderRadius: 6,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    padding: 8,
+    position: "sticky",
+    top: 60,
+  }),
+  headlineList: css({
+    listStyleType: "none",
+    paddingLeft: 10,
+  }),
+  headlineItem: css({
+    color: "rgb(80, 80, 80)",
+    fontSize: "0.8rem",
+    marginBottom: 4,
+    letterSpacing: 0,
+    cursor: "pointer",
+  }),
+  headlineLink: css({
+    color: "rgb(80, 80, 80)",
+    textDecoration: "none",
+    "&:hover": {
+      fontWeight: 600,
+    },
   }),
 }

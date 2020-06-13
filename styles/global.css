@@ -11,41 +11,75 @@ body {
     sans-serif;
 }
 
+@media screen and (max-width: 700px) {
+  body {
+    font-size: 13px;
+  }
+}
+
+
 h1 {
-  font-size: 26px;
+  font-size: 1.6rem;
   margin-top: 10px;
   margin-bottom: 40px;
-  letter-spacing: 0.15rem;
+  letter-spacing: 0.1rem;
   line-height: 2.2rem;
+}
+@media screen and (max-width: 700px) {
+  h1 {
+    font-size: 1.3rem;
+  }
 }
 
 h2 {
-  font-size: 24px;
+  font-size: 1.4rem;
   margin-top: 80px;
 }
-
-h3 {
-  font-size: 20px;
-  margin-top: 40px;
+@media screen and (max-width: 700px) {
+  h2 {
+    font-size: 1.2rem;
+  }
 }
 
+
+h3 {
+  font-size: 1.2rem;
+  margin-top: 40px;
+}
+@media screen and (max-width: 700px) {
+  h3 {
+    font-size: 1rem;
+  }
+}
+
+
 h4 {
-  font-size: 18px;
+  font-size: 1.1px;
   margin-top: 30px;
+}
+@media screen and (max-width: 700px) {
+  h4 {
+    font-size: 0.9rem;
+  }
 }
 
 p {
   margin-top: 30px;
   margin-bottom: 30px;
   padding-right: 20px;
+  @media screen and (max-width: 700px) {
+    padding-right: 0;
+  }
 }
 
 pre {
   border-radius: 4px;
   background-color: rgb(255, 255, 255, 0.7) !important;
   border: 1px solid rgb(210, 210, 210);
+  white-space: pre-wrap;
   font-size: 0.8rem;
   letter-spacing: 0;
+  width: 92%;
 }
 
 blockquote {
@@ -54,7 +88,12 @@ blockquote {
   border-left: 4px solid #D1E0EA;
   padding-left: 14px;
   color: rgb(100, 100, 100);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
+}
+
+dt {
+  float: left;
+  margin-right: 8px;
 }
 
 .fa-link {

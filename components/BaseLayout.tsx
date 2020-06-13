@@ -56,9 +56,9 @@ export function BaseLayout(props: Props) {
       </Head>
       <Header />
       <main>
-        <div css={styles.background}>
+        {/* <div css={styles.background}>
           <BackgroundShapes />
-        </div>
+        </div> */}
         <div>{props.children}</div>
       </main>
 

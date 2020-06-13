@@ -1,5 +1,6 @@
 import { css } from "@emotion/core"
 import Link from "next/link"
+import { mq } from "../libs/mediaQuery"
 
 type Props = {
   useH1?: boolean
@@ -47,12 +48,18 @@ const styles = {
   title: css({
     marginTop: 6,
     paddingRight: 36,
+    [mq.sp]: {
+      paddingRight: 20,
+    },
     display: "flex",
     flexDirection: "row",
   }),
   titleLogo: css({
     height: 50,
     width: "auto",
+    [mq.sp]: {
+      height: 40,
+    },
   }),
   links: css({
     position: "absolute",

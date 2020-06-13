@@ -3,32 +3,30 @@ import { PostHeader } from "../../components/PostHeader"
 
 export const meta = {
   title: "Node.jsでLambdaを開発するならClaudia.jsがオススメ",
-  tags: ["node.js", "lambda"],
+  tagNames: ["node.js", "lambda"],
   color1: "#00D5FF",
   color2: "#6BD63E",
   createdAt: new Date("2020-06-05"),
+  author: "@gaishimo",
+  lastUpdatedAt: new Date("2020-06-05"),
 }
 
 export const headlines = [
-  { title: "Claudia.jsとは", children: [] },
-  { title: "単独の Lambda Function を作成してみる",
+  {
+    title: "Claudia.jsとは",
+    children: [],
+  },
+  {
+    title: "単独の Lambda Function を作成してみる",
     children: [
       { title: "コマンドラインツールをインストール", children: [] },
       { title: "Lambda プロジェクト作成", children: [] },
-    ]
+    ],
   },
 ]
 
+export default (props) => <PostLayout headlines={headlines} meta={meta}>{props.children}</PostLayout>
 
-export default (props) => <PostLayout>{props.children}</PostLayout>
-
-<PostHeader 
-  color1={"#00D5FF"}
-  color2={"#6BD63E"}
-  tagNames={meta.tags}
-  title={meta.title}
-  createdAt={meta.createdAt}
-/>
 
 
 この記事は[Serverless(2) Advent Calendar 2016](http://qiita.com/advent-calendar/2016/serverless2) の 16 日目の記事です。
