@@ -2,6 +2,8 @@ const rehypePrism = require("@mapbox/rehype-prism")
 const remarkSlug = require("remark-slug")
 const remarkAutolinkHeadings = require("remark-autolink-headings")
 
+const withOffline = require("next-offline")
+
 const withMDX = require("@next/mdx")({
   extension: /\.mdx?$/,
   options: {
@@ -26,6 +28,8 @@ const withMDX = require("@next/mdx")({
     ],
   },
 })
-module.exports = withMDX({
-  pageExtensions: ["tsx", "mdx"],
-})
+module.exports = withOffline(
+  withMDX({
+    pageExtensions: ["tsx", "mdx"],
+  }),
+)
