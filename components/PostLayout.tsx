@@ -40,13 +40,14 @@ export function PostLayout(props: Props) {
   return (
     <MDXProvider>
       <BaseLayout>
-        <motion.div
+        {/* <motion.div
           initial="hidden"
           animate="visible"
           variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
           transition={{ duration: 1.2 }}
           css={styles.container}
-        >
+        > */}
+        <div css={styles.container}>
           <article css={styles.articleWrapper}>
             <div css={styles.article}>
               <PostHeader {...props.meta} />
@@ -70,7 +71,8 @@ export function PostLayout(props: Props) {
               </ul>
             </div>
           </div>
-        </motion.div>
+        </div>
+        {/* </motion.div> */}
       </BaseLayout>
     </MDXProvider>
   )
