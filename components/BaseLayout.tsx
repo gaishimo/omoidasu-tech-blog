@@ -40,6 +40,7 @@ export function BaseLayout(props: Props) {
           content={props.description || DEFAULT_DESC}
         />
         <meta name="og:image" content="/ogImage.png" />
+        <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/favicon.png" />
         {/* render-blockingを防ぐため2つ記述する */}
         {/* https://qiita.com/rana_kualu/items/95a7adf8420ea2b9f657 */}
