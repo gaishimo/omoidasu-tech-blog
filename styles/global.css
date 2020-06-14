@@ -125,19 +125,11 @@ dt {
   margin-right: 8px;
 }
 
-svg.svg-inline--fa {
-  width: 16px;
+.header-link-icon {
+  margin-right: 6px;
 }
 
 
-
-.fa-link {
-  font-size: 1rem;
-  color: rgb(0, 0, 0, 0.15);
-  position: relative;
-  left: -6px;
-  padding-bottom: 4px;
-}
 @media screen and (max-width: 700px) {
   .fa-link {
     padding-bottom: 0;

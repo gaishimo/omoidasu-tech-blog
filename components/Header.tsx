@@ -12,14 +12,26 @@ export function Header(props: Props) {
       <div css={styles.headerEdge} />
       {props.useH1 ? (
         <h1 css={styles.title}>
-          <img css={styles.logo} src="/omoidasuLogo.png" />
-          <img alt="omoidasu" css={styles.titleLogo} src="/titleLogo.png" />
+          <img alt="omoidasu logo" css={styles.logo} src="/omoidasuLogo.png" />
+          <img
+            alt="omoidasu title logo"
+            css={styles.titleLogo}
+            src="/titleLogo.png"
+          />
         </h1>
       ) : (
         <Link href={"/"}>
           <div css={styles.title}>
-            <img css={styles.logo} src="/omoidasuLogo.png" />
-            <img alt="omoidasu" css={styles.titleLogo} src="/titleLogo.png" />
+            <img
+              alt="omoidasu logo"
+              css={styles.logo}
+              src="/omoidasuLogo.png"
+            />
+            <img
+              alt="omoidasu title logo"
+              css={styles.titleLogo}
+              src="/titleLogo.png"
+            />
           </div>
         </Link>
       )}

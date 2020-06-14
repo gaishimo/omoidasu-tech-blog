@@ -14,8 +14,12 @@ const withMDX = require("@next/mdx")({
           behavior: "prepend",
           content: {
             type: "element",
-            tagName: "i",
-            properties: { className: ["fas", "fa-link", "fa-sm"] },
+            tagName: "img",
+            properties: {
+              alt: "header link",
+              src: "/linkGreyIcon.png",
+              className: ["header-link-icon"],
+            },
           },
         },
       ],
