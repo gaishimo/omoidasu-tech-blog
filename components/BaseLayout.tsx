@@ -18,6 +18,7 @@ type Props = {
 //   : Constants.SITE_HOSTNAME
 
 const DEFAULT_TITLE = "Omoidasu Tech Blog"
+const DEFAULT_DESC = "Omoidasu, Inc.の技術ブログです。"
 
 const WEB_FONT_URL =
   "https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;700&display=swap"
@@ -30,11 +31,14 @@ export function BaseLayout(props: Props) {
       <Head>
         <title>{props.title || DEFAULT_TITLE}</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
-        <meta name="description" content={props.description} />
+        <meta name="description" content={props.description || DEFAULT_DESC} />
         <meta name="og:title" content={props.title || DEFAULT_TITLE} />
         <meta name="og:type" content="website" />
         <meta name="og:site_name" content="Omoidasu Tech Blog" />
-        <meta name="og:description" content={props.description} />
+        <meta
+          name="og:description"
+          content={props.description || DEFAULT_DESC}
+        />
         <meta name="og:image" content="/ogImage.png" />
         <link rel="icon" href="/favicon.png" />
         {/* render-blockingを防ぐため2つ記述する */}
