@@ -39,7 +39,10 @@ export function PostLayout(props: Props) {
 
   return (
     <MDXProvider>
-      <BaseLayout>
+      <BaseLayout
+        title={`${props.meta.title} | Omoidasu Tech Blog`}
+        description={props.meta.description}
+      >
         {/* <motion.div
           initial="hidden"
           animate="visible"
