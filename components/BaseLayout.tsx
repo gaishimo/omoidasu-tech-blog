@@ -37,7 +37,7 @@ export function BaseLayout(props: Props) {
         <meta name="og:description" content={props.description} />
         <meta name="og:image" content="/ogImage.png" />
         <script
-          async
+          defer
           src="https://kit.fontawesome.com/d0cfd959a8.js"
           crossOrigin="anonymous"
         ></script>
