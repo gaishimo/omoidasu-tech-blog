@@ -40,6 +40,7 @@ export function BaseLayout(props: Props) {
           content={props.description || DEFAULT_DESC}
         />
         <meta name="og:image" content="/ogImage.png" />
+        <meta name="theme-color" content="#00D5FF" />
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/favicon.png" />
         {/* render-blockingを防ぐため2つ記述する */}
