@@ -1,3 +1,4 @@
+import { parseISO } from "date-fns"
 import { PostLayout } from "../../components/PostLayout"
 import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 
@@ -9,7 +10,7 @@ export const meta = {
   createdAt: new Date("2020-06-13"),
   author: "@gaishimo",
   description: "ブログを新たに開設しました。",
-  lastUpdatedAt: new Date("2020-06-13"),
+  lastUpdatedAt: parseISO("2020-06-14 18:40:00 JST"),
 }
 
 export const headlines = [
@@ -222,10 +223,14 @@ const withMDX = require("@next/mdx")({
           behavior: "prepend",
           content: {
             type: "element",
-            tagName: "i",
-            properties: { className: ["fas", "fa-link", "fa-sm"] },
+            tagName: "img",
+            properties: {
+              alt: "header link",
+              src: "/linkGreyIcon.png",
+              className: ["header-link-icon"],
+            },
           },
-        },
+        },,
       ]
     ]
   }
@@ -233,10 +238,10 @@ const withMDX = require("@next/mdx")({
 ```
 
 この設定をすると、以下のようにヘッダに自動でリンク(aタグ)を設定されます。
-さらにiタグのエレメントを見出しの前に追加することで左にリンクアイコンを表示しています(アイコンはfont-awesomeを利用しました。
+さらにimgタグのエレメントを見出しの前に追加することで左にリンクアイコンを表示しています。
 
 ```html
-<h2><a href="#見出し1">見出し1</a></h2>
+<h2><a href="#見出し1"><img src="/linkGreyIcon.png" /></a>見出し1</h2>
 ```
 
 ### rehype-pluginでpreタグのシンタックスハイライト設定
