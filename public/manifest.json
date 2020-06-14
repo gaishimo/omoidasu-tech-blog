@@ -3,7 +3,7 @@
   "short_name": "Omoidash Tech",
   "theme_color": "#00d5ff",
   "background_color": "white",
-  "display": "browser",
+  "display": "minimal-ui",
   "Scope": "/",
   "start_url": "/",
   "icons": [
