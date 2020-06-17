@@ -5,6 +5,7 @@ import { Footer } from "./Footer"
 import { css } from "@emotion/core"
 import { getScrollHeight } from "../utils/domUtils"
 import BackgroundShapes from "./BackgroundShapes"
+import { Constants } from "../libs/Constants"
 
 type Props = {
   children: ReactNode
@@ -41,6 +42,28 @@ export function BaseLayout(props: Props) {
         />
         <meta name="og:image" content="/ogImage.png" />
         <meta name="theme-color" content="#00D5FF" />
+
+        {Constants.GA_TRACKING_ID != null && (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${Constants.GA_TRACKING_ID}`}
+            />
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${Constants.GA_TRACKING_ID}', {
+              page_path: window.location.pathname,
+            });
+          `,
+              }}
+            />
+          </>
+        )}
+
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/favicon.png" />
         {/* render-blockingを防ぐため2つ記述する */}
