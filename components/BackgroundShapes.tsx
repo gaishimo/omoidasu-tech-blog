@@ -58,7 +58,7 @@ function getRandomPosition(
   size: number,
 ) {
   return {
-    x: random(size, windowWidth - size * 3),
+    x: random(size, windowWidth - 100 - size * 4),
     y: random(size, windowHeight - size),
   }
 }

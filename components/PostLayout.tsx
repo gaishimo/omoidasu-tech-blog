@@ -98,9 +98,9 @@ const styles = {
     width: 760,
     paddingLeft: 160,
     [mq.sp]: {
-      width: "100%",
+      width: "96%",
       paddingLeft: 0,
-      padding: 10,
+      padding: 8,
     },
   }),
   article: css({
