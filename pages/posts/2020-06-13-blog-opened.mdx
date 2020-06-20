@@ -1,4 +1,4 @@
-import { parseISO } from "date-fns"
+import { parse, parseISO } from "date-fns"
 import { PostLayout } from "../../components/PostLayout"
 import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 
@@ -10,7 +10,8 @@ export const meta = {
   createdAt: new Date("2020-06-13"),
   author: "@gaishimo",
   description: "ブログを新たに開設しました。",
-  lastUpdatedAt: parseISO("2020-06-14 18:40:00 JST"),
+  imagePath: "/ogImage.png",
+  lastUpdatedAt: new Date("2020-06-20 10:36:00 +09:00"),
 }
 
 export const headlines = [
@@ -29,7 +30,12 @@ export const headlines = [
 
 export default (props) => <PostLayout headlines={headlines} meta={meta}>{props.children}</PostLayout>
 
-Omoidasu Techブログを開設しました!
+この度Omoidasu Techブログというブログサイトを開設しました!
+
+<ImageWrapper width="50%">
+  <img alt="テンプレート表示" src="/ogImage.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
 
 Omoidasu, Inc.では[omoidasu](https://omoidasu.app)というアプリを開発しているのですが、開発の際のノウハウや調査等の情報をここに残していきたいと思います。
 

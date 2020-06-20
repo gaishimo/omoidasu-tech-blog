@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:rss": "node ./.next/serverless/posts/rss-feed.js",
     "start": "next start"
   },
   "dependencies": {
@@ -22,7 +23,8 @@
     "react-scroll-parallax": "^2.3.3",
     "remark-autolink-headings": "^6.0.0",
     "remark-emoji": "^2.1.0",
-    "remark-slug": "^6.0.0"
+    "remark-slug": "^6.0.0",
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@emotion/babel-preset-css-prop": "^10.0.27",

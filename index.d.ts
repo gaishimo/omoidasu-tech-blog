@@ -9,6 +9,7 @@ type PostMeta = {
   color2: string
   author: string
   description: string
+  imagePath: string | null
   createdAt: Date
   lastUpdatedAt: Date
 }

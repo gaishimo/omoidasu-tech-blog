@@ -4,6 +4,7 @@ import * as path from "path"
 import { BaseLayout } from "../components/BaseLayout"
 import { PostItem } from "../components/PostItem"
 import { mq } from "../libs/mediaQuery"
+import { getAllPosts } from "../libs/posts"
 
 type Props = {
   posts: Post[]
@@ -64,16 +65,7 @@ const styles = {
 }
 
 export async function getStaticProps() {
-  const mdxFileNames = fs.readdirSync(path.resolve(".", "pages", "posts"))
-  const posts = mdxFileNames
-    .map(fileName => {
-      const { meta } = require(`./posts/${fileName}`)
-      return {
-        ...meta,
-        id: fileName.replace(/.mdx$/, ""),
-      }
-    })
-    .sort((a: PostMeta, b: PostMeta) => (a.createdAt > b.createdAt ? 0 : 1))
+  const posts = await getAllPosts()
   return {
     props: {
       posts: JSON.parse(JSON.stringify(posts)),
