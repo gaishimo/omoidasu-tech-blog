@@ -3,7 +3,7 @@ import { ReactNode } from "react"
 import { Header } from "./Header"
 import { Footer } from "./Footer"
 import { css } from "@emotion/core"
-import { getScrollHeight } from "../utils/domUtils"
+import { getScrollHeight, isBrowser } from "../utils/domUtils"
 import BackgroundShapes from "./BackgroundShapes"
 import { Constants } from "../libs/Constants"
 
@@ -14,9 +14,9 @@ type Props = {
 }
 
 // OGPのボット等からリクエストがきた場合windowが無いので注意
-// const currentHostName = isBrowser()
-//   ? window.location.hostname
-//   : Constants.SITE_HOSTNAME
+const currentHostName = isBrowser()
+  ? window.location.hostname
+  : Constants.SITE_HOSTNAME
 
 const DEFAULT_TITLE = "Omoidasu Tech Blog"
 const DEFAULT_DESC = "Omoidasu, Inc.の技術ブログです。"
@@ -40,7 +40,10 @@ export function BaseLayout(props: Props) {
           name="og:description"
           content={props.description || DEFAULT_DESC}
         />
-        <meta name="og:image" content="/ogImage.png" />
+        <meta
+          name="og:image"
+          content={`https://${currentHostName}/ogImage.png`}
+        />
         <meta name="theme-color" content="#00D5FF" />
 
         {Constants.GA_TRACKING_ID != null && (
