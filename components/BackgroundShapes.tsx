@@ -57,7 +57,6 @@ function getRandomPosition(
   windowHeight: number,
   size: number,
 ) {
-  console.log("windowWidth:", windowWidth)
   return {
     x: random(size, windowWidth - size * 2),
     y: random(size, windowHeight - size),
