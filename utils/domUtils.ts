@@ -11,7 +11,7 @@ export function getScrollHeight() {
 
 export function getWindowWidth() {
   if (typeof window !== "undefined") {
-    return window.innerWidth
+    return window.screen.width
   }
   return 0
 }
