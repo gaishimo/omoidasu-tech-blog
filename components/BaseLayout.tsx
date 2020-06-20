@@ -44,6 +44,18 @@ export function BaseLayout(props: Props) {
           name="og:image"
           content={`https://${currentHostName}/ogImage.png`}
         />
+        <meta name="og:locale" content="ja_JP" />
+        <meta name="og:url" content={`https://${currentHostName}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={props.title || DEFAULT_TITLE} />
+        <meta
+          name="twitter:description"
+          content={props.description || DEFAULT_DESC}
+        />
+        <meta
+          name="twitter:image"
+          content={`https://${currentHostName}/ogImage.png`}
+        />
         <meta name="theme-color" content="#00D5FF" />
 
         {Constants.GA_TRACKING_ID != null && (
