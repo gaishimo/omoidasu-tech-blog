@@ -11,6 +11,6 @@ export async function getAllPosts(): Promise<Post[]> {
         id: fileName.replace(/.mdx$/, ""),
       }
     })
-    .sort((a: PostMeta, b: PostMeta) => (a.createdAt > b.createdAt ? 0 : 1))
+    .sort((a: PostMeta, b: PostMeta) => (a.createdAt > b.createdAt ? 1 : 0))
   return posts
 }
