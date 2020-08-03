@@ -11,8 +11,10 @@ export async function getAllPosts(): Promise<Post[]> {
         id: fileName.replace(/.mdx$/, ""),
       }
     })
-    .sort((a: PostMeta, b: PostMeta) =>
-      a.createdAt.getTime() > b.createdAt.getTime() ? 0 : 1,
+    .slice()
+    .sort(
+      (a: PostMeta, b: PostMeta) =>
+        b.createdAt.getTime() - a.createdAt.getTime(),
     )
   return posts
 }
