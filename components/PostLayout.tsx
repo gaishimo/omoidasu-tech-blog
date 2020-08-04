@@ -42,6 +42,7 @@ export function PostLayout(props: Props) {
       <BaseLayout
         title={`${props.meta.title} | Omoidasu Tech Blog`}
         description={props.meta.description}
+        imagePath={props.meta.imagePath}
       >
         {/* <motion.div
           initial="hidden"

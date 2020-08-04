@@ -11,6 +11,7 @@ type Props = {
   children: ReactNode
   description?: string
   title?: string
+  imagePath?: string
 }
 
 // OGPのボット等からリクエストがきた場合windowが無いので注意
@@ -27,6 +28,10 @@ const PRISM_CSS_URL =
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css"
 
 export function BaseLayout(props: Props) {
+  const ogImageUrl = props.imagePath
+    ? `https://${currentHostName}${props.imagePath}`
+    : `https://${currentHostName}/ogImage.png`
+
   return (
     <div>
       <Head>
@@ -40,10 +45,7 @@ export function BaseLayout(props: Props) {
           name="og:description"
           content={props.description || DEFAULT_DESC}
         />
-        <meta
-          name="og:image"
-          content={`https://${currentHostName}/ogImage.png`}
-        />
+        <meta name="og:image" content={ogImageUrl} />
         <meta name="og:locale" content="ja_JP" />
         <meta name="og:url" content={`https://${currentHostName}`} />
         <meta name="twitter:card" content="summary_large_image" />
@@ -52,10 +54,7 @@ export function BaseLayout(props: Props) {
           name="twitter:description"
           content={props.description || DEFAULT_DESC}
         />
-        <meta
-          name="twitter:image"
-          content={`https://${currentHostName}/ogImage.png`}
-        />
+        <meta name="twitter:image" content={ogImageUrl} />
         <meta name="theme-color" content="#00D5FF" />
 
         {Constants.GA_TRACKING_ID != null && (
