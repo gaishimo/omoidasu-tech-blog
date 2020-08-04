@@ -58,10 +58,21 @@ export function PostLayout(props: Props) {
             </div>
             <div css={styles.articleFooter}>
               <dl>
-                <dt>作者:</dt>
-                <dd>{props.meta.author}</dd>
                 <dt>最終更新:</dt>
                 <dd>{format(props.meta.lastUpdatedAt, "yyyy-MM-dd HH:mm")}</dd>
+                <dt>作者:</dt>
+                <dd>
+                  <a href="https://twitter.com/gaishimo">{props.meta.author}</a>
+                  <br />
+                  主にReact Nativeでのアプリ開発を行っています。
+                  <br />
+                  <a href="https://omoidasu.app" target="_blank">
+                    Omoidasu
+                  </a>
+                  というアプリを作っています。
+                </dd>
+                <dt></dt>
+                <dd></dd>
               </dl>
             </div>
           </article>
