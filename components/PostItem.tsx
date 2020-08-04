@@ -51,6 +51,7 @@ const styles = {
     justifyContent: "center",
   }),
   post: css({
+    flex: 1,
     [mq.sp]: {
       maxWidth: "70%",
     },
