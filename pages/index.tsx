@@ -1,6 +1,4 @@
 import { css } from "@emotion/core"
-import * as fs from "fs"
-import * as path from "path"
 import { BaseLayout } from "../components/BaseLayout"
 import { PostItem } from "../components/PostItem"
 import { mq } from "../libs/mediaQuery"
