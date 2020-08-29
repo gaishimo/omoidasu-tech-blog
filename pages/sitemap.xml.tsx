@@ -41,7 +41,7 @@ export async function getServerSideProps({ req, res }: NextPageContext) {
               elements: [
                 {
                   type: "text",
-                  text: format(post.lastUpdatedAt, "yyyy-MM-dd HH:mm:ss XXX"),
+                  text: format(post.lastUpdatedAt, "yyyy-MM-dd"),
                 },
               ],
             },
