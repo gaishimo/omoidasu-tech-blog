@@ -22,7 +22,7 @@ export const meta = {
   ),
 }
 
-export const headlines = [{ title: "要約" }]
+export const headlines = [{ title: "firestoreのindexを自動で管理する" }]
 
 export default props => (
   <PostLayout headlines={headlines} meta={meta}>
@@ -93,7 +93,7 @@ firebase CLIからデプロイする際にインデックスファイルの場�
 firebase deploy --only firestore:rules --project $PROJECT_NAME
 ```
 
-このようにしておけば、別の環境にインデックスを反映させる場合もコマンド一発で住みます。
+このようにしておけば別の環境にインデックスを反映させる場合もコマンド一発で住みます。
 
 
 インデックスが10, 20とかどんどん増えていった場合に手動で行っていると管理できなくなってくるので、このようにコードで定義しておいて自動で更新する方法がおすすめです。
