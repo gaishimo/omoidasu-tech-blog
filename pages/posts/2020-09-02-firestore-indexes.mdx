@@ -1,0 +1,99 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+
+export const meta = {
+  title: "firestoreのindexを自動で管理する",
+  tagNames: ["firebase", "firestore"],
+  color1: "#EE7E0C",
+  color2: "#F8C62F",
+  createdAt: parse(
+    "2020-09-02 10:10:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description: "Firestoreのインデックス管理について説明します",
+  imagePath: null,
+  lastUpdatedAt: parse(
+    "2020-09-02 10:10:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [{ title: "要約" }]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+Firestoreを利用している場合に、悩ましいのが増えていくインデックスの管理です。
+
+単一フィールドのみを利用したクエリ(例えばIDで検索とか)であれば、自動的に作成される[単一フィールドインデックス](https://firebase.google.com/docs/firestore/query-data/index-overview?hl=en#single-field_indexes) でまかなえます。
+ただ、実際にアプリや管理画面等を作成していると、様々な条件でクエリを実行するケースが増えてくるため、その場合複合インデックスを追加していく必要があります。
+
+
+アプリからインデックスがない状態でクエリを実行すると、以下のようなエラーが出ます。
+```
+Uncaught (in promise) FirebaseError: The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/xxxxxxxxxx/firestore/indexes?create_composite=xxxxxxxxxx
+```
+
+このリンクにアクセスすると以下のような画面が表示され、ここからインデックスを作成することができます。
+
+<ImageWrapper width="70%">
+  <img alt="Before After" src="/posts/2020-09-02-firestore-indexes/firestore-create-index.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+
+ただ毎回画面から手動で作ってしまうと、dev環境・production環境等のように複数のfirebaseプロジェクトを使っている場合、別の環境にまたに手動でインデックス設定を移さないといけなくなります。
+
+ですのでこの画面から作成するのではなくインデックス定義用のjsonファイルを置いておき、firebase CLI を使って更新するのがおすすめです。
+
+firestore.indexes.json のようなJSONファイルをプロジェクト内に配置します。フォーマットは以下のようになります。作成画面の内容を見ながら記述すると楽です。
+
+```js
+{
+  "indexes": [
+    {
+      "collectionGroup": "collectionName",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "field1",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "field2",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ]
+}
+```
+
+firebase CLIからデプロイする際にインデックスファイルの場所がわかるように、firebase.jsonに以下のように定義します。
+
+```
+{
+  "firestore": {
+    "indexes": "./firestore.indexes.json"
+  }
+}
+```
+
+
+そして以下のスクリプトを実行するとインデックスがデプロイされます。
+
+```
+firebase deploy --only firestore:rules --project $PROJECT_NAME
+```
+
+このようにしておけば、別の環境にインデックスを反映させる場合もコマンド一発で住みます。
+
+
+インデックスが10, 20とかどんどん増えていった場合に手動で行っていると管理できなくなってくるので、このようにコードで定義しておいて自動で更新する方法がおすすめです。
