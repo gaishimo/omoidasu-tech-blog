@@ -39,6 +39,7 @@ module.exports = withOffline({
   generateInDevMode: true,
   workboxOpts: {
     swDest: "static/service-worker.js",
+    maximumFileSizeToCacheInBytes: 5000000,
     runtimeCaching: [
       {
         urlPattern: /^https?.*/,
