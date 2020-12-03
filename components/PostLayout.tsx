@@ -67,7 +67,7 @@ export function PostLayout(props: Props) {
                   <br />
                   主にReact Nativeでのアプリ開発を行っています。
                   <br />
-                  <a href="https://omoidasu.co.jp/apps" target="_blank">
+                  <a href="https://omoidasu.co.jp/ja/apps" target="_blank">
                     運用中のアプリ一覧
                   </a>
                 </dd>
