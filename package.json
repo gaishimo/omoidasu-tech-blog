@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@emotion/core": "^10.0.28",
+    "@emotion/react": "^11.1.1",
     "@mdx-js/loader": "~1.6.21",
     "@mdx-js/react": "^1.6.21",
     "@next/mdx": "~10.0.3",
