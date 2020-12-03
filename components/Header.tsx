@@ -41,11 +41,11 @@ export function Header(props: Props) {
         </a>
         <a
           css={styles.link}
-          href="https://omoidasu.app"
+          href="https://omoidasu.co.jp"
           rel="noopener noreferrer"
           target="_blank"
         >
-          Omoidasu
+          運用中のアプリ
         </a>
       </div>
     </header>
