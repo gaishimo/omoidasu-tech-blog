@@ -1,5 +1,5 @@
 import * as React from "react"
-import { css } from "@emotion/core"
+import { css } from "@emotion/react"
 import { range, random } from "../utils/numUtils"
 import { getScrollHeight, getWindowWidth } from "../utils/domUtils"
 import MovingShape from "./atoms/MovingShape"

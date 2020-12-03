@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"
-import { css } from "@emotion/core"
+import { css } from "@emotion/react"
 import { Parallax } from "react-scroll-parallax"
 import Shape from "./Shape"
 import { getWindowWidth } from "../../utils/domUtils"

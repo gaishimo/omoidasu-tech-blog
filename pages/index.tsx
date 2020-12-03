@@ -1,4 +1,4 @@
-import { css } from "@emotion/core"
+import { css } from "@emotion/react"
 import { BaseLayout } from "../components/BaseLayout"
 import { PostItem } from "../components/PostItem"
 import { mq } from "../libs/mediaQuery"

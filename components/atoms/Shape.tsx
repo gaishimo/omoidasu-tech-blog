@@ -1,5 +1,5 @@
 import * as React from "react"
-import { css, SerializedStyles } from "@emotion/core"
+import { css, SerializedStyles } from "@emotion/react"
 
 type Props = {
   color: string
