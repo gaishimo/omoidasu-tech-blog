@@ -1,0 +1,42 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+export const meta = {
+  title: "AndroidのExpo ClientアプリをAPKで直接インストールする",
+  tagNames: ["expo", "react-native"],
+  color1: "#1364B1",
+  color2: "#52BEC7",
+  createdAt: parse(
+    "2020-12-04 12:10:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "AndroidのExpo Clientアプリを、CLI(expo client:install:android)ではなく、APKを直接インストールする方法です。",
+  imagePath: null,
+  lastUpdatedAt: parse(
+    "2020-12-04 12:10:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [{ title: "should NOT have fewer than 1 properties" }]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+AndroidのExpo Clientを入れたいときは、基本的にExpo CLIで`expo client:install:android` を実行するか、Google Playから最新版をインストールする形になるかと思います。
+
+[Expo CLI - Expo Documentation](https://docs.expo.io/workflow/expo-cli/#expo-clientinstallandroid)
+
+ただ、USBにつながっていないときや、Storeにないバージョンをインストールしたいときは、以下のS3に各バージョンのAPKファイルが置かれており、そこにAndroid端末からアクセスして直接ダウンロードすることも可能です。(x.x.xのバージョン部分は変更してください)
+https://exp-android-apks.s3.amazonaws.com/Exponent-x.x.x.apk
+
+※このURLは変更される可能性がありますのでご注意ください
+
