@@ -1,0 +1,379 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+export const meta = {
+  title: "M1 Mac上でReact Nativeアプリを実行・検証してみる",
+  tagNames: ["expo", "react-native"],
+  color1: "#1364B1",
+  color2: "#52BEC7",
+  createdAt: parse(
+    "2020-12-17 10:40:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description: "React NativeのアプリをM1 Mac上で検証する手順についてです。",
+  imagePath: null,
+  lastUpdatedAt: parse(
+    "2020-12-17 10:40:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [
+  { title: "React Nativeで作成したアプリは動く?" },
+  { title: "ストアに公開されていないアプリの検証は?" },
+  {
+    title: "サンプルプロジェクトで検証",
+    children: [
+      { title: "iOS Simulatorで起動できる状態を用意" },
+      { title: "macOS上で起動してみる (Mac Designed for iPhone)" },
+      { title: "macOS上で起動してみる (Mac Designed for iPad)" },
+      { title: "macOS上で起動してみる (Mac)" },
+    ],
+  },
+  {
+    title: "その他React Native絡みで確認した点",
+    children: [
+      { title: "Fast Refreshは動作する?" },
+      { title: "React NativeのDebug Menuは開ける?" },
+      { title: "Platformの各値は?" },
+    ],
+  },
+  { title: "ExpoのManaged Workflowのアプリは実行できる?" },
+  { title: "おわりに" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+この記事は[React Native Advent Calendar 2020 - Qiita](https://qiita.com/advent-calendar/2020/react-native) の17日目の記事です。前日は [@ariiyu](https://qiita.com/ariiyu)さんの記事 [【2020年版】 React NativeでiOSアプリを作ってストアでリリースしてみた](https://qiita.com/ariiyu/items/93a2d829df684c02ea5d) でした。
+
+
+先日Apple Silicon(M1チップ)搭載のMacbook Proを購入したので、M1 Mac上でReact Nativeアプリの実行を検証してみたいと思います。Simulatorで実行するのではなくmacOS上でアプリとして実行します。
+
+
+## React Nativeで作成したアプリは動く?
+
+React Nativeで作成したアプリは通常のネイティブと同様にXCodeでビルドされているため、macOS上で実行させることができます。
+
+App Storeで開発者が許可していればStoreからダウンロードして起動できます。ちなみに弊社が開発している[Tadayou](https://tadayou.app)というiOSアプリ(Expoで開発した瞑想アプリ)も、問題なくインストール & 起動することができました。※インストールした時点でのExpo SDKバージョンは39です。
+
+<ImageWrapper width={300}>
+  <img alt="App Storeで表示" src="/posts/2020-12-17-m1-mac-react-native/store-tadayou.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+<div style={{ marginTop: 24 }} />
+
+<ImageWrapper width={300}>
+  <img alt="M1 Mac上でアプリを起動" src="/posts/2020-12-17-m1-mac-react-native/tadayou-on-m1.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+ただしApp Storeからインストール可能であっても、一部のアプリについてはiPhoneやiPadと同じように動作しない場合があるので注意が必要です。完全に検証されていないものは、toreに"macOSでは検証されていません" の注意書きが表示されます。
+
+
+## ストアに公開されていないアプリの検証は?
+
+ストアに公開していれば上記のようにインストールして試せますが、まだ未公開の場合やリリースしていない機能をMac上で検証したい場合にはどうすればよいのでしょうか?
+
+以下を読むとXCode 12以上であればmacOS上で直接実行できそうです。
+[Running Your iOS Apps on macOS | Apple Developer Documentation](https://developer.apple.com/documentation/apple_silicon/running_your_ios_apps_on_macos)
+
+> Xcode supports debugging, testing, and profiling your iOS app natively on Macs with Apple silicon. When you open your iOS project in Xcode 12 or later, you have the option to build your app and run it directly on macOS. This option doesn’t run your app in a Simulator; it runs it as an iOS App for Mac. You can then test whether your app’s features work as expected.
+
+TestFlightは現状macOSでは利用できないようです。もしも別のmacマシンで実行したい場合は、アーカイブを作成してAd-HocまたはDevelopment distributionで配布する必要があるようです。
+
+> TestFlight isn’t available on macOS. When you’re ready to distribute your app to users, create an archive and export it using the Ad-Hoc or Development distribution method. During the export process, Xcode creates an appropriately signed app for you to distribute to your testers. For more information, see Distributing Your App to Registered Devices.
+
+
+## サンプルプロジェクトで検証
+
+
+### iOS Simulatorで起動できる状態を用意
+
+ミニマムなReact Nativeのサンプルアプリを用意して検証していきたいと思います。
+
+検証したXCodeのバージョンは12.3です。
+
+
+以下のReact Nativeプロジェクトを用意しました(React Nativeバージョン0.63.4)。 `react-native init` し、画面を少し変えてiOS Simulatorで起動できる状態にしたものです。
+https://github.com/gaishimo/RnAppOnMacOS
+
+
+
+このアプリを従来通りXCodeからiOS Simulatorで起動すると以下のような画面が表示されます。
+
+<ImageWrapper width={160}>
+  <img alt="iOS Simulatorで起動" src="/posts/2020-12-17-m1-mac-react-native/app-on-ios-simulator.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+
+アプリ画面のコードは以下です。中心に円を3つ表示させているんですが、画面サイズの違いがわかりやすいように円のサイズをデバイスの幅で動的に変更し、ウィンドウが縦長か横長かで円の並べ方を変えるようにしてます。
+```js
+import React from 'react';
+import {StyleSheet, View, StatusBar, useWindowDimensions} from 'react-native';
+
+const COLORS = ['#5EF2FE', '#66FF85', '#ECFF66'];
+
+const App: () => React$Node = () => {
+  const dimensions = useWindowDimensions();
+  const direction = dimensions.width > dimensions.height ? 'row' : 'column';
+  const radius =
+    direction === 'row' ? dimensions.width * 0.05 : dimensions.height * 0.05;
+  return (
+    <>
+      <StatusBar barStyle="dark-content" />
+      <View style={[styles.page, {flexDirection: direction}]}>
+        {[0, 1, 2].map((i) => (
+          <View
+            key={i}
+            style={[
+              styles.shape,
+              {
+                width: radius * 2,
+                height: radius * 2,
+                borderRadius: radius,
+                backgroundColor: COLORS[i],
+                opacity: 0.5,
+              },
+            ]}
+          />
+        ))}
+      </View>
+    </>
+  );
+};
+
+const styles = StyleSheet.create({
+  page: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  shape: {
+    marginVertical: 16,
+    marginHorizontal: 16,
+  },
+});
+
+export default App;
+
+```
+
+
+
+ちなみに開発環境の構築は以下を参考にさせていただきました。[M1 (Apple Silicon) Macで既存のReact Nativeプロジェクトの開発環境が整うまで](https://zenn.dev/myb/articles/4b1dd3821703aa2ac95b#pods%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AEbuild-settings%E3%82%92%E8%A8%AD%E5%AE%9A)
+
+
+※ビルド時にFlipper部分でこけてしまうので、応急処置でPodfileでflipperの設定部分を無効にしています
+
+
+```ruby
+target 'MacOSExample' do
+  config = use_native_modules!
+
+  use_react_native!(:path => config["reactNativePath"])
+
+  target 'MacOSExampleTests' do
+    inherit! :complete
+    # Pods for testing
+  end
+
+  # Enables Flipper.
+  #
+  # Note that if you have use_frameworks! enabled, Flipper will not work and
+  # you should disable these next few lines.
+  # ↓ disable
+  # use_flipper!
+  post_install do |installer|
+    # ↓ disable
+    # flipper_post_install(installer)
+    installer.pods_project.build_configurations.each do |build_configuration|
+      build_configuration.build_settings['ONLY_ACTIVE_ARCH'] = 'No'
+    end
+  end
+end
+```
+
+### macOS上で起動してみる (Mac Designed for iPhone)
+
+さて、いよいよmacOS上で起動してみたいと思います。XCodeで起動するデバイスを選択する箇所に、"My Mac (Designed for iPhone)"というのが選べます。
+
+
+<ImageWrapper width={400}>
+  <img alt="XCodeでMy Macを選んで起動" src="/posts/2020-12-17-m1-mac-react-native/xcode-run-mac.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+選択して起動すると以下のエラーが出ました。
+
+```
+Signing for "MacOSExample" requires a development team. Select a development team in the Signing & Capabilities editor.
+```
+
+Signingの設定が必要とのことなので、TARGETを選択し、"Signing & Capability"の"Sign"でTeamを選択します。またMacデバイスが登録されていないというエラーが出ているので、"Register Device"を押して登録します。
+
+<ImageWrapper width={400}>
+  <img alt="XCodeのSigning設定" src="/posts/2020-12-17-m1-mac-react-native/xcode-signing.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+
+再度ビルド・実行すると、無事起動できました! 
+<ImageWrapper width={400}>
+  <img alt="XCodeのSigning設定" src="/posts/2020-12-17-m1-mac-react-native/app-on-macos-01.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+アプリのウィンドウはは横長になってますが、これは画面の向きの設定でLandscape(横向き)を許可しているためです。Portrait(縦向き)しか許可していなければ、ウィンドウは縦長固定で表示されます。
+
+
+### macOS上で起動してみる (Mac Designed for iPad)
+
+次にiPadアプリとしてビルド・実行してみます。
+XCodeのTARGETの"General" - "Deployment Info"の設定で、iPadにチェックをつけます。また、ウィンドウサイズを可変にするため、すべてのDevice Orientationにチェックを付けます。
+
+ビルド・実行すると、無事起動できました!ウィンドウサイズも自由に変更可能です!
+
+<ImageWrapper width={300}>
+  <img alt="XCodeのDeployment Info設定" src="/posts/2020-12-17-m1-mac-react-native/app-on-macos-02.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+<ImageWrapper width={"100%"}>
+  <img alt="XCodeのDeployment Info設定" src="/posts/2020-12-17-m1-mac-react-native/app-on-macos-03.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+ただ、ウィンドウサイズを変えてみると、円の並びとサイズがそれに合わせて動的に変更されるはずが変わりません。`useWindowDimensions` で取得される値が起動時の値のままなのが原因のようです。
+
+React Nativeのドキュメントでは以下のようにあるので意図した挙動ではなさそうです。
+
+> useWindowDimensions automatically updates width and height values when screen size changes. You can get your application window's width and height like so:
+
+[useWindowDimensions · React Native](https://reactnative.dev/docs/usewindowdimensions)
+
+SimulatorのiPadで起動した場合は問題なく動的に値が変化するため、mac上で起動したときの問題のようです。回避策としてViewのonLayoutイベントを拾ってstateにウィンドウサイズを保存する形に修正しました。
+
+
+```jsx
+  const onLayout = useCallback(
+    (event) => {
+      const {width, height} = event.nativeEvent.layout;
+      setWindowSize({width, height});
+    },
+    [setWindowSize],
+  )
+
+  return (
+    <View
+      onLayout={onLayout}
+      ...
+    >
+      ...
+    </View>
+  )
+
+```
+
+これで、ウィンドウサイズの変更に合わせて画面を変化させられるようになりました。
+
+
+### macOS上で起動してみる (Mac Designed for iPad)
+
+次に、"Deployment Info" でMacにチェックをつけて実行してみます。チェックを付けると以下のメッセージが表示されます。
+
+<ImageWrapper width={240}>
+  <img alt="XCodeのDeployment Info設定 MacをON" src="/posts/2020-12-17-m1-mac-react-native/xcode-enable-mac.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+macOSのみにしか互換性がないコンテンツが埋め込まれるようです。mac専用のアプリになって、iPhoneやiPadでは実行できなくなるという理解です。
+
+
+ビルド・実行すると無事表示されました。
+
+<ImageWrapper width={300}>
+  <img alt="Run on mac" src="/posts/2020-12-17-m1-mac-react-native/app-on-macos-04.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+今回のアプリだとUIの違いがほとんどないんですが、入力フォームやボタン等のコンポーネントを使っていれば、もう少し違いがわかるかもしれません。
+
+
+## その他React Native絡みで確認した点
+
+### Fast Refreshは動作する?
+
+Fast Refreshは問題なく動作しました。JSのコードを変更すると即時に起動中のアプリが更新されました。
+
+### React NativeのDebug Menuは開ける?
+
+Designed for Macで実行した場合(MacのチェックボックスをON)、Command + DでDebug Menuを起動できました。
+
+<ImageWrapper width={200}>
+  <img alt="XCodeのDeployment Info設定" src="/posts/2020-12-17-m1-mac-react-native/rn-debug-menu.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+ただしMacのチェックボックスを外して起動したとき(iPhoneまたはiPad)はキーボードショートカットが効かず開くことができませんでした。端末のようにシェイクして開くこともできないので、現状では開く方法をみつけられませんでした。
+
+### Platformの各値は?
+
+Designed for iPadで起動したときもDesigned for Macとして起動したときも、以下の同じ値が返ってきました。OSは基本的にiosとして扱われていることがわかります。
+
+
+```js
+{
+	"OS": "ios",
+	"Version": "14.2",
+	"__constants": {
+		"forceTouchAvailable": false,
+		"interfaceIdiom": "pad",
+		"isTesting": false,
+		"osVersion": "14.2",
+		"reactNativeVersion": {
+			"major": 0,
+			"minor": 63,
+			"patch": 4
+		},
+		"systemName": "iOS"
+	},
+	"constants": {
+		"forceTouchAvailable": false,
+		"interfaceIdiom": "pad",
+		"isTesting": false,
+		"osVersion": "14.2",
+		"reactNativeVersion": {
+			"major": 0,
+			"minor": 63,
+			"patch": 4
+		},
+		"systemName": "iOS"
+	},
+	"isPad": true,
+	"isTV": false,
+	"isTVOS": false,
+	"isTesting": false,
+	"select": [Function select]
+}
+```
+
+
+## ExpoのManaged Workflowのアプリは実行できる?
+
+ExpoのManaged Workflowを使っている場合、macOS上で起動させることはできるのでしょうか? 
+
+Expo Clientアプリは現状(2020-12-17時点)ではmacOSにインストールできないので、Expo Clientから実行させることはできなさそうです。Expoでビルドして作成したipaファイルをAd-Hoc等で配布等するしかなさそうです。もしも今後Expo ClientアプリがmacOSに対応してインストールできるようになれば、Expo Clientアプリを通して簡単に検証できるようになったりするかもしれません。
+
+
+## おわりに
+
+M1 Mac上でiOSアプリを簡単に起動できるというのはとても衝撃的でした。
+
+記事の内容的にReact Nativeというより、iOS開発全般というような内容も結構入ってしまいましたが..。React NativeアプリはFlexboxでレイアウトするため、ウィンドウサイズが変化しやすく大きくウィンドウを使うPC上での実行とは相性がよいのではないかと思いました。アプリの内容にもよりますが、画面サイズを大きく使った方が良いiOSアプリや、入力が多いiOSアプリは特にmacOS上でのメリットを活かせるのではないかと思います。現状はまだM1 Macが出たばかりでそこまで普及していませんが、数年後に普及率が高くなっていったとき、macOS上での実行の重要度が上がってくるのではないかと思います。
+
+[React Native Advent Calendar 2020](https://qiita.com/advent-calendar/2020/react-native)の次の記事は @takagimeowさんです!
+
+
+## 参考
+
+- [Running Your iOS Apps on macOS | Apple Developer Documentation](https://developer.apple.com/documentation/apple_silicon/running_your_ios_apps_on_macos)
+- [M1 (Apple Silicon) Macで既存のReact Nativeプロジェクトの開発環境が整うまで](https://zenn.dev/myb/articles/4b1dd3821703aa2ac95b#pods%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AEbuild-settings%E3%82%92%E8%A8%AD%E5%AE%9A)
+- [useWindowDimensions · React Native](https://reactnative.dev/docs/usewindowdimensions)

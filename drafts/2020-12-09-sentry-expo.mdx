@@ -1,0 +1,40 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+export const meta = {
+  title: "ExpoでSentryの設定をする (sentry-expo v3)",
+  tagNames: ["expo", "react-native", "sentry"],
+  color1: "#6C5FC7",
+  color2: "#025BB7",
+  createdAt: parse(
+    "2020-12-09 17:45:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "ExpoのManaged WorkflowでSentryの設定を行う方法です。expo-sentryのv3でいつくか変更がありました。",
+  imagePath: null,
+  lastUpdatedAt: parse(
+    "2020-12-09 17:45:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [{ title: "" }]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+ExpoでSentryの設定を行う方法をまとめました。
+
+sentry-expoは@sentry/react-antiveをラップしている
+
+sentry-expo v3 : @sentry/react-native 2.1.0
+sentry-expo v2 : @sentry/react-native 1.4.2
+
+<Sen

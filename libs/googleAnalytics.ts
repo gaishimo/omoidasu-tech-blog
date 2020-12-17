@@ -1,9 +1,11 @@
 import { Constants } from "./Constants"
 
 export function trackPageView(url: string) {
-  window.gtag("config", Constants.GA_TRACKING_ID, {
-    page_path: url,
-  })
+  if (window.gtag) {
+    window.gtag("config", Constants.GA_TRACKING_ID, {
+      page_path: url,
+    })
+  }
 }
 
 export function trackEvent({
