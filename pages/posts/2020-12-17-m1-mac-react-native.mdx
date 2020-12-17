@@ -22,26 +22,26 @@ export const meta = {
 }
 
 export const headlines = [
-  { title: "React Nativeで作成したアプリは動く?" },
-  { title: "ストアに公開されていないアプリの検証は?" },
+  { title: "React Nativeで作成したアプリは動く？" },
+  { title: "ストアに公開されていないアプリの検証は？" },
   {
     title: "サンプルプロジェクトで検証",
     children: [
       { title: "iOS Simulatorで起動できる状態を用意" },
-      { title: "macOS上で起動してみる (Mac Designed for iPhone)" },
-      { title: "macOS上で起動してみる (Mac Designed for iPad)" },
-      { title: "macOS上で起動してみる (Mac)" },
+      { title: "macOS上で起動してみる - Mac Designed for iPhone" },
+      { title: "macOS上で起動してみる - Mac Designed for iPad" },
+      { title: "macOS上で起動してみる - Mac" },
     ],
   },
   {
     title: "その他React Native絡みで確認した点",
     children: [
-      { title: "Fast Refreshは動作する?" },
-      { title: "React NativeのDebug Menuは開ける?" },
-      { title: "Platformの各値は?" },
+      { title: "Fast Refresh" },
+      { title: "React NativeのDebug Menu" },
+      { title: "Platformの各値" },
     ],
   },
-  { title: "ExpoのManaged Workflowのアプリは実行できる?" },
+  { title: "ExpoのManaged Workflowのアプリ" },
   { title: "おわりに" },
 ]
 
@@ -57,7 +57,7 @@ export default props => (
 先日Apple Silicon(M1チップ)搭載のMacbook Proを購入したので、M1 Mac上でReact Nativeアプリの実行を検証してみたいと思います。Simulatorで実行するのではなくmacOS上でアプリとして実行します。
 
 
-## React Nativeで作成したアプリは動く?
+## React Nativeで作成したアプリは動く？
 
 React Nativeで作成したアプリは通常のネイティブと同様にXCodeでビルドされているため、macOS上で実行させることができます。
 
@@ -76,7 +76,7 @@ App Storeで開発者が許可していればStoreからダウンロードして
 ただしApp Storeからインストール可能であっても、一部のアプリについてはiPhoneやiPadと同じように動作しない場合があるので注意が必要です。完全に検証されていないものは、toreに"macOSでは検証されていません" の注意書きが表示されます。
 
 
-## ストアに公開されていないアプリの検証は?
+## ストアに公開されていないアプリの検証は？
 
 ストアに公開していれば上記のようにインストールして試せますが、まだ未公開の場合やリリースしていない機能をMac上で検証したい場合にはどうすればよいのでしょうか?
 
@@ -199,7 +199,7 @@ target 'MacOSExample' do
 end
 ```
 
-### macOS上で起動してみる (Mac Designed for iPhone)
+### macOS上で起動してみる - Mac Designed for iPhone
 
 さて、いよいよmacOS上で起動してみたいと思います。XCodeで起動するデバイスを選択する箇所に、"My Mac (Designed for iPhone)"というのが選べます。
 
@@ -229,7 +229,7 @@ Signingの設定が必要とのことなので、TARGETを選択し、"Signing &
 アプリのウィンドウはは横長になってますが、これは画面の向きの設定でLandscape(横向き)を許可しているためです。Portrait(縦向き)しか許可していなければ、ウィンドウは縦長固定で表示されます。
 
 
-### macOS上で起動してみる (Mac Designed for iPad)
+### macOS上で起動してみる - Mac Designed for iPad
 
 次にiPadアプリとしてビルド・実行してみます。
 XCodeのTARGETの"General" - "Deployment Info"の設定で、iPadにチェックをつけます。また、ウィンドウサイズを可変にするため、すべてのDevice Orientationにチェックを付けます。
@@ -278,7 +278,7 @@ SimulatorのiPadで起動した場合は問題なく動的に値が変化する�
 これで、ウィンドウサイズの変更に合わせて画面を変化させられるようになりました。
 
 
-### macOS上で起動してみる (Mac Designed for iPad)
+### macOS上で起動してみる - Mac
 
 次に、"Deployment Info" でMacにチェックをつけて実行してみます。チェックを付けると以下のメッセージが表示されます。
 
@@ -300,11 +300,11 @@ macOSのみにしか互換性がないコンテンツが埋め込まれるよう
 
 ## その他React Native絡みで確認した点
 
-### Fast Refreshは動作する?
+### Fast Refresh
 
 Fast Refreshは問題なく動作しました。JSのコードを変更すると即時に起動中のアプリが更新されました。
 
-### React NativeのDebug Menuは開ける?
+### React NativeのDebug Menu
 
 Designed for Macで実行した場合(MacのチェックボックスをON)、Command + DでDebug Menuを起動できました。
 
@@ -314,7 +314,7 @@ Designed for Macで実行した場合(MacのチェックボックスをON)、Com
 
 ただしMacのチェックボックスを外して起動したとき(iPhoneまたはiPad)はキーボードショートカットが効かず開くことができませんでした。端末のようにシェイクして開くこともできないので、現状では開く方法をみつけられませんでした。
 
-### Platformの各値は?
+### Platformの各値
 
 Designed for iPadで起動したときもDesigned for Macとして起動したときも、以下の同じ値が返ってきました。OSは基本的にiosとして扱われていることがわかります。
 
@@ -356,7 +356,7 @@ Designed for iPadで起動したときもDesigned for Macとして起動した�
 ```
 
 
-## ExpoのManaged Workflowのアプリは実行できる?
+## ExpoのManaged Workflowのアプリ
 
 ExpoのManaged Workflowを使っている場合、macOS上で起動させることはできるのでしょうか? 
 
