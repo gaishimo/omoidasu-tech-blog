@@ -15,7 +15,7 @@ export const meta = {
   description: "React NativeのアプリをM1 Mac上で検証する手順についてです。",
   imagePath: "/posts/2020-12-17-m1-mac-react-native/article-image.png",
   lastUpdatedAt: parse(
-    "2020-12-17 10:40:00 +09:00",
+    "2020-12-18 10:16:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
@@ -216,13 +216,13 @@ Signing for "MacOSExample" requires a development team. Select a development tea
 
 Signingの設定が必要とのことなので、TARGETを選択し、"Signing & Capability"の"Sign"でTeamを選択します。またMacデバイスが登録されていないというエラーが出ているので、"Register Device"を押して登録します。
 
-<ImageWrapper width={400}>
+<ImageWrapper width={350}>
   <img alt="XCodeのSigning設定" src="/posts/2020-12-17-m1-mac-react-native/xcode-signing.png" width={"100%"} height="auto" />
 </ImageWrapper>
 
 
 再度ビルド・実行すると、無事起動できました! 
-<ImageWrapper width={400}>
+<ImageWrapper width={350}>
   <img alt="XCodeのSigning設定" src="/posts/2020-12-17-m1-mac-react-native/app-on-macos-01.png" width={"100%"} height="auto" />
 </ImageWrapper>
 
@@ -369,7 +369,8 @@ M1 Mac上でiOSアプリを簡単に起動できるというのはとても衝�
 
 記事の内容的にReact Nativeというより、iOS開発全般というような内容も結構入ってしまいましたが..。React NativeアプリはFlexboxでレイアウトするため、ウィンドウサイズが変化しやすく大きくウィンドウを使うPC上での実行とは相性がよいのではないかと思いました。アプリの内容にもよりますが、画面サイズを大きく使った方が良いiOSアプリや、入力が多いiOSアプリは特にmacOS上でのメリットを活かせるのではないかと思います。現状はまだM1 Macが出たばかりでそこまで普及していませんが、数年後に普及率が高くなっていったとき、macOS上での実行の重要度が上がってくるのではないかと思います。
 
-[React Native Advent Calendar 2020](https://qiita.com/advent-calendar/2020/react-native)の次の記事は @takagimeowさんです!
+[React Native Advent Calendar 2020](https://qiita.com/advent-calendar/2020/react-native)の次の記事は [@takagimeowさん](https://qiita.com/takagimeow/items/11b9e7f7c1052ada6995)です!
+
 
 
 ## 参考
