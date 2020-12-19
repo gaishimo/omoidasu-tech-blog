@@ -15,7 +15,7 @@ export const meta = {
   description: "React NativeのアプリをM1 Mac上で検証する手順についてです。",
   imagePath: "/posts/2020-12-17-m1-mac-react-native/article-image.png",
   lastUpdatedAt: parse(
-    "2020-12-18 10:16:00 +09:00",
+    "2020-12-19 09:40:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
@@ -64,7 +64,7 @@ export default props => (
 
 ## React Nativeで作成したアプリは動く？
 
-React Nativeで作成したアプリは通常のネイティブと同様にXCodeでビルドされているため、macOS上で実行させることができます。
+React Nativeで作成したアプリは通常のネイティブアプリと同様にXCodeでビルドされているため、macOS上で実行させることができます。
 
 App Storeで開発者が許可していればStoreからダウンロードして起動できます。ちなみに弊社が開発している[Tadayou](https://tadayou.app)というiOSアプリ(Expoで開発した瞑想アプリ)も、問題なくインストール & 起動することができました。※インストールした時点でのExpo SDKバージョンは39です。
 
@@ -370,9 +370,9 @@ Expo Clientアプリは現状(2020-12-17時点)ではmacOSにインストール�
 
 ## おわりに
 
-M1 Mac上でiOSアプリを簡単に起動できるというのはとても衝撃的でした。
+M1 Mac上でiOSアプリを簡単に起動できるというのはとても衝撃的でした。macOS上で直接起動させられるのならば、アプリの開発にiOS Simulatorを使って開発をする必要もなくなるかもしれません。
 
-記事の内容的にReact Nativeというより、iOS開発全般というような内容も結構入ってしまいましたが..。React NativeアプリはFlexboxでレイアウトするため、ウィンドウサイズが変化しやすく大きくウィンドウを使うPC上での実行とは相性がよいのではないかと思いました。アプリの内容にもよりますが、画面サイズを大きく使った方が良いiOSアプリや、入力が多いiOSアプリは特にmacOS上でのメリットを活かせるのではないかと思います。現状はまだM1 Macが出たばかりでそこまで普及していませんが、数年後に普及率が高くなっていったとき、macOS上での実行の重要度が上がってくるのではないかと思います。
+記事の内容的にReact Nativeというより、iOS開発全般というような内容も結構入ってしまいましたが..。React NativeアプリはFlexboxでレイアウトするため、ウィンドウサイズが変化しやすく大きくウィンドウを使うPC上での実行とは相性がよいのではないかと思いました。アプリの内容にもよりますが、画面サイズを大きく使った方が良いアプリや、入力が多いアプリはmacOS上でのメリットを活かせるのではないかと思います。現状はまだM1 Macが出たばかりでそこまで普及していませんが、数年後に普及率が高くなっていったとき、macOS上での実行の重要度が上がってくるのではないかと思います。
 
 [React Native Advent Calendar 2020](https://qiita.com/advent-calendar/2020/react-native)の次の記事は [@takagimeowさん](https://qiita.com/takagimeow/items/11b9e7f7c1052ada6995)です!
 
