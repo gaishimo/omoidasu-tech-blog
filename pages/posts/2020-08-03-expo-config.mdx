@@ -11,7 +11,7 @@ export const meta = {
   author: "@gaishimo",
   description: "Expoの設定ファイルをtypescriptで動的に書くやり方について説明します。",
   imagePath: "/ogImage.png",
-  lastUpdatedAt: parse("2020-08-03 16:46:00 +09:00", "yyyy-MM-dd HH:mm:ss XXX", new Date()),
+  lastUpdatedAt: parse("2021-06-04 18:00:00 +09:00", "yyyy-MM-dd HH:mm:ss XXX", new Date()),
 }
 
 export const headlines = [
@@ -23,6 +23,10 @@ export const headlines = [
 ]
 
 export default (props) => <PostLayout headlines={headlines} meta={meta}>{props.children}</PostLayout>
+
+
+※ この記事に記載されている--configオプションを使う方式はdeprecatedになりました。以下を参照してください。
+https://github.com/expo/fyi/blob/master/config-flag-migration.md
 
 
 ## Expoの設定ファイルについて
