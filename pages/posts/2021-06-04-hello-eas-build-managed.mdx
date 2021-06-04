@@ -1,0 +1,450 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+export const meta = {
+  title: "Hello EAS Build! (Managed Workflow)",
+  tagNames: ["expo", "react-native"],
+  color1: "#6855F9",
+  color2: "rgb(220, 220, 220)",
+  createdAt: parse(
+    "2021-06-04 17:05:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "最近サポートされた、EAS BuildのManaged Workflowビルドを試してみます。",
+  imagePath: "/posts/2020-12-17-m1-mac-react-native/article-image.png",
+  lastUpdatedAt: parse(
+    "2021-06-04 17:05:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [
+  { title: "EASのManaged Buildについて" },
+  { title: "事前準備" },
+  { title: "プロジェクト作成" },
+  { title: "EAS設定" },
+  { title: "設定 Profileの追加" },
+  { title: "iOSのad hoc provisioning profileの作成" },
+  { title: "ビルドの実行" },
+  { title: "端末でのアプリの実行" },
+  { title: "publishする" },
+  { title: "Publish時の注意点" },
+  { title: "終わりに" },
+  { title: "参考Docs" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+## EAS BuildのManagedビルドについて
+
+EAS BuildはExpoが提供する、クラウド上でReact Nativeプロジェクト・Expoプロジェクトのアプリバイナリを作成するためのサービスです。
+
+2020年12月の段階で既にExpo Buildについては発表されていましたが、その時点ではまだManaged Workflowには対応されていませんでした。
+[Expo Application Services (EAS): Build and Submit | by Brent Vatne | Exposition](https://blog.expo.io/expo-application-services-eas-build-and-submit-fc1d1476aa2e)
+
+その後2021年4月にManaged Workflowのビルドが可能になりました。
+[Expo managed workflow in 2021. Part 2: Customizing the runtime | by Brent Vatne | Apr, 2021 | Exposition](https://blog.expo.io/expo-managed-workflow-in-2021-d1c9b68aa10)
+
+
+それまでも既存のExpoのビルド方式(Classicビルド)で Managed Workflowでビルドは行うことができましたが、EAS Buildはそれとは異なる特徴を備えています。
+
+- 使わない不要なライブラリを含めずに済む
+- 独自のNativeモジュールを追加することができる
+- Prebuildというプロセスがある (expo ejectを再利用してManagedプロジェクトから通常のRNプロジェクトに変換)
+
+2021年6月時点ではPreviewの機能となっていて、Priorityプラン(月29$)に入ってないと利用できません。弊社ではPriority Planに入っているのでその利点を活かし、まずはミニマムなExpoプロジェクトでビルドを試してみたいと思います。
+
+## 事前準備
+
+通常Expoを利用する際にはexpo-cliを利用しますが、それに加えて、EAS用のCLIであるeas-cliをインストールしておきます。
+
+```bash
+npm install -g expo-cli eas-cli
+```
+
+## プロジェクト作成
+
+Managed WorkflowのExpoプロジェクトをexpo initで作成します。
+
+```bash
+$ expo init
+✔ What would you like to name your app? … my-app
+✔ Choose a template: › blank (TypeScript)    same as blank but with TypeScript configuration
+✔ Downloaded and extracted project files.
+🧶 Using Yarn to install packages. Pass --npm to use npm instead.
+✔ Installed JavaScript dependencies.
+
+✅ Your project is ready!
+
+To run your project, navigate to the directory and run one of the following yarn commands.
+
+- cd my-app
+- yarn start # you can open iOS, Android, or web from here, or run them directly with the commands below.
+- yarn android
+- yarn ios # requires an iOS device or macOS for access to an iOS simulator
+- yarn web
+```
+
+
+## EAS設定
+
+EASビルドを行うためにはまずEASの設定を作成する必要があります。`eas build:configure` で作成できます。
+
+```bash
+$ eas build:configure
+💡 The following process will configure your iOS and/or Android project to be compatible with EAS Build. These changes only apply to your local project files and you can safely revert them at any time.
+
+✔ Which platforms would you like to configure for EAS Build? › All
+
+✔ Generated eas.json
+✔ What would you like your Android application id to be? … com.gaishimo.example1
+✔ What would you like your iOS bundle identifier to be? … com.gaishimo.example1
+
+✔ Can we commit these changes to git for you? › Yes
+✔ Commit message: … Configure EAS Build
+✔ Committed changes
+
+🎉 Your iOS and Android projects are ready to build.
+
+- Run eas build when you are ready to create your first build.
+- Once the build is completed, run eas submit to upload the app to the Apple App Store or Google Play Store
+- Learn more about other capabilities of EAS Build: https://docs.expo.io/build/introduction
+```
+
+実行するとEASビルドの設定ファイルである`eas.json`が以下の内容で作成されます。
+
+```json
+{
+  "builds": {
+    "android": {
+      "release": {
+        "workflow": "managed"
+      }
+    },
+    "ios": {
+      "release": {
+        "workflow": "managed"
+      }
+    }
+  }
+}
+```
+
+設定はprofileという単位で指定できます。ここでというと"android"、"ios"の下の"release"がprofileです。profileの名前は任意のものを指定することができます。 workflowは"managed"となっていますが、Managed Workflow以外の場合はこの値が"general"になります。
+
+またeas build:configureの途中でapp idについて入力を求められますが、この値ははapp.jsonに反映されます。(`expo.ios.bundleIndentifier` と `expo.android.package`)
+
+
+## 設定 Profileの追加
+
+release用のprofileは既に作成されているので、今度は検証環境用のprofileを追加してみます。profile名は"alpha" としておきます。
+
+```json
+{
+  "builds": {
+    "android": {
+      "release": {
+        "workflow": "managed"
+      },
+      // 追加
+      "alpha": {
+        "workflow": "managed",
+        "releaseChannel": "alpha",
+        "distribution": "internal"
+      }
+    },
+    "ios": {
+      "release": {
+        "workflow": "managed"
+      },
+      // 追加
+      "alpha": {
+        "workflow": "managed",
+        "releaseChannel": "alpha",
+        "distribution": "internal"
+      }
+    }
+  }
+}
+```
+
+内部での検証用なので"distribution" に "internal" を指定しています。internalを指定すると内部配布が可能になります。これによりTestFlightやPlayStore無しに検証ができます。またOTA用のchannelとして"alpha"という名前のchannelを指定しています。
+
+
+## iOSのad hoc provisioning profileの作成
+
+iOSで内部配布するには、事前に端末のUDIDを設定したad hoc provisioning profileを使ってビルドする必要があります。Androidに関して特に設定は不要です。
+
+デバイスを追加するには、`eas device:create` を実行します。
+
+```bash
+
+$ eas device:create
+This command lets you register your Apple devices (iPhones and iPads) for internal distribution of your app.
+Internal distribution means that you won't need upload your app archive to App Store / Testflight.
+Your app archive (.ipa) will be installable on your equipment as long as you sign your application with an adhoc provisiong profile.
+The provisioning profile needs to contain the UDIDs (unique identifiers) of your iPhones and iPads.
+
+First of all, please choose the Expo account under which you want to register your devices.
+Later, authenticate with Apple and choose your desired Apple Team (if your Apple ID has access to multiple teams).
+
+✔ You're inside the project directory. Would you like to use gaishimo-omoidasu account? … yes
+› Log in to your Apple Developer account to continue
+✔ Apple ID: … <省略>
+› Restoring session /home/gaishimo/.app-store/auth/<省略>/cookie
+› Session expired Local session
+› The password is only used to authenticate with Apple and never stored on EAS servers
+  Learn more: https://bit.ly/2VtGWhU
+✔ Password (for <省略>): … ********************
+› Saving Apple ID password to the local Keychain
+  Learn more: https://docs.expo.io/distribution/security#keychain
+✔ Logged in New session
+› Team <省略> (<省略> )
+› Provider <省略>  (<省略> )
+✔ How would you like to register your devices? › Website - generates a registration URL to be opened on your devices
+
+[QR Code]
+
+Open the following link on your iOS devices (or scan the QR code) and follow the instructions to install the development profile:
+
+https://expo.io/register-device/<省略>
+```
+
+ターミナル上にQRコードが表示されるためデバイスからQRコードを読み取ってアクセスします。
+
+
+<ImageWrapper width={180}>
+  <img alt="Provisioning Profileをダウンロード" src="/posts/2021-06-04-hello-eas-build-managed/downloadProfile.jpeg" width={"100%"} height="auto" />
+</ImageWrapper>
+
+この画面からProvisioning Profileがインストールできるため、ダウンロードし設定からインストールします。
+
+
+
+
+
+## ビルドの実行
+
+では準備ができたので実際にビルドしてみます。ビルドは`eas build` コマンドで行います。
+
+`--platform`オプションで対象OS (android | ios | all)を指定、`--profile`オプションで対象profileを指定します。
+
+```bash
+$ eas build --platform all --profile alpha
+```
+
+初回実行時はAndroidのKeystoreの作成を求められます。独自のKeystoreを指定することも可能です。
+
+```bash
+✔ Using remote Android credentials (Expo server)
+✔ Generate a new Android Keystore? … yes
+✔ Created keystore
+✔ Assign a name to your build credentials: … Build Credentials <省略>
+✔ Uploaded to EAS 1s
+✔ Using remote iOS credentials (Expo server)
+```
+
+次に、Apple Developerアカウントでサインインするかどうかを聞かれます。サインインすればビルドに必要な情報を自動で集めてきてくれます。サインインしない場合はすべて手動で入力する必要があります。
+
+```bash
+If you provide your Apple account credentials we will be able to generate all necessary build credentials and fully validate them.
+This is optional, but without Apple account access you will need to provide all the values manually and we can only run minimal validation on them.
+✔ Do you want to log in to your Apple account? … yes
+
+› Log in to your Apple Developer account to continue
+✔ Apple ID: … <省略>
+```
+
+Distribution Certificateが既に存在する場合、それを再利用するか聞かれます。
+
+```bash
+✔ Fetched Apple distribution certificates
+✔ Reuse this distribution certificate?
+Cert ID: <省略>, Serial number: <省略>, Team ID: <省略>, Team name: <省略> (Company/Organization)
+    Created: 9 months ago, Updated: 9 months ago,
+    Expires: Sat, 21 Aug 2021 01:42:36 GMT+0000
+    📲 Used by: <省略> … yes
+Using distribution certificate with serial number <省略>
+```
+
+含めるデバイスを指定します。先程追加したUDIDが表示されます。
+
+```bash
+✔ Select devices for the adhoc build: › <省略>
+✔ Created new profile: *[expo] com.gaishimo.example1 AdHoc <省略>
+
+```
+
+以下、ビルド表示の全文です。※一部省略
+
+```bash
+$ eas build --platform all --profile alpha
+✔ Linked to project @gaishimo-omoidasu/my-app
+✔ Using remote Android credentials (Expo server)
+✔ Generate a new Android Keystore? … yes
+✔ Created keystore
+✔ Assign a name to your build credentials: … Build Credentials <省略>
+✔ Uploaded to EAS 1s
+✔ Using remote iOS credentials (Expo server)
+
+If you provide your Apple account credentials we will be able to generate all necessary build credentials and fully validate them.
+This is optional, but without Apple account access you will need to provide all the values manually and we can only run minimal validation on them.
+✔ Do you want to log in to your Apple account? … yes
+
+› Log in to your Apple Developer account to continue
+✔ Apple ID: … <省略>
+› Restoring session /home/gaishimo/.app-store/auth/<省略>/cookie
+› <省略: Apple Team名> (<省略: Apple Team ID>)
+› <省略: Provider名>  (<省略: Provider ID>)
+✔ Logged in Local session
+✔ Bundle identifier registered com.gaishimo.example1
+✔ Synced capabilities: No updates
+✔ Fetched Apple distribution certificates
+✔ Reuse this distribution certificate?
+Cert ID: <省略>, Serial number: <省略>, Team ID: <省略>, Team name: <省略> (Company/Organization)
+    Created: 9 months ago, Updated: 9 months ago,
+    Expires: Sat, 21 Aug 2021 01:42:36 GMT+0000
+    📲 Used by: <省略> … yes
+Using distribution certificate with serial number <省略>
+✔ Select devices for the adhoc build: › <省略>
+✔ Created new profile: *[expo] com.gaishimo.example1 AdHoc <省略>
+
+Project Credentials Configuration:
+  Project: <省略: Project ID>
+  Bundle Identifier: com.gaishimo.example1
+  Configuration: Ad Hoc
+
+  Distribution Certificate:
+    Serial Number: <省略>
+    Expiration Date: Sat, 21 Aug 2021 01:42:36 GMT+0000
+    Apple Team: <省略> (<省略> (Company/Organization))
+    Updated 9 months ago
+
+  Provisioning Profile:
+    Developer Portal ID: <省略>
+    Status: active
+    Expiration Date: Sat, 21 Aug 2021 01:42:36 GMT+0000
+    Apple Team: <省略> (<省略>(Company/Organization))
+    Provisioned devices:
+    - <省略> (UDID: <省略>)
+    Updated 2 seconds ago
+
+All credentials are ready to build @gaishimo-omoidasu/my-app (com.gaishimo.example1)
+
+✔ Uploaded to EAS 1s
+
+Android build details: https://expo.io/accounts/gaishimo-omoidasu/builds/<省略>
+iOS build details: https://expo.io/accounts/gaishimo-omoidasu/builds/<省略>
+
+Waiting for build to complete. You can press Ctrl+C to exit.
+```
+
+ビルドのURLが表示されて待ち状態になります。このまま待ち続けるか、終了してURLに直接して進捗を確認しても構いません。ビルド時に"—no-wait"オプションを付けると、ビルドが始まったら待機なしですぐに終了します。
+
+
+## 端末でのアプリの実行
+
+ビルドが成功したらビルドページに端末でアクセスしInstallボタンをタップします。
+
+
+<ImageWrapper width={180}>
+  <img alt="EASビルド画面からアプリをダウンロード" src="/posts/2021-06-04-hello-eas-build-managed/installApp.jpeg" width={"100%"} height="auto" />
+</ImageWrapper>
+
+アプリがインストールされホーム画面に追加されるため、起動してみます。
+
+
+<ImageWrapper width={180}>
+  <img alt="端末ホーム画面に追加されたアプリ" src="/posts/2021-06-04-hello-eas-build-managed/installedApp.jpeg" width={"100%"} height="auto" />
+</ImageWrapper>
+
+問題なく起動できました!
+
+
+<ImageWrapper width={180}>
+  <img alt="起動されたアプリ" src="/posts/2021-06-04-hello-eas-build-managed/launchedApp.jpeg" width={"100%"} height="auto" />
+</ImageWrapper>
+
+そして驚くべきはアプリサイズです。
+
+<ImageWrapper width={260}>
+  <img alt="起動されたアプリ" src="/posts/2021-06-04-hello-eas-build-managed/appSize.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+サイズがわずか9.6MBです。 Classicビルドの場合最低でも40MB近くになってしまうのと比べると、特質すべき小ささです。ClassicビルドのManagedワークフローの場合、仕組み上必要になりそうな最低限のライブラリセットがすべて含まれてしまうため、どうしてもサイズが大きくなってしまいます。EASビルドでは必要なライブラリのみを含めるため、この小ささが実現できています。
+
+
+## publishする
+
+最後にOTA Updateをしてみたいと思います。コードを一部修正して更新します。eas.jsonの設定で"alpha"という名前を設定したので、そのchannelを指定してpublishしてみます。
+
+```bash
+$ expo publish --release-channel alpha
+
+› Expo SDK: 41.0.0
+› Release channel: alpha
+› Workflow: Managed
+
+Building optimized bundles and generating sourcemaps...
+Starting Metro Bundler
+Finished building JavaScript bundle in 67896ms.
+
+Bundle                     Size
+┌ index.ios.js           831 kB
+├ index.android.js       837 kB
+├ index.ios.js.map      3.28 MB
+└ index.android.js.map   3.3 MB
+
+💡 JavaScript bundle sizes affect startup time. Learn more: https://expo.fyi/javascript-bundle-sizes
+
+Analyzing assets
+Saving assets
+No assets changed, skipped.
+
+Processing asset bundle patterns:
+- /home/gaishimo/workspace/my-app/**/*
+
+Uploading JavaScript bundles
+Publish complete
+
+📝  Manifest: https://exp.host/<省略>/index.exp?release-channel=alpha&sdkVersion=41.0.0 Learn more: https://expo.fyi/manifest-url
+⚙️   Project page: https://expo.io/<省略>?release-channel=alpha Learn more: https://expo.fyi/project-page
+```
+
+publishが完了したらアプリを2度立ち上げ直します(OTA Updateはデフォルトではバックグラウンドで反映されるため)。
+
+<ImageWrapper width={180}>
+  <img alt="更新されたアプリ" src="/posts/2021-06-04-hello-eas-build-managed/updatedApp.jpeg" width={"100%"} height="auto" />
+</ImageWrapper>
+
+メッセージが変わっていることが確認できました!
+
+
+## Publish時の注意点
+
+OTA UpdateはJSのコードのみしかアップデートしないため、ライブラリのバージョンが変わったりしてランタイム側との互換性が合わないJSコードを反映してしまうと不具合やクラッシュすることがあり得ます。ですのでpublishするのはライブラリのバージョンが変更されていないときに限定しましょう。もしもライブラリのバージョン等が変わるときは新しくビルドを作成しましょう。Expoでは新しいバイナリを作成するごとにrelease channel名を変更することを推奨しています。
+
+[Over-the-air updates - Expo Documentation](https://docs.expo.io/build/updates/#updating-managed-apps-built-with-eas-build)
+
+また、この辺りの利便性を改善するためにEAS Updateというサービスが開発中だそうです。詳細はまだわかりませんが、今後が楽しみです。
+
+[fyi/eas-update.md at master · expo/fyi](https://github.com/expo/fyi/blob/master/eas-update.md)
+
+## 終わりに
+
+今回はまずEAS Buildを体感してみました。次回はExpoが今までサポートしていなかったライブラリ等を試しに追加してビルドしてみようかと思います。
+
+## 参考Docs
+
+- [EAS Build - Expo Documentation](https://docs.expo.io/build/introduction/)
+- [fyi/eas-update.md at master · expo/fyi](https://github.com/expo/fyi/blob/master/eas-update.md)
+- [Expo managed workflow in 2021. Part 2: Customizing the runtime | by Brent Vatne | Apr, 2021 | Exposition](https://blog.expo.io/expo-managed-workflow-in-2021-d1c9b68aa10)
+- [Expo Application Services (EAS): Build and Submit | by Brent Vatne | Exposition](https://blog.expo.io/expo-application-services-eas-build-and-submit-fc1d1476aa2e)
