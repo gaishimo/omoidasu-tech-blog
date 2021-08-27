@@ -28,3 +28,12 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+
+# for yarn v2
+.yarn/*
+!.yarn/cache
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
