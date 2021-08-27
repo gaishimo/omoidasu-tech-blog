@@ -1,0 +1,99 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+export const meta = {
+  title: "Expo関連の各種ドキュメント",
+  tagNames: ["expo", "react-native"],
+  color1: "#6855F9",
+  color2: "rgb(220, 220, 220)",
+  createdAt: parse(
+    "2021-08-27 15:30:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "Expo (React Native)関連のリンクをまとめました。",
+  lastUpdatedAt: parse(
+    "2021-08-27 15:30:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [
+  { title: "Expo" },
+  { title: "Snack" },
+  { title: "Expo Documentation" },
+  { title: "Exposition" },
+  { title: "expo.fyi" },
+  { title: "Expo Feedback" },
+  { title: "Forums" },
+  { title: "Expo and React Native Jobs" },
+  { title: "SNS・ツールアカウント" },
+  { title: "Githubリポジトリ" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+Expo(React Native)関連のリンクをまとめました(随時更新)。
+
+### [Expo](https://expo.dev/)
+Expoのサービスサイト。
+
+- [Pricing - EAS Priority Plan](https://expo.dev/pricing)
+- [Team Member](https://expo.dev/about)
+
+### [Snack](https://snack.expo.dev/)
+
+Playground。ブラウザ上でReact Nativeのコードサンプルを作成し共有することができます。
+
+### [Expo Documentation](https://docs.expo.dev)
+
+公式ドキュメント。
+
+- [Guides](https://docs.expo.dev/guides/)
+- [Feature Preview](https://docs.expo.dev/feature-preview/)
+- [API Reference](https://docs.expo.dev/versions/latest/)
+
+
+### [Exposition](https://blog.expo.dev)
+
+公式ブログ。SDKや新機能のリリース時はここでアナウンスされます。
+
+### [expo.fyi](https://github.com/expo/fyi)
+
+主に公式ドキュメントの文脈外のTipsがここにまとめられています。
+
+### [Expo Feedback](https://expo.canny.io/)
+
+ユーザ(開発者)からの機能要望や、ロードマップ。特定の機能が今後追加されるかどうか確認したいときはここを見るとよいです。
+
+
+### [Forums](https://forums.expo.dev/)
+
+フォーラム。困ったときや質問があるときはここを確認・投稿するとよいです。
+
+### [Expo and React Native Jobs](https://pallet.xyz/list/expo-jobs/jobs)
+
+ExpoやReact Nativeの求人。
+
+### SNS・ツールアカウント
+
+- [Twitter - @expo](https://twitter.com/expo)
+- [Youtube - Expo](https://www.youtube.com/channel/UCx_YiR733cfqVPRsQ1n8Fag)
+- [Discord - Expo Developers](https://discord.gg/4gtbPAdpaE)
+
+### Githubリポジトリ
+
+- https://github.com/expo/expo
+- https://github.com/expo/expo-cli
+- https://github.com/expo/eas-cli
+- https://github.com/expo/create-react-native-app
+- https://github.com/expo/examples
+- https://github.com/expo/expo-github-action
+- https://github.com/byCedric/eas-monorepo-example
