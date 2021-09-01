@@ -4,24 +4,55 @@ import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 export const meta = {
   title: "ExpoのManaged Workflowでアプリ内課金を実装する",
   tagNames: ["expo", "react-native", "eas"],
-  color1: "rgb(50, 50, 50)",
-  color2: "rgb(200, 200, 200)",
+  color1: "rgb(67,49,230)",
+  color2: "rgb(200,50,50)",
   createdAt: parse(
-    "2021-08-28 12:00:00 +09:00",
+    "2021-09-01 10:35:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
   author: "@gaishimo",
   description:
     "ExpoのEAS Buildで、Managed Workflowプロジェクトに対してアプリ内課金を実装する手順について説明します。",
+  imagePath: "/posts/2021-08-28-eas-iap/purchase-ios.png",
   lastUpdatedAt: parse(
-    "2021-08-28 12:00:00 +09:00",
+    "2021-09-01 10:35:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
 }
 
-export const headlines = []
+export const headlines = [
+   { title: "概要", children: [{ title: "前提" }] },
+   { title: "以前のClassic BuildではEjectする必要があった" },
+   { title: "EAS Buildでアプリ内課金が可能に" },
+   { title: "expo-in-app-purchasesの追加" },
+   { title: "AppStore・Google Playの設定" },
+   {
+     title: "Development Clientの導入",
+     children: [
+       { title: "expo-dev-clientの追加" },
+       { title: "EASの設定" },
+       { title: "Adhocの設定" },
+       { title: "EAS Buildの実行" },
+       { title: "DevClientのインストール" },
+       { title: "DevClientの起動" },
+     ]
+   },
+   { title: "アプリ内課金の実装" },
+   { title: "Androidでの動作確認" },
+   {
+     title: "アプリ内課金実装でのその他注意点",
+     children: [
+       { title: "iOSの復元処理" },
+       { title: "iOSで購入が中断された場合の処理" },
+       { title: "Androidでクレジットカード購入の承認が必要な場合" },
+       { title: "レシート、購入トークンの検証" },
+     ]
+   },
+   { title: "OTA Updateを行う場合の注意" },
+   { title: "終わりに" },
+]
 
 export default props => (
   <PostLayout headlines={headlines} meta={meta}>
@@ -31,7 +62,7 @@ export default props => (
 
 ## 概要
 
-この記事では、ExpoのManagedワークフローでアプリ内課金を実装する手順について説明します。ライブラリは[expo-in-app-purchases](https://docs.expo.dev/versions/latest/sdk/in-app-purchases/)を使います。
+Expo(React Native)のManaged Workflowでアプリ内課金を実装する手順について説明します。ライブラリは[expo-in-app-purchases](https://docs.expo.dev/versions/latest/sdk/in-app-purchases/)を使います。
 
 ### 前提
 
@@ -39,33 +70,38 @@ export default props => (
 - expo-in-app-purchase: 10.2.0
 - 課金アイテム: 非消耗型(一度限り購入するもの)
 
+*サブスクリプションについては今回は記載していませんが、Expoでのビルド、環境構築の流れは同じなため、その部分は参考になると思います。
+
 
 ## 以前のClassic BuildではEjectする必要があった
 
 従来、Expoプロジェクトでアプリ内課金を実装するにはEjectを行いBare Workflowに変更する必要がありました。これはExpoの旧形式のビルド(Classic Build)の仕組みによる制約です。
 
-Classicビルドは、あらかじめ使いそうなNativeライブラリをひとまとまりとして用意しておき、それを元にアプリアーカイブを作成するという仕組みになっています。その中にアプリ内課金の機能は含まれておらず、独自にネイティブライブラリを追加することもできません。また、アプリ内課金を動作させるにはプロジェクトごとに一つのユニークなアプリを持つ必要がありますが、開発用のクライアントアプリ(Expo Go)が一つしか利用できないため、開発時にアプリ内課金を利用することが仕組み上そもそもできない状態でした。
+Classicビルドはあらかじめ使われそうなNativeライブラリをひとまとまりとして用意しておき(Shell App)、それを元にアプリバイナリを作成するという仕組みになっています。
+[Expo managed workflow in 2021. Part 1: The preset Expo runtime | by Brent Vatne | Exposition](https://blog.expo.dev/expo-managed-workflow-in-2021-5b887bbf7dbb)
 
-Managed Workflowが使えないとExpoを使う利点がかなり損なわれてしまうため、この点がExpoを選ぶ上での一つのネックになっていたと思います。
+
+そのひとまとまりのライブラリの中にアプリ内課金の機能は含まれていません。そこに独自にネイティブライブラリを追加することもできません。また、アプリ内課金を動作させるにはプロジェクトごとに一つのユニークなアプリを持つ必要がありますが、開発用のクライアントアプリ(Expo Go)が一つしか利用できないため、開発時にアプリ内課金を利用することが仕組み上そもそもできない状態でした。
+
+Managed Workflowが使えないとなると、Expoを使う利点がかなり損なわれてしまいます。この点がExpoを選択する上での一つのネックになっていました。
 
 
 ## EAS Buildでアプリ内課金が可能に
 
-しかし、2021年にExpoが提供を開始した[EAS Build](https://docs.expo.dev/build/introduction/)という仕組みにより、Managed Workflowであってもアプリ内課金を組み込むことができるようになりました。
+しかし、2021年にExpoが提供を開始した[EAS Build](https://docs.expo.dev/build/introduction/)というビルド方式により、Managed Workflowであってもアプリ内課金を組み込むことができるようになりました。
 
 EAS BuildはClassic Buildと異なり独自のNativeモジュールを追加することが可能です。EAS Buildの仕組みについては、以下の公式ブログの記事が参考になります。
 [Expo managed workflow in 2021. Part 2: Customizing the runtime | by Brent Vatne | Exposition](https://blog.expo.dev/expo-managed-workflow-in-2021-d1c9b68aa10)
 
-更に、Custom Development Clientsというものをビルドできるようになりました。これは、開発用のクライアントを独自にカスタマイズしてビルド・内部配布することができるというものです。これにより開発時にアプリ内課金の機能を利用・検証することも可能になりました。
+更に、[Custom Development Clients](https://docs.expo.dev/clients/introduction/)というものをビルドできるようになりました。これは独自にカスタマイズしたクライアントアプリ(Expo Goアプリに代わるもの)をビルド・内部配布することができるというものです。これにより開発時にアプリ内課金の機能を利用・検証することも可能になりました。
 [Introducing: Custom Development Clients | by TC Davis | Jul, 2021 | Exposition](https://blog.expo.dev/introducing-custom-development-clients-5a2c79a9ddf8)
 
 
 これらの機能は2021円8月時点ではまだPreviewのため、利用するには[Priorityプラン(月29ドル)](https://expo.dev/pricing)に加入する必要があります。([Previewはベータ版のような位置づけとは異なり、ユーザのフィードバックを受けるための期間とのことです](https://docs.expo.dev/feature-preview/#what-does-feature-preview-mean))
 
+旧方式のビルド(Classicビルド)は今後もサポートは続きますが、EAS Buildが主力になっていくものと思われます。
 
-弊社の[Simpluna](https://apps.apple.com/jp/app/id1528652349?ign-itsct=apps_box&ign-itscg=30200)というアプリ(iOS & Android)では、EAS Buildを利用して2021年7月からアプリ内課金を提供していますが、特に問題なく動作しています。
-
-Simplunaを初回リリースした時点(2020年8月)ではアプリ内課金を導入するにはEjectするしかない状態でしたが、近いうちにManaged Workflowでもサポートされそうだったので、最初はアプリ内課金を含めずにリリースすることにしました。無料のみでユーザを増やし改善していきながら、アプリ内課金がサポートされた時点で導入するという計画です。1年ほど経ってついにEAS Buildが提供されたため、2021年7月に導入したという流れになります。
+弊社のSimplunaというアプリ([iOS](https://apps.apple.com/jp/app/id1528652349?ign-itsct=apps_box&ign-itscg=30200) & [Android](https://play.google.com/store/apps/details?id=app.simpluna))では、2021年7月からEAS Buildを利用してアプリ内課金を提供していますが、特に問題なく動作・運用できています。アプリを初回リリースした2020年8月時点ではアプリ内課金を導入するにはEjectするしかない状態でしたが、[いずれManaged Workflowでもサポートされそうだったので](https://expo.canny.io/feature-requests/p/in-app-purchases)、最初はアプリ内課金を含めずにリリースすることにしました。Managed Workflowのまま無料のみでユーザを増やし改善していきながら、アプリ内課金がサポートされた時点で導入するという計画でした。1年ほど経ってついにEAS BuildがPreviewで提供されたため、2021年7月に導入したという流れになります。
 
 以下では、実際にどのように導入していくかを説明していきたいと思います。
 
@@ -74,45 +110,45 @@ Simplunaを初回リリースした時点(2020年8月)ではアプリ内課金�
 
 実装は[expo-in-app-purchases](https://www.npmjs.com/package/expo-in-app-purchases)を使って行います。まず通常通りライブラリをpackage.jsonに追加します。
 
-```
+```bash
 yarn add expo-in-app-purchases
 ```
 
 ※npmの場合は随時変更してください
 
-もしもライブラリの設定でNative部分に関連する修正(iosフォルダ・androidフォルダ内で発生する修正)が必要な場合は[Config Plugin](https://docs.expo.dev/guides/config-plugins/)を利用する必要があるのですが、expo-in-app-purchasesに関してはネイティブ固有の設定は必要ないため不要です。
+React Nativeのライブラリによっては、設定でNative部分に関連する修正(iosフォルダ・androidフォルダ内で発生する修正)が必要な場合があります。その場合は[Config Plugin](https://docs.expo.dev/guides/config-plugins/)を利用する必要があるのですが、expo-in-app-purchasesに関してはネイティブ固有の設定は必要ないため不要です。
 
 
 
 ## AppStore・Google Playの設定
 
-アプリ内課金を利用するには、事前にAppStoreとGoogle Playの設定を行う必要があります。
+アプリ内課金を利用するには事前にAppStoreとGoogle Playの設定を行う必要があります。
 
-手順は[InAppPurchasesのドキュメント](https://docs.expo.dev/versions/latest/sdk/in-app-purchases/#setup) に記載されている通りなのですが、iOSのIn-App PurhchaseのCapabilityの設定は自動で行われるため特に設定する必要はありません。
+手順は[InAppPurchasesのドキュメント](https://docs.expo.dev/versions/latest/sdk/in-app-purchases/#setup) に記載されている通りなのですが、iOSのIn-App PurchaseのCapabilityの設定は自動で行われるため特に設定する必要はありません。
 
-Google Playについては、一度アプリ内課金のライブラリを含む状態でアプリアーカイブを作成しアップロードする必要があります。そうしないと課金アイテムの設定ができません。今回の手順では後でビルドを作成するため、一旦後回しにして大丈夫です。
+Google Playについては、一度アプリ内課金のライブラリを含む状態でアプリアーカイブを作成しアップロードする必要があります。そうしないと課金アイテムの設定画面に進めません。今回の手順では後でビルドを作成するため、一旦後回しにします。
 
 
-## Development Clientのビルド
+## Development Clientの導入
 
-今の状態でexpo-in-app-purchasesを用いてコードを実装しても、Expo Goアプリではエラーが発生してしまいます。これはExpo Goアプリではexpo-in-app-purchasesのRuntime(Native Module)が提供されていないためです。
+この状態でexpo-in-app-purchasesを用いてコードを実装しても、Expo Goアプリを起動したときにエラーが発生してしまいます。これは前述したとおり、Expo Goアプリではexpo-in-app-purchasesのNative Moduleが提供されていないためです。
 
-このままではExpo Goでは開発ができないため、expo-in-app-purhcasesを含んだクライアントアプリ(DevClient)をビルドします。
+このままではExpo Goでは開発ができないため、expo-in-app-purchasesを含んだクライアントアプリ(Custom Development Clients)をビルドします。
 
-DevClientは作成せずに通常のビルド(aab, ipa)を生成して端末にアプリをインストールしてアプリ内課金を検証する方法もあると思いますが、その場合開発しながら課金を検証するということができず開発効率が悪くなります。またExpo Goの場合はexpo-in-app-purchasesをimportしないようにする等の対応が必要になります。諸々手間がかかるため、DevClientをビルドすることをおすすめします。
+DevClientは作成せずに通常のスタンドアロンビルド(aab, ipa)を生成し、端末にインストールしてアプリ内課金を検証する方法もあると思いますが、その場合開発しながら課金を検証することができず効率が悪くなります。またExpo Goの場合はexpo-in-app-purchasesをimportしないようにする等の対応が必要になります。諸々手間がかかるため、DevClientをビルドすることをおすすめします。
 
 
 ### expo-dev-clientの追加
 
 プロジェクトにexpo-dev-clientパッケージを追加します。
 
-```
+```bash
 yarn add expo-dev-client
 ```
 
 アプリのコードトップ(App.tsx) にexpo-dev-clientのimportを追加します。これは、DevClient上でエラーメッセージをわかりやすく表示する機能を有効にするためです。
 
-```
+```javascript
 import "expo-dev-client"
 ```
 
@@ -123,12 +159,10 @@ import "expo-dev-client"
 
 ### EASの設定
 
-EASビルドができるようにeas.jsonを生成します。事前にeas-cliのインストールが必要です(`npm install -g eas-cli`)。
+EASビルドの設定を行います。`eas build::configure`でEASの設定ファイルである`eas.json`を生成します。事前にeas-cliのインストールが必要です(`npm install -g eas-cli`)。
 
 ```bash
-$ eas build::configure
- ›   Error: command build::configure not found
-gaishimo@dev01:~/workspace/expo-iap-example$ eas build:configure
+$ eas build:configure
 💡 The following process will configure your iOS and/or Android project to be compatible with EAS Build. These changes only apply to your local project files and you can safely revert them at any time.
 
 ✔ Which platforms would you like to configure for EAS Build? › All
@@ -136,10 +170,10 @@ gaishimo@dev01:~/workspace/expo-iap-example$ eas build:configure
 ✔ Generated eas.json
 
 📝  Android application id Learn more: https://expo.fyi/android-package
-✔ What would you like your Android application id to be? … com.gaishimo.example1
+✔ What would you like your Android application id to be? … <省略>
 
 📝  iOS Bundle Identifier Learn more: https://expo.fyi/bundle-identifier
-✔ What would you like your iOS bundle identifier to be? … com.gaishimo.example1
+✔ What would you like your iOS bundle identifier to be? … <省略>
 
 ✔ Can we commit these changes to git for you? › Yes
 ✔ Commit message: … Configure EAS Build
@@ -167,16 +201,16 @@ gaishimo@dev01:~/workspace/expo-iap-example$ eas build:configure
 
 `release`と共に `development` というprofile名の設定が追加されています。`"developmentClient": true`は開発クライアント用のビルドであり、`"distribution": "internal"`は内部配布であることを意味します。
 
-また、同時にapp.jsonにBundle ID(ios)、package名(android)が付与されます。
+同時にapp.jsonにBundle ID(ios)、package名(android)のフィールドが追加されます。
 
 ### Adhocの設定
 
-iOSの場合、Development Clientを内部配布するには、ad hoc provisioning profileに対して端末のUDIDを設定する必要があります。
+iOSでDevelopment Clientを内部配布するには、ad hoc provisioning profileに対して端末のUDIDを設定する必要があります。
 
 
 `eas device:create` を実行し、
 
-```
+```bash
 $ eas device:create
 This command lets you register your Apple devices (iPhones and iPads) for internal distribution of your app.
 Internal distribution means that you won't need upload your app archive to App Store / Testflight.
@@ -186,7 +220,7 @@ The provisioning profile needs to contain the UDIDs (unique identifiers) of your
 First of all, please choose the Expo account under which you want to register your devices.
 Later, authenticate with Apple and choose your desired Apple Team (if your Apple ID has access to multiple teams).
 
-✔ You're inside the project directory. Would you like to use gaishimo-omoidasu account? … yes
+✔ You're inside the project directory. Would you like to use <省略> account? … yes
 › Log in to your Apple Developer account to continue
 ✔ Apple ID: … <省略>
 › Restoring session /home/gaishimo/.app-store/auth/<省略>/cookie
@@ -208,22 +242,22 @@ Open the following link on your iOS devices (or scan the QR code) and follow the
 https://expo.io/register-device/<省略>
 ```
 
-ターミナル上にQRコードが表示されるためデバイスからQRコードを読み取ってアクセスし、Provisioning Profileをダウンロード・インストールします。
+ターミナル上にQRコードが表示されるため、iOSデバイスからカメラでQRコードを読み取ってアクセスし、Provisioning Profileをダウンロード・インストールします。
 
 
 
 ### EAS Buildの実行
 
-設定が完了したら、Development Clientをビルドしてみます。
-```
+設定が完了したら、Development Clientをビルドしてみます。`eas build`コマンドで、`--profile`オプションに`development`を指定して実行します。
+```bash
 $ eas build --platform all --profile development
-✔ Created @gaishimo-omoidasu/expo-iap-example (https://expo.dev/accounts/gaishimo-omoidasu/projects/expo-iap-example) on Expo
+✔ Created <省略>/expo-iap-example (https://expo.dev/accounts/<省略>/projects/expo-iap-example) on Expo
 ✔ Using remote Android credentials (Expo server)
 ✔ Generate a new Android Keystore? … yes
 ✔ Created keystore
 ✔ Compressed project files 17s (206 MB)
 ✔ Uploaded to EAS 11s Learn more: https://expo.fyi/eas-build-archive
-✔ Linked to project @gaishimo-omoidasu/expo-iap-example (https://expo.dev/accounts/gaishimo-omoidasu/projects/expo-iap-example)
+✔ Linked to project <省略> (https://expo.dev/accounts/<省略>/projects/expo-iap-example)
 ✔ Using remote iOS credentials (Expo server)
 
 If you provide your Apple account credentials we will be able to generate all necessary build credentials and fully validate them.
@@ -231,61 +265,58 @@ This is optional, but without Apple account access you will need to provide all 
 ✔ Do you want to log in to your Apple account? … yes
 
 › Log in to your Apple Developer account to continue
-✔ Apple ID: … gaithimo@gmail.com
-› Restoring session /home/gaishimo/.app-store/auth/gaithimo@gmail.com/cookie
+✔ Apple ID: … <省略>
+› Restoring session /home/gaishimo/.app-store/auth/<省略>/cookie
 › Session expired Local session
 › The password is only used to authenticate with Apple and never stored on EAS servers
   Learn more: https://bit.ly/2VtGWhU
-✔ Password (for gaithimo@gmail.com): … **********
+✔ Password (for <省略>): … **********
 › Saving Apple ID password to the local Keychain
   Learn more: https://docs.expo.dev/distribution/security#keychain
 ✔ Logged in New session
-› Team Omoidasu, Inc. (UF2VN9TFY6)
-› Provider Omoidasu, Inc. (119036950)
-✔ Bundle identifier registered com.gaishimo.example1
+› Team <省略> (<省略>)
+› Provider <省略> (<省略>)
+✔ Bundle identifier registered <省略>
 ✔ Synced capabilities: No updates
 ✔ Synced capability identifiers: No updates
 ✔ Fetched Apple distribution certificates
 ✔ Reuse this distribution certificate?
-Cert ID: FPB55CX4MG, Serial number: 5B5C85FC8B1D146808E78E505C5BB366, Team ID: UF2VN9TFY6, Team name: Omoidasu, Inc. (Company/Organization)
+Cert ID: <省略>, Serial number: <省略>, Team ID: <省略>, Team name: <省略> (Company/Organization)
     Created: 5 days ago, Updated: 5 days ago,
     Expires: Tue, 23 Aug 2022 00:17:32 GMT+0000
-    📲 Used by: @gaishimo-omoidasu/simpluna-alpha,@gaishimo-omoidasu/simpluna,@gaishimo-omoidasu/simpluna-alpha-dev … yes
-Using distribution certificate with serial number 5B5C85FC8B1D146808E78E505C5BB366
-✔ Select devices for the adhoc build: › 00008030-000161CC36DA802E (iPhone 11 Pro), 00008030-001818D20290802E (iPhone 11 Pro), 561b611b1abb78b72c16d6517323d5ec96b4e61e (iPhone 7), bf1a0d03c683c91648a80b2cdc6515e407197d8d (iPhone SE (gen 1))
-✔ Created new profile: *[expo] com.gaishimo.example1 AdHoc 1630121320983
+    📲 Used by: <省略> … yes
+Using distribution certificate with serial number <省略>
+✔ Select devices for the adhoc build: › <省略>
+✔ Created new profile: *[expo] <省略>
 
 Project Credentials Configuration:
-  Project: @gaishimo-omoidasu/expo-iap-example
-  Bundle Identifier: com.gaishimo.example1
+  Project: <省略>
+  Bundle Identifier: <省略>
   Configuration: Ad Hoc
 
   Distribution Certificate:
-    Serial Number: 5B5C85FC8B1D146808E78E505C5BB366
+    Serial Number: <省略>
     Expiration Date: Tue, 23 Aug 2022 00:17:32 GMT+0000
-    Apple Team: UF2VN9TFY6 (Omoidasu, Inc. (Company/Organization))
+    Apple Team: <省略>x
     Updated 5 days ago
 
   Provisioning Profile:
-    Developer Portal ID: 35S7QF6RJ8
+    Developer Portal ID: <省略>
     Status: active
     Expiration Date: Tue, 23 Aug 2022 00:17:32 GMT+0000
-    Apple Team: UF2VN9TFY6 (Omoidasu, Inc. (Company/Organization))
+    Apple Team: <省略>
     Provisioned devices:
-    - iPhone 11 Pro (UDID: 00008030-000161CC36DA802E)
-    - iPhone 11 Pro (UDID: 00008030-001818D20290802E)
-    - iPhone 7 (UDID: 561b611b1abb78b72c16d6517323d5ec96b4e61e)
-    - iPhone SE (gen 1) (UDID: bf1a0d03c683c91648a80b2cdc6515e407197d8d)
+    - iPhone 11 Pro (UDID: <省略>)
     Updated 2 seconds ago
 
-All credentials are ready to build @gaishimo-omoidasu/expo-iap-example (com.gaishimo.example1)
+All credentials are ready to build <省略>
 
 ✔ Would you like to setup Push Notifications for your project? … no
 ✔ Compressed project files 16s (206 MB)
 ✔ Uploaded to EAS 12s Learn more: https://expo.fyi/eas-build-archive
 
-Android build details: https://expo.dev/accounts/gaishimo-omoidasu/builds/a34f947c-809e-46e0-b0f1-44d4fff6e58d
-iOS build details: https://expo.dev/accounts/gaishimo-omoidasu/builds/3d4c9882-15a8-47dd-9b37-61f4451110d1
+Android build details: https://expo.dev/accounts/<省略>/builds/<省略>
+iOS build details: https://expo.dev/accounts/<省略>/builds/<省略>
 
 Waiting for builds to complete. You can press Ctrl+C to exit.
 ```
@@ -294,7 +325,7 @@ Waiting for builds to complete. You can press Ctrl+C to exit.
 
 ビルドが成功したら、ビルド結果ページでインストールボタンをクリックします。QRコードが表示されるので、iPhone端末で読み取ってインストールします。
 
-<ImageWrapper width={180}>
+<ImageWrapper width={240}>
   <img alt="DevClientをインストール" src="/posts/2021-08-28-eas-iap/install-dev-client-ios.png" width="100%" height="auto" />
 </ImageWrapper>
 
@@ -303,25 +334,146 @@ Waiting for builds to complete. You can press Ctrl+C to exit.
 DevClientを端末上で起動してみます。
 
 まずサーバを起動します。expo startの際に`--dev-client`オプションをつけて起動します。
-```
+```bash
 expo start --dev-client
 ```
 
-ターミナル上にQRコードが表示されるため、カメラでQRコードを読み取ると、無事Dev Clientが起動しました!
+ターミナル上に表示されるQRコードを端末のカメラで読み取ると、無事Dev Clientが起動しました! これでアプリ内課金を開発する環境が整いました。
 
-<ImageWrapper width={240}>
+<ImageWrapper width={200}>
   <img alt="DevClientを起動" src="/posts/2021-08-28-eas-iap/dev-client-run-ios.jpeg" width="100%" height="auto" />
 </ImageWrapper>
 
 
 ## アプリ内課金の実装
 
-開発用の環境が整ったので、expo-in-app-purhchasesを用いてアプリ内課金の実装をします。最低限のアイテム購入を確認するためのコードを作成します。
+開発用の環境が整ったので、expo-in-app-purhchasesを用いてアプリ内課金の実装をします。
 
-以下がコードのサンプルです。
+以下がコードのサンプルです。最低限、アイテム購入ができることを確認するためのコードになります。
 
-```
-TODO
+```javascript
+import "expo-dev-client"
+import {
+  connectAsync,
+  finishTransactionAsync,
+  getProductsAsync,
+  IAPItemDetails,
+  IAPQueryResponse,
+  IAPResponseCode,
+  InAppPurchase,
+  purchaseItemAsync,
+  setPurchaseListener,
+} from "expo-in-app-purchases"
+import { StatusBar } from "expo-status-bar"
+import React, { useCallback, useEffect, useState } from "react"
+import { ActivityIndicator, Button, StyleSheet, Text, View } from "react-native"
+
+const PRODUCT_ID = "<省略>"
+
+export default function App() {
+  const [purchasing, setPurchasing] = useState<boolean>(false)
+  const [productItem, setProductItem] = useState<IAPItemDetails | null>(null)
+
+  const prepare = useCallback(async () => {
+    try {
+      await connectAsync()
+
+      setPurchaseListener(async (result: IAPQueryResponse<InAppPurchase>) => {
+        const { responseCode, results, errorCode } = result
+        console.log(
+          `purchaseListener responseCode: ${responseCode}, errorCode: ${errorCode}`,
+        )
+        switch (responseCode) {
+          case IAPResponseCode.OK: {
+            if (results == null || results.length === 0) {
+              throw new Error("no purchase results")
+            }
+            // androidの場合、unfinishなレコードが含まれてくる場合があるため、
+            // acknowledgedがfalseのものに限定する
+            // https://docs.expo.dev/versions/latest/sdk/in-app-purchases/#inapppurchasessetpurchaselistenercallback-result-iapqueryresponse--void
+            const purchase = results.find(result => !result.acknowledged)
+            if (purchase) {
+              const isConsumable = false
+              await finishTransactionAsync(purchase, isConsumable)
+            }
+            break
+          }
+          case IAPResponseCode.USER_CANCELED: {
+            break
+          }
+          case IAPResponseCode.ERROR: {
+            console.log("errored.", errorCode)
+            break
+          }
+          case IAPResponseCode.DEFERRED: {
+            // 親の承認が必要な場合 (iOSの場合のみ)
+            console.log("deferred")
+            break
+          }
+        }
+        setPurchasing(false)
+      })
+
+      const { responseCode, results } = await getProductsAsync([PRODUCT_ID])
+      if (responseCode === IAPResponseCode.OK) {
+        if (results == null || results.length === 0) {
+          throw new Error("no results")
+        }
+
+        console.log("results:", results)
+        const item = results.find(r => r.productId === PRODUCT_ID)
+        if (item == null) throw new Error("item not found.")
+        setProductItem(item)
+      }
+    } catch (err) {
+      console.log(err)
+    }
+  }, [])
+
+  const doPurchase = useCallback(async () => {
+    try {
+      setPurchasing(true)
+      await purchaseItemAsync(PRODUCT_ID)
+    } catch (err) {
+      console.log(err)
+      setPurchasing(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    prepare()
+  }, [prepare])
+
+  return (
+    <View style={styles.container}>
+      <Text>Expo IAP Example!!</Text>
+      <StatusBar style="auto" />
+      {productItem && (
+        <View style={styles.product}>
+          {purchasing ? (
+            <ActivityIndicator size="small" />
+          ) : (
+            <Button
+              title={`アイテムを${productItem.price}で購入`}
+              onPress={doPurchase}
+            />
+          )}
+        </View>
+      )}
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  product: { marginTop: 40 },
+})
+
 ```
 
 画面はシンプルに購入ボタンのみを表示します。
@@ -329,15 +481,23 @@ TODO
   <img alt="購入用画面" src="/posts/2021-08-28-eas-iap/purchase-screen.jpeg" width="100%" height="auto" />
 </ImageWrapper>
 
-iOSの場合、購入時にApple IDでのサインインを求められるため、AppStore Connectで作成したSandboxのテスターアカウントでログインします。ログインすると、OSの購入用モーダルが表示されるため、再度Sandboxアカウントのパスワードを入力します。
+コードを簡単に説明すると、画面ロード時にまず以下の処理を行います。
+- `connectAsync`で初期化
+- `setPurchaseListener`でイベントハンドラーを設定
+- `getProductsAsync`でプロダクトを取得
+
+画面表示後、購入ボタンをタップしたら`purchaseItemAsync`で購入処理を開始し、`setPurchaseListener`で設定したハンドラーにおいて、購入が成功したら`finishTransactionAsync`を呼び出して購入確定という流れになります。
+
+
+iOSの場合、購入時にApple IDでのサインインを求められるためAppStore Connectで作成したSandboxのテスターアカウントでログインします。ログイン後OSの購入用モーダルが表示されるため、再度Sandboxアカウントのパスワードを入力します。
 
 <ImageWrapper width={240}>
-  <img alt="購入用画面" src="/posts/2021-08-28-eas-iap/purchase-ios.jpeg" width="100%" height="auto" />
+  <img alt="購入用画面" src="/posts/2021-08-28-eas-iap/purchase-ios.png" width="100%" height="auto" />
 </ImageWrapper>
 
 Sandbox環境の場合OSの購入用モーダルが2度表示されてしまうことがありますが、これはSandbox環境のみの現象のため本番環境では特に問題ありません。
 
-購入が無事完了すると、完了のアラートが表示されます。
+購入が無事完了すると完了のアラートが表示されます(iOSの場合)。
 <ImageWrapper width={240}>
   <img alt="購入用画面" src="/posts/2021-08-28-eas-iap/purchased-ios.png" width="100%" height="auto" />
 </ImageWrapper>
@@ -345,21 +505,19 @@ Sandbox環境の場合OSの購入用モーダルが2度表示されてしまう�
 ## Androidでの動作確認
 
 
-### ストア用ビルドの作成・アップロード
+Androidの場合、Google Play Consoleでアプリ内課金の設定をするのに一度アプリアーカイブをビルドしてストアにアップロードする必要があります。
 
-Androidの場合、Google Playでアプリ内課金の設定をするのに、一度アプリアーカイブをビルドしてストアにアップロードする必要があります。
+`eas:configure`した際に作成された`release`profileでandroidのビルドを行います。
 
-eas:configure した際に作成されたrelease profileでandroidのビルドを行います。
-
-```
+```bash
 eas build --platform android --profile release
 ```
 
-ビルドが成功すると、ビルド結果画面からaabファイルとしてダウンロードできるため、ダウンロードします。一度何らかの形で課金機能が含まれたaabをアップロードすればアプリ内課金の画面は設定可能になるため、内部テストリリース等でアップロードします。(リリース自体は必ずしも公開する必要はありません)
+ビルドが成功するとビルド結果画面からaabファイルとしてダウンロードできます。一度課金機能が含まれたaabをGoogle Play Consoleでアップロードすればアプリ内課金の画面は設定可能になるため、内部テストリリース等でアップロードします(リリース自体は必ずしも公開する必要はありません)。アップロードしたらアプリ内アイテム画面から課金アイテムの設定を行います。
 
-課金アイテムを追加した直後はまだ、アプリのプログラム上からプロダクトを取得できないのです(productIdを指定して、getProductsAsyncしても結果が空になる)が、しばらく待つか、Android端末の設定でアプリのキャッシュをクリアすると取得できるようになります。
+課金アイテムを追加した直後は、アプリのプログラム上からプロダクトを直ぐに取得できない場合があります(productIdを指定して、`getProductsAsync`しても結果が空になる)。しばらく待つか、Android端末の設定でアプリのキャッシュをクリアすると取得できるようになります。
 
-Android上でDevClientを起動し購入を行うと、OSの購入モーダルが表示されます。
+Android上でDevClientを起動し購入を行うと購入モーダルが表示されます。
 
 <ImageWrapper width={240}>
   <img alt="購入用画面" src="/posts/2021-08-28-eas-iap/purchase-screen-android.png" width="100%" height="auto" />
@@ -370,15 +528,52 @@ Android上でDevClientを起動し購入を行うと、OSの購入モーダル�
 [アプリ ライセンスを使用したアプリ内課金のテスト - Play Console ヘルプ](https://support.google.com/googleplay/android-developer/answer/6062777?hl=ja)
 
 
-## アプリ内課金の実装の注意点
+## アプリ内課金実装でのその他注意点
 
-今回は最低限、購入ができることを確認したかったため最低限のコードしか書いていませんが、実際にアプリ内課金を導入する場合には以下についても追加を検討する必要があると思います。
+今回は最低限購入ができることを確認したかったため最低限のコードしか書いていないためご注意ください。以下の内容についても実装を検討ください。
 
 ### iOSの復元処理
 
 iOSの場合、復元ボタンで以前の購入を復元できるようにする必要があります。
-以前に購入したかどうかは`getPurchaseHistoryAsync()`で取得できます。復元ボタンをタップした際に`getPurchaseHistoryAsync`を呼び出し、過去の購入履歴が存在したら機能等を付与する形にすればよいでしょう。
+以前に購入したかどうかは`getPurchaseHistoryAsync()`で取得できます。復元ボタンをタップした際に`getPurchaseHistoryAsync`を呼び出し、過去の購入履歴が存在したら機能等を付与する形にすればよいと思います。
 
 ### iOSで購入が中断された場合の処理
 
-iOSで、購入時に規約が変更等されて同意が必要だったりした場合、中断されます。
+iOSで、購入時に規約が変更等されて同意が必要だったりした場合、中断されます。その場合、purchaseListenerでのresponseCodeは通常時と異なる値が来るため、一度そのパターンで検証することをおすすめします。AppStore ConnectでSandboxのテスターアカウントの設定で"このテスターの購入を中断する" のチェックボックスをONにすると中断をテストできます。
+
+### Androidでクレジットカード購入の承認が必要な場合
+
+Androidで購入時に承認が必要なクレジットカードが使われた場合、時間差で購入が確定するため注意が必要です。テストカードを使えば試すことができます。却下される場合のパターンも存在します。
+
+### レシート、購入トークンの検証
+
+購入したレシートが正常なものかどうかを確認することで不正な購入を防止できます。
+
+購入の証明として、iOSの場合はレシート、Androidの場合は購入トークンが発行されます。購入時のイベントハンドラーで購入レコードから取得できます。購入レコードを`purchase`とした場合、iOSの場合は`purchase.transactionReceipt`、Androidの場合は`purchase.purchaseToken`で取得できます。
+
+サーバサイドで検証するためのAPIを用意しておき、購入直後やアプリ起動時にチェックするのがよいと思います。
+
+参考:
+- [App Storeを使用してレシートを検証する - 日本語ドキュメント - Apple Developer](https://developer.apple.com/jp/documentation/storekit/in-app_purchase/validating_receipts_with_the_app_store/)
+- [サーバーを用いたAndroidのレシート検証 - WonderPlanet Developers’ Blog](https://developers.wonderpla.net/entry/2021/06/04/140228)
+
+
+## OTA Updateを行う場合の注意
+
+EAS Buildの場合、OTA Updateを実施する際には注意が必要です。
+
+OTA UpdateはJSのコードのみしかアップデートしないため、ライブラリのバージョンが変わったりしてランタイム側との互換性が合わないJSコードを反映してしまうと不具合やクラッシュすることがあり得ます。
+
+今までのClassicビルドでは、ランタイム部分はExpoのSDKがバージョンアップされない限り更新されませんでしたが、EAS Buildでアプリバイナリを独自にカスタマイズできるようになった分、ランタイムと互換性の合わないJSコードをpublishしてしまうリスクが出てきます。Expoでは新しいバイナリを作成するごとにrelease channel名を変更することを推奨しています。[Over-the-air updates - Expo Documentation](https://docs.expo.dev/build/updates/#updating-managed-apps-built-with-eas-build)
+
+また、OTA Updateに関連してEAS Updateというサービスを開発中だそうです(現在クローズドalpha)。
+[fyi/eas-update.md at master · expo/fyi](https://github.com/expo/fyi/blob/master/eas-update.md)
+
+
+## 終わりに
+
+Ejectせずにアプリ内課金を実装できるようになったことはかなり大きな出来事だと思います。
+
+今までは、アプリ内課金やサポートされていないNativeライブラリが必要なプロジェクトの場合、Ejectする必要があり、Expoのメリットを最大限活かすことができませんでした。それがExpoを使わない理由になったり、引いてはReact Nativeを導入しない理由になるケースも多かったのではと推測します。
+
+今後、新規にReact Nativeのプロジェクトを始めるときはExpoのManaged Workflowを使うという選択肢が増えていくのではないかと思います。
