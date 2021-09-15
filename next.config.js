@@ -1,4 +1,10 @@
-module.exports = {
+const withPlugins = require('next-compose-plugins')
+const withMDX = require("@next/mdx")({
+  extension: /\.mdx$/,
+})
+
+module.exports = withPlugins([withMDX], {
+  pageExtensions: ["tsx", "mdx"],
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
@@ -13,4 +19,4 @@ module.exports = {
     ]
     return config
   },
-}
+})
