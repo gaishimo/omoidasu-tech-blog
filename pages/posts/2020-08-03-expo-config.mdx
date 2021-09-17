@@ -1,0 +1,109 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+
+export const meta = {
+  title: "Expoの設定(app.json)をtypescriptで動的に記述する",
+  tagNames: ["expo", "react-native", "typescript"],
+  color1: "#0887C3",
+  color2: "#0DA4D3",
+  createdAt: parse("2020-08-03 00:00:00 +09:00", "yyyy-MM-dd HH:mm:ss XXX", new Date()),
+  author: "@gaishimo",
+  description: "Expoの設定ファイルをtypescriptで動的に書くやり方について説明します。",
+  imagePath: "/ogImage.png",
+  lastUpdatedAt: parse("2021-06-04 18:00:00 +09:00", "yyyy-MM-dd HH:mm:ss XXX", new Date()),
+}
+
+export const headlines = [
+  { title: "Expoの設定ファイルについて" },
+  { title: "ファイル自体を環境別に分ける" },
+  { title: "ファイルを動的に記述する" },
+  { title: "Expoの設定ファイルについて" },
+  { title: ".envを読み込んで設定値として利用する" },
+]
+
+export default (props) => <PostLayout headlines={headlines} meta={meta}>{props.children}</PostLayout>
+
+
+※ この記事に記載されている--configオプションを使う方式はdeprecatedになりました。以下を参照してください。
+https://github.com/expo/fyi/blob/master/config-flag-migration.md
+
+
+## Expoの設定ファイルについて
+
+Expoではアプリのメタ情報や設定値をapp.jsonに記載します。
+
+ただapp.jsonはstaticなJSONファイルのためそのままだと環境別(例えばdevelopment, staging, productionのように)に値を指定できません。
+
+そこで、環境別に設定値を記述するにはどうしたらよいか説明します。
+
+## ファイル自体を環境別に分ける
+
+`expo start`でサーバを起動する際に`--config`オプションで設定ファイルを指定できます。
+`app.dev.json`, `app.staging.json`, `app.production.json` のように設定ファイルを環境別に用意しておき、以下のようなnpm scriptを用意して`expo start`の引数で指定すれば環境別に起動できます。
+
+
+```json
+"scripts": {
+  "start:dev": "expo start --config app.dev.json",
+  "start:staging": "expo start --config app.staging.json",
+  "start:production": "expo start --config app.production.json"
+}
+```
+
+
+## ファイルを動的に記述する
+
+[Environment variables in Expo - Expo Documentation](https://docs.expo.io/guides/environment-variables/) に記載がありますが、
+設定ファイル名をapp.config.js のように拡張子を.jsにすることでjavascriptで動的に記載することができます。
+またドキュメントには記載がないですが、ファイル名をapp.config.tsのように拡張子を.tsにすることでTypeScriptで記述することも可能です。
+
+ファイルの中身は形式は以下のように記述します。
+
+```typescript
+export default {
+  expo: {
+    name: "xxxxx",
+    slug: "xxxxx",
+    ...
+  }
+}
+```
+
+## .env を読み込んで設定値として利用する
+
+固有の設定値を.envに環境変数として指定している場合、[dotenv](https://github.com/motdotla/dotenv)を使えば設定ファイル内で読み込むことができます。
+
+```typescript
+import dotenv from "dotenv"
+
+dotenv.config({ path: "../../.env.dev" })
+```
+
+読み込んだ値は`process.env.xxxx`でアクセスできます。
+
+```typescript
+export default {
+  expo: {
+    name: process.env.APP_NAME,
+     ...
+  }
+}
+```
+
+アプリのコードから[expo-constants](https://docs.expo.io/versions/latest/sdk/constants/)を使って設定値にアクセスさせたい場合、以下のように`extra`フィールドに指定します。
+
+```ts
+  extra: ["APP_NAME", "API_ENDPOINT"].reduce((envs, key) => ({
+    ...envs,
+    [key]: process.env[key],
+  }), {})
+```
+
+コードからは以下ようにアクセスできます。
+
+```ts
+import Constants from 'expo-constants'
+
+console.log("API_ENDPOINT:", Constants.manifest.extra.API_ENDPOINT)
+```

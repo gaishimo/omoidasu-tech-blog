@@ -1,41 +1,54 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { FlatList, StyleSheet, Text, View } from "react-native"
+import { BaseLayout } from "../components/BaseLayout"
+import { PostItem } from "../components/PostItem"
+import { Colors } from "../libs/colors"
+import { getAllPosts } from "../libs/posts"
 
-export default function App(props) {
+type Props = {
+  posts: Post[]
+}
+
+export async function getStaticProps() {
+  const posts = await getAllPosts()
+  return {
+    props: {
+      posts: JSON.parse(JSON.stringify(posts)),
+    },
+  }
+}
+
+export default function IndexPage(props: Props) {
   return (
-    <View style={styles.container}>
-      <Text accessibilityRole="header" style={styles.text}>
-        React Native for Web & Next.js
-      </Text>
-
-      <Text style={styles.link} accessibilityRole="link" href={`/alternate`}>
-        A universal link
-      </Text>
-
-      <View style={styles.textContainer}>
-        <Text accessibilityRole="header" aria-level="2" style={styles.text}>
-          Subheader
-        </Text>
+    <BaseLayout>
+      <View style={styles.container}>
+        <View style={styles.desc}>
+          <Text style={styles.descText}>Omoidasu, Incの技術ブログです。</Text>
+        </View>
+        <View style={styles.body}>
+          <FlatList
+            data={props.posts}
+            style={styles.list}
+            renderItem={({ item }) => (
+              <View style={styles.item}>
+                <PostItem post={item} />
+              </View>
+            )}
+            keyExtractor={item => item.id}
+          />
+        </View>
       </View>
-    </View>
+    </BaseLayout>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    flexGrow: 1,
-    justifyContent: 'center',
+    width: 500,
+    paddingTop: 40,
   },
-  link: {
-    color: 'blue',
-  },
-  textContainer: {
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  text: {
-    alignItems: 'center',
-    fontSize: 24,
-    marginBottom: 24,
-  },
+  desc: { alignItems: "center" },
+  descText: { color: Colors.textColor1 },
+  body: {},
+  item: { marginBottom: 40 },
+  list: { marginTop: 40 },
 })

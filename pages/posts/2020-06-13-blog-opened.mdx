@@ -1,0 +1,336 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+
+export const meta = {
+  title: "Omoidasu Techブログを開設しました!",
+  tagNames: ["blog", "next.js", "mdx"],
+  color1: "#00D5FF",
+  color2: "#FFE641",
+  createdAt: parse("2020-06-13 00:00:00 +09:00", "yyyy-MM-dd HH:mm:ss XXX", new Date()),
+  author: "@gaishimo",
+  description: "ブログを新たに開設しました。",
+  imagePath: "/ogImage.png",
+  lastUpdatedAt: parse("2021-09-17 12:13:00 +09:00", "yyyy-MM-dd HH:mm:ss XXX", new Date()),
+}
+
+export const headlines = [
+  { title: "記事を書くフォーマットをMDXにする" },
+  { title: "Next.jsでMDXを使う設定" },
+  { title: "Next.jsのファイル構成" },
+  { title: "MDXでの記事の書き方" },
+  { title: "mdx-jsでの変換時にpluginを差し込む", children: [
+    { title: "remark-pluginで見出しのページ内リンクを設定する" },
+    { title: "rehype-pluginでpreタグのシンタックスハイライト設定" },
+  ] },
+  { title: "一覧ページの作り" },
+  { title: "終わりに" },
+  { title: "参考サイト" },
+]
+
+export default (props) => <PostLayout headlines={headlines} meta={meta}>{props.children}</PostLayout>
+
+この度Omoidasu Techブログというブログサイトを開設しました!
+
+<ImageWrapper width="100%" maxWidth={400} sourceUri="/ogImage.png"  />
+
+
+Omoidasu, Inc.では主にReact Nativeアプリを開発しているのですが、開発の際のノウハウや調査等の情報をここに残していきたいと思います。
+
+今回はこのブログシステムをどのように構築したのか簡単に説明したいと思います。
+
+
+## 記事を書くフォーマットをMDXにする
+
+ブログ記事を書くフォーマットには[MDX](https://mdxjs.com/) を使っています。MDXではmarkdownにJSXを埋め込めます。
+
+まず記事自体をMarkdown形式で記述することは決めていたんですが、更に以下辺りができるとよいかなというのがありました。
+- メタ情報をファイルに定義したい
+- 動的なコード等を埋め込めるようにしたい
+
+Contentful等のHeadless CMSを利用するとこれらのカスタマイズが難しそうだったのでCMSは使わないようにしました。
+
+素のMarkdownであっても[Front Matter](https://jekyllrb.com/docs/front-matter/) を使えばメタ情報を埋めることはできそうですが、MDXであればJavaScriptが自由に記載できるので、自分が記事を書く分にはその方が自由度がありよいかなということでMDXを使うことにしました。
+
+
+## Next.jsでMDXを使う設定
+
+以前静的なサイトにGatsbyを使ったんですが、少し癖があったので今回はNext.jsを使ってみることにしました。
+
+Next.jsではMDXファイルを使うためのプラグインが用意されています。
+
+必要なライブラリをインストールし
+```bash
+npm install --save @next/mdx @mdx-js/loader
+```
+
+
+next.config.jsに以下の設定を記述すればmdxファイルを読み込んでくれます。
+[Next.js | MDX](https://mdxjs.com/getting-started/next)
+
+
+
+```js
+const withMDX = require("@next/mdx")({
+  extension: /\.mdx?$/,
+})
+module.exports = withMDX({
+  pageExtensions: ["tsx", "mdx"],
+})
+```
+
+- `@next/mdx`: @mdx-js/loaderを使ってmdxファイルを読み込むWebpack設定を追加してくれます。
+- `@mdx-js/loader`: webpackでmdxを読み込むためのloaderです(babel-loaderやts-loader等と同じ位置づけ)。
+
+
+
+## Next.jsのファイル構成
+
+ページは以下2つのみです。
+- `/`: TOPページ。記事の一覧を表示する
+- `/posts/*`: 各記事ページ
+
+トップページは`pages/index.tsx`を用意し、各記事のページは`pages/posts/`の下に記事のファイル(例: 2020-06-13-title.mdx) を配置するようにしています。
+
+`pages/posts/`以下に直接mdxファイルを置いていく形ではなく、`posts/[post].tsx`ファイルを一つだけおいて、別の場所に置いたmdxファイルを読み込んでparseする方式でもよいかなと思ったんですが、少し複雑になりそうなのと、記事のファイルをそのまま配置する方がより直感的でシンプルな気がしたのでこの方式にしました。(ひょっとしたら今後読み込む形式に変更するかもです)
+
+
+## MDXでの記事の書き方
+
+記事用のmdxファイルのテンプレートは以下のようなります。
+```jsx
+import { PostLayout } from "../../components/PostLayout"
+
+export const meta = {
+  title: "記事タイトル",
+  tagNames: ["tag1", "tag2"],
+  color1: "#00D5FF",
+  color2: "#6BD63E",
+  createdAt: new Date("2020-06-05"),
+  author: "author",
+  description: "記事概要....",
+  lastUpdatedAt: new Date("2020-06-05"),
+}
+
+export const headlines = [
+  {
+    title: "見出し1",
+    children: [
+      { title: "見出し1-1", children: [] }
+    ],
+  },
+  {
+    title: "見出し2",
+    children: [],
+  },
+]
+
+export default (props) => <PostLayout headlines={headlines} meta={meta}>{props.children}</PostLayout>
+
+## 見出し1
+
+### 見出し1-1
+
+## 見出し2
+```
+
+exportしている変数`meta`は記事のメタ情報で、レイアウトや一覧画面でリストするときに利用します。 `headlines`はサイドバーで利用する見出し情報になります。見出し情報はmarkdownを解析して自動で定義する方が重複せずよいと思いますが、そこまでやるのが面倒だったのもあり今のところobject形式で定義する形にしています。
+
+mdxファイルをレイアウトのcomponentでラップしたい場合、以下のように`export default` で`props.children`を子に指定したcomponentを定義してあげればよいです。
+
+```jsx
+export default (props) => <Layout>{props.children}</Layout>
+```
+
+このテンプレートの状態でページをブラウザに表示させると以下のようになります。
+<ImageWrapper width="80%" maxWidth={800} alt="テンプレート表示" sourceUri="/posts/2020-06-13-blog-opened/page-example1.png"  />
+
+
+## mdx-jsでの変換時にpluginを差し込む
+
+`@next/mdx`ではparseする際にoptionでプラグインを指定することにより、MDXからJSXに変換する途中にフックを差し込むことができます。
+
+```js
+const withMDX = require("@next/mdx")({
+  extension: /\.mdx?$/,
+  options: {
+    remarkPlugins: [
+      ...
+    ],
+    rehypePlugins: [
+      ...
+    ],
+  },
+})
+```
+
+remarkPluginとrehypePluginの違いを整理してみます。[remark](https://github.com/remarkjs/remark)はMarkDownプロセッサーで[rehype](https://github.com/rehypejs/rehype)はHTMLプロセッサーになります。どちらもプラグイン群により構成されているものです。
+
+mdx-jsでの変換の流れは[Plugins | MDX](https://mdxjs.com/advanced/plugins#plugins) に記載されていますが、
+
+1. Parse: MDX text => MDAST
+2. Transpile: MDAST => MDXAST (remark-mdx)
+3. Transform: remark plugins applied to AST
+4. Transpile: MDXAST => MDXHAST
+5. Transform: rehype plugins applied to AST
+6. Generate: MDXHAST => JSX text
+
+
+remarkPluginはタイミング3で、rehypePluginはタイミング5で実行されるとあります。
+
+以下のタイミングで実行されると考えれば良さそうです。
+- remarkPlugin: MarkdownにMDX構文のサポートが追加された後(JSXになる前)
+- rehypePlugin: JSX(HTML)に変換された後
+
+
+### remark-pluginで見出しのページ内リンクを設定する
+
+記事中のヘッダー(`##`や`###`) にidを指定しておき、サイドバーの見出しリストから該当の記事セクションに移動できると便利です。ただ、markdown上ではIDを指定することができないため、[remark-slug](https://github.com/remarkjs/remark-slug)プラグインを利用しました。
+
+```js
+const remarkSlug = require("remark-slug")
+
+const withMDX = require("@next/mdx")({
+  extension: /\.mdx?$/,
+  options: {
+    remarkPlugins: [remarkSlug],
+  }
+}
+```
+
+このように設定すると、見出しに自動でid属性が指定されます。
+```markdown
+## 見出し1
+```
+↓
+```
+<h2 id="見出し1">見出し1</h2>
+```
+
+※`_`やスペース等、id属性で指定できない文字は`-`に変換され、大文字は小文字に変換されるので注意です
+
+また、見出しの左にリンクアイコンを付けて、見出しを指定したURLへ移動できるようにするために、[remark-autolink-headings](https://github.com/remarkjs/remark-autolink-headings) を利用しています。
+
+
+```js
+const remarkAutolinkHeadings = require("remark-autolink-headings")
+
+const withMDX = require("@next/mdx")({
+  extension: /\.mdx?$/,
+  options: {
+    remarkPlugins: [
+      [
+      remarkAutolinkHeadings,
+        {
+          behavior: "prepend",
+          content: {
+            type: "element",
+            tagName: "img",
+            properties: {
+              alt: "header link",
+              src: "/linkGreyIcon.png",
+              className: ["header-link-icon"],
+            },
+          },
+        },
+      ]
+    ]
+  }
+}
+```
+
+この設定をすると、以下のようにヘッダに自動でリンク(aタグ)を設定されます。
+さらにimgタグのエレメントを見出しの前に追加することで左にリンクアイコンを表示しています。
+
+```html
+<h2><a href="#見出し1"><img src="/linkGreyIcon.png" /></a>見出し1</h2>
+```
+
+### rehype-pluginでpreタグのシンタックスハイライト設定
+
+preタグで表示されるコードをシンタックスハイライトするには[@mapbox/rehype-prism](https://github.com/mapbox/rehype-prism) を利用しました。
+
+```js
+const rehypePrism = require("@mapbox/rehype-prism")
+
+const withMDX = require("@next/mdx")({
+  extension: /\.mdx?$/,
+  options: {
+    rehypePlugins: [rehypePrism],
+  }
+})
+```
+
+rehype用のCSSをloadする設定をheadタグの記載がしてある箇所に追加すればOKです。
+
+```html
+<head>
+  ...
+  <link
+    href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css"
+    rel="stylesheet"
+  />
+</head>
+```
+
+これでシンタックスハイライトが有効になります。
+
+
+## 一覧ページの作り
+
+TOPの記事一覧を表示するページ(`page/index.tsx`)では、`getStaticProps`で静的コンテンツとしてブログの一覧を読みこんでいます。
+
+mdxのあるディレクトリのmdxファイルをリストし、`require`で読み込んでmeta情報を取得してpropsとして渡しています。
+
+```js
+export async function getStaticProps() {
+  const mdxFileNames = fs.readdirSync(path.resolve(".", "pages", "posts"))
+  const posts = mdxFileNames
+    .map(fileName => {
+      const { meta } = require(`./posts/${fileName}`)
+      return {
+        ...meta,
+        id: fileName.replace(/.mdx$/, ""),
+      }
+    })
+    .sort((a: PostMeta, b: PostMeta) => (a.createdAt > b.createdAt ? 0 : 1))
+  return {
+    props: {
+      posts: JSON.parse(JSON.stringify(posts)),
+    },
+  }
+}
+```
+
+ページのjsxではこのpropsから渡ってきた記事一覧をループさせて表示しています。
+```jsx
+<div css={styles.posts}>
+  {props.posts.map(post => (
+    <div key={post.id} css={styles.postItem}>
+      <PostItem post={post} />
+    </div>
+  ))}
+</div>
+```
+
+これで以下のように一覧表示することができました。
+
+<ImageWrapper width="80%" maxWidth={800} alt="記事リスト" sourceUri="/posts/2020-06-13-blog-opened/list1.png"  />
+
+
+## 終わりに
+
+CSSのスタイリングは自身で独自に設定しましたが、個性のあるデザインになったのではないかと思います。
+
+今後追加したい機能は以下辺りです。
+- 見出しをスクロールにより自動でアクティブにする
+- 見出しリストを自動で作成する
+
+ブログができたので技術的な内容を今後どんどん発信していきたいと思います。
+
+
+## 参考サイト
+
+以下の記事がとても参考になりました。感謝です。
+
+[Next.js + MDX でブログを書いています - HelloRusk Official Website](https://hellorusk.net/posts/20191209)

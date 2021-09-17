@@ -1,0 +1,69 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+export const meta = {
+  title:
+    "Next.js Vercelデプロイ時にエラー should NOT have fewer than 1 properties",
+  tagNames: ["vercel", "next.js"],
+  color1: "#000000",
+  color2: "rgb(150, 150, 150)",
+  createdAt: parse(
+    "2020-12-03 15:40:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "Vercelでデプロイした時にshould NOT have fewer than 1 propertiesと謎のエラーが出た場合の対処法です。",
+  imagePath: null,
+  lastUpdatedAt: parse(
+    "2020-12-03 15:40:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [{ title: "should NOT have fewer than 1 properties" }]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+VercelでNext.jsのプロジェクトをデプロイしようとした時、デプロイの最後の方で以下のエラーが出て失敗してしまいました。
+
+```
+12:21:15.982  	+ First Load JS shared by all                                  91.3 kB
+12:21:15.982  	  ├ chunks/commons.d9d755.js                                   13.4 kB
+12:21:15.982  	  ├ chunks/f86bf8ba69955715d1b634ad31a22480e320de24.68b771.js  23 kB
+12:21:15.982  	  ├ chunks/framework.9707fd.js                                 42.1 kB
+12:21:15.982  	  ├ chunks/main.77de94.js                                      6.88 kB
+12:21:15.982  	  ├ chunks/pages/_app.7edfff.js                                5.17 kB
+12:21:15.982  	  ├ chunks/webpack.e06743.js                                   751 B
+12:21:15.982  	  └ css/46d253d9fac8332c1b4f.css                               635 B
+12:21:15.982  	λ  (Lambda)  server-side renders at runtime (uses getInitialProps or getServerSideProps)
+12:21:15.982  	○  (Static)  automatically rendered as static HTML (uses no initial props)
+12:21:15.982  	●  (SSG)     automatically generated as static HTML + JSON (uses getStaticProps)
+12:21:15.982  	   (ISR)     incremental static regeneration (uses revalidate in getStaticProps)
+12:21:16.063  	Done in 17.02s.
+12:21:16.412  	Uploading build outputs...
+12:21:17.241  	Error: should NOT have fewer than 1 properties
+12:21:19.531  	Done with "package.json"
+```
+
+`Error: should NOT have fewer than 1 properties` とだけ出るので手がかりがなく途方にくれたんですが、設定でおかしな箇所がないか諸々確認していると、next.config.js の以下の部分が原因だとわかりました。
+
+```javascript
+module.exports = {
+  i18n: {
+    locales: ["en", "ja"],
+    defaultLocale: "en",
+    domains: []   // ここ
+  },
+}
+```
+
+プロジェクトを多言語対応した時に、domainsを空配列にしていたのですが、これが原因だったようです。多言語化する際、ロケールは `/en/company` のようにサブパスで分けることにしたので、ドメインルーティング用のdomainsフィールドは不要で、とりあえず空配列を設定してしまっていたのが問題でした。このdomainsフィールドを削除して再度デプロイしたところエラーがでなくなりました。
+
+もし同じ問題を踏んだ人の参考になれば幸いです。

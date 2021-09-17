@@ -17,7 +17,10 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "paths": {
+      "*": ["./src/@types"]
+    }
   },
   "exclude": [
     "node_modules"

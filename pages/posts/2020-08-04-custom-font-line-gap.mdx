@@ -1,0 +1,147 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+
+export const meta = {
+  title:
+    "React Nativeでカスタムフォントの行間がやたら拡がってしまう場合の調整方法",
+  tagNames: ["react-native", "font", "custom font", "styling"],
+  color1: "#00D2F9",
+  color2: "#B1000E",
+  createdAt: parse(
+    "2020-08-04 00:00:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "React Nativeでカスタムフォントを使った場合、行間がやたら拡がってしまう場合があります。その場合の調整方法について説明します。",
+  imagePath: "/posts/2020-08-04-custom-font-line-gap/beforeAfter.png",
+  lastUpdatedAt: parse(
+    "2020-08-04 10:10:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [
+  { title: "要約" },
+  { title: "カスタムフォントの行間問題" },
+  { title: "フォントファイルの編集" },
+  { title: "終わりに" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+<ImageWrapper width="100%">
+  <img alt="Before After" src="/posts/2020-08-04-custom-font-line-gap/beforeAfter.png" width={"100%"} height="auto" />
+</ImageWrapper>
+
+## 要約
+- カスタムフォントによって行間が大きく開いてしまうことがある
+- フォントファイルを編集して調整できる
+- Font Tools for XCodeを使う
+- hheaテーブルのascender, descender, lineGap辺りを確認・調整する
+
+
+## カスタムフォントの行間問題
+
+React Nativeでカスタムフォントを使った場合、font-familyによって行間がやたらと拡がってしまう場合があります。
+
+例えば、[筑紫A丸ゴシック R](https://fontworks.co.jp/fontsearch/TsukuARdGothicStd-R/) を使った場合の例を挙げます。以下のように行間がかなり開いてしまいます。
+
+<ImageWrapper width="50%">
+  <img alt="筑紫A丸ゴシックの例. 行間が開いている" src="/posts/2020-08-04-custom-font-line-gap/line-gap1.jpg" width={"100%"} height="auto" />
+</ImageWrapper>
+
+iOSのデフォルトのシステムフォントを指定した場合は以下のようになります。行間がほとんど開いていません。
+
+<ImageWrapper width="50%">
+  <img alt="システムフォントの例: 行間が開いていない" src="/posts/2020-08-04-custom-font-line-gap/system-font.jpg" width={"100%"} height="auto" />
+</ImageWrapper>
+
+この行間のギャップはlineHeightを指定しても縮めることはできず、heightを指定すると複数行のテキストを表示することができなくなってしまいます。
+
+これに対応するためにはフォントファイル自体を編集する必要があります。
+
+## フォントファイルの編集
+
+カスタムフォントにOTFを使っている前提で進めます。
+
+まずFont Tools for XCode を[こちら](https://developer.apple.com/download/more/?=Font%20Tools%20for%20Xcode) からダウンロードします。
+ダウンロードすると、ftxdumperfuser というCLIツールを使えるようになります。
+
+フォントファイル(.otf)を特定のフォルダに置き、該当フォルダで以下のコマンドを実行するとフォントファイルの中身をXMLに出力してくれます。
+
+```bash
+ftxdumperfuser --table hhea --auto d font-file.otf
+```
+
+- `--auto d` : auto dumpを実行
+- `--table hhea` : 対象としてhheaテーブルを指定
+
+※hheaはOpen Typeフォントを構成する情報テーブルの一つで、横書き用の情報ヘッダーが格納されています。
+
+カレントディレクトリに出力されたXMLを開いてみると、中に以下のような記述があります。
+
+```xml
+<hheaTable
+	versionMajor="1"
+	versionMinor="0"
+	ascender="880"
+	descender="-120"
+	lineGap="1000"
+	advanceWidthMax="1056"
+	minLeftSideBearing="-247"
+	minRightSideBearing="-248"
+	xMaxExtent="1132"
+	caretSlopeRise="1"
+	caretSlopeRun="0"
+	caretOffset="0"
+	metricDataFormat="0"
+	numberOfHMetrics="8721"
+	/>
+```
+
+この中の`ascender`, `descender`, `lineGap` 辺りが関連していそうです。
+
+これらの値については、こちらの記事の説明が分かりやすいです。
+[A-Liaison BLOG: iOSのフォントのお話](http://akisute.com/2016/09/ios.html)
+
+
+lineGapが1000とかなり高めに指定されているので、行間が大きく開くのはこれが原因と思われます。
+
+このlineGapの値を120に変更してみます。
+※以下を参考にしascenderとlineGapの合計が1000になるようにしてみました
+
+[Font embedded line height issue · Issue #17322 · facebook/react-native](https://github.com/facebook/react-native/issues/17322#issuecomment-353730680)
+
+XMLを更新した後、以下のコマンドでXMLをotfファイルに反映させます。
+
+```bash
+ftxdumperfuser --table hhea --auto f font-file.otf
+```
+
+- `--auto f`: do an auto-fuse (合成するというような意味?)
+
+成功すると元のotfファイルが更新されます。otfファイルをアプリに反映させて画面を見てみると...
+
+行間が縮まっているのが確認できました!
+
+<ImageWrapper width="50%">
+  <img alt="更新後の例. 行間が縮まっている" src="/posts/2020-08-04-custom-font-line-gap/line-gap2.jpg" width={"100%"} height="auto" />
+</ImageWrapper>
+
+
+## 参照
+
+- [Font embedded line height issue · Issue #17322 · facebook/react-native](https://github.com/facebook/react-native/issues/17322#issuecomment-353730680)
+- [How to use Apple’s font tools to tweak a font | by Trevor Harmon | Medium](https://medium.com/@thetrevorharmon/how-to-use-apples-font-tools-to-tweak-a-font-a386600255ae)
+- [A-Liaison BLOG: iOSのフォントのお話](http://akisute.com/2016/09/ios.html)
+- [OpenTypeフォントとは？ | よくあるご質問 | サポート | 株式会社モリサワ](https://www.morisawa.co.jp/support/faq/165)
+- [ぬらくら 第35回　OpenTypeフォントの中身(その3) | フォント・書体の開発及び販売 ｜ ダイナコムウェア株式会社](https://www.dynacw.co.jp/fontstory/fontstory_detail.aspx?s=86&r=32&ftag=%E9%80%A3%E8%BC%89%E3%82%B3%E3%83%A9%E3%83%A0)
