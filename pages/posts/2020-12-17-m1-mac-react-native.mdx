@@ -56,7 +56,7 @@ export default props => (
 
 先日Apple Silicon(M1チップ)搭載のMacbook Proを購入したので、M1 Mac上でReact Nativeアプリの実行を検証してみたいと思います。Simulatorで実行するのではなくmacOS上でアプリとして実行します。
 
-※開発環境の構築方法については、すみませんがあまり記載してません。macOS上でのアプリの直接実行について中心に書いてます。
+※開発環境の構築方法については、すみませんがあまり記載してません。macOS上でのアプリの直接実行について書いてます。
 
 もしも環境構築については知りたい方は、こちらの記事が一番参考になると思います。
 [M1 (Apple Silicon) Macで既存のReact Nativeプロジェクトの開発環境が整うまで](https://zenn.dev/myb/articles/4b1dd3821703aa2ac95b#pods%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E3%81%AEbuild-settings%E3%82%92%E8%A8%AD%E5%AE%9A)
@@ -68,15 +68,14 @@ React Nativeで作成したアプリは通常のネイティブアプリと同�
 
 App Storeで開発者が許可していればStoreからダウンロードして起動できます。ちなみに弊社が開発している[Tadayou](https://tadayou.app)というiOSアプリ(Expoで開発した瞑想アプリ)も、問題なくインストール & 起動することができました。※インストールした時点でのExpo SDKバージョンは39です。
 
-<ImageWrapper width={300}>
-  <img alt="App Storeで表示" src="/posts/2020-12-17-m1-mac-react-native/store-tadayou.png" width={"100%"} height="auto" />
-</ImageWrapper>
+
+<ImageWrapper width="80%" maxWidth={400} alt="AppStoreでの表示" sourceUri="/posts/2020-12-17-m1-mac-react-native/store-tadayou.png"  />
+
 
 <div style={{ marginTop: 24 }} />
 
-<ImageWrapper width={300}>
-  <img alt="M1 Mac上でアプリを起動" src="/posts/2020-12-17-m1-mac-react-native/tadayou-on-m1.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={300} alt="Mac上でアプリを起動" sourceUri="/posts/2020-12-17-m1-mac-react-native/tadayou-on-m1.png"  />
+
 
 ただしApp Storeからインストール可能であっても、一部のアプリについてはiPhoneやiPadと同じように動作しない場合があるので注意が必要です。完全に検証されていないものは、toreに"macOSでは検証されていません" の注意書きが表示されます。
 
@@ -112,12 +111,12 @@ https://github.com/gaishimo/RnAppOnMacOS
 
 このアプリを従来通りXCodeからiOS Simulatorで起動すると以下のような画面が表示されます。
 
-<ImageWrapper width={160}>
-  <img alt="iOS Simulatorで起動" src="/posts/2020-12-17-m1-mac-react-native/app-on-ios-simulator.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width={160} alt="iOS Simulatorで起動" sourceUri="/posts/2020-12-17-m1-mac-react-native/app-on-ios-simulator.png"  />
+
 
 
 アプリ画面のコードは以下です。中心に円を3つ表示させているんですが、画面サイズの違いがわかりやすいように円のサイズをデバイスの幅で動的に変更し、ウィンドウが縦長か横長かで円の並べ方を変えるようにしてます。
+
 ```js
 import React from 'react';
 import {StyleSheet, View, StatusBar, useWindowDimensions} from 'react-native';
@@ -209,27 +208,25 @@ end
 さて、いよいよmacOS上で起動してみたいと思います。XCodeで起動するデバイスを選択する箇所に、"My Mac (Designed for iPhone)"というのが選べます。
 
 
-<ImageWrapper width={400}>
-  <img alt="XCodeでMy Macを選んで起動" src="/posts/2020-12-17-m1-mac-react-native/xcode-run-mac.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={400} alt="XCodeでMy Macを選んで起動" sourceUri="/posts/2020-12-17-m1-mac-react-native/xcode-run-mac.png"  />
 
 選択して起動すると以下のエラーが出ました。
 
-```
+```bash
 Signing for "MacOSExample" requires a development team. Select a development team in the Signing & Capabilities editor.
 ```
 
 Signingの設定が必要とのことなので、TARGETを選択し、"Signing & Capability"の"Sign"でTeamを選択します。またMacデバイスが登録されていないというエラーが出ているので、"Register Device"を押して登録します。
 
-<ImageWrapper width={350}>
-  <img alt="XCodeのSigning設定" src="/posts/2020-12-17-m1-mac-react-native/xcode-signing.png" width={"100%"} height="auto" />
-</ImageWrapper>
+
+<ImageWrapper width="80%" maxWidth={500} alt="XCodeのSigning設定" sourceUri="/posts/2020-12-17-m1-mac-react-native/xcode-signing.png"  />
 
 
-再度ビルド・実行すると、無事起動できました! 
-<ImageWrapper width={350}>
-  <img alt="XCodeのSigning設定" src="/posts/2020-12-17-m1-mac-react-native/app-on-macos-01.png" width={"100%"} height="auto" />
-</ImageWrapper>
+
+再度ビルド・実行すると、無事起動できました!
+
+<ImageWrapper width="80%" maxWidth={400} alt="XCodeのSigning設定" sourceUri="/posts/2020-12-17-m1-mac-react-native/app-on-macos-01.png"  />
+
 
 アプリのウィンドウはは横長になってますが、これは画面の向きの設定でLandscape(横向き)を許可しているためです。Portrait(縦向き)しか許可していなければ、ウィンドウは縦長固定で表示されます。
 
@@ -241,13 +238,12 @@ XCodeのTARGETの"General" - "Deployment Info"の設定で、iPadにチェック
 
 ビルド・実行すると、無事起動できました!ウィンドウサイズも自由に変更可能です!
 
-<ImageWrapper width={300}>
-  <img alt="XCodeのDeployment Info設定" src="/posts/2020-12-17-m1-mac-react-native/app-on-macos-02.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={300} alt="Mac Designed for iPadでアプリを起動 (縦)" sourceUri="/posts/2020-12-17-m1-mac-react-native/app-on-macos-02.png"  />
 
-<ImageWrapper width={"100%"}>
-  <img alt="XCodeのDeployment Info設定" src="/posts/2020-12-17-m1-mac-react-native/app-on-macos-03.png" width={"100%"} height="auto" />
-</ImageWrapper>
+
+<ImageWrapper width="90%" maxWidth={600} alt="Mac Designed for iPadでアプリを起動 (横)" sourceUri="/posts/2020-12-17-m1-mac-react-native/app-on-macos-03.png"  />
+
+
 
 ただ、ウィンドウサイズを変えてみると、円の並びとサイズがそれに合わせて動的に変更されるはずが変わりません。`useWindowDimensions` で取得される値が起動時の値のままなのが原因のようです。
 
@@ -287,18 +283,16 @@ SimulatorのiPadで起動した場合は問題なく動的に値が変化する�
 
 次に、"Deployment Info" でMacにチェックをつけて実行してみます。チェックを付けると以下のメッセージが表示されます。
 
-<ImageWrapper width={240}>
-  <img alt="XCodeのDeployment Info設定 MacをON" src="/posts/2020-12-17-m1-mac-react-native/xcode-enable-mac.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="70%" maxWidth={240} alt="XCodeのDeployment Info設定 MacをON" sourceUri="/posts/2020-12-17-m1-mac-react-native/xcode-enable-mac.png"  />
+
 
 macOSのみにしか互換性がないコンテンツが埋め込まれるようです。mac専用のアプリになって、iPhoneやiPadでは実行できなくなるという理解です。
 
 
 ビルド・実行すると無事表示されました。
 
-<ImageWrapper width={300}>
-  <img alt="Run on mac" src="/posts/2020-12-17-m1-mac-react-native/app-on-macos-04.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={300} alt="Macアプリとして起動" sourceUri="/posts/2020-12-17-m1-mac-react-native/app-on-macos-04.png"  />
+
 
 今回のアプリだとUIの違いがほとんどないんですが、入力フォームやボタン等のコンポーネントを使っていれば、もう少し違いがわかるかもしれません。
 
@@ -313,9 +307,9 @@ Fast Refreshは問題なく動作しました。JSのコードを変更すると
 
 Designed for Macで実行した場合(MacのチェックボックスをON)、Command + DでDebug Menuを起動できました。
 
-<ImageWrapper width={200}>
-  <img alt="XCodeのDeployment Info設定" src="/posts/2020-12-17-m1-mac-react-native/rn-debug-menu.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={200} alt="Debugメニューの起動" sourceUri="/posts/2020-12-17-m1-mac-react-native/rn-debug-menu.png"  />
+
+
 
 ただしMacのチェックボックスを外して起動したとき(iPhoneまたはiPad)はキーボードショートカットが効かず開くことができませんでした。端末のようにシェイクして開くこともできないので、現状では開く方法をみつけられませんでした。
 
@@ -363,7 +357,7 @@ Designed for iPadで起動したときもDesigned for Macとして起動した�
 
 ## ExpoのManaged Workflowのアプリ
 
-ExpoのManaged Workflowを使っている場合、macOS上で起動させることはできるのでしょうか? 
+ExpoのManaged Workflowを使っている場合、macOS上で起動させることはできるのでしょうか?
 
 Expo Clientアプリは現状(2020-12-17時点)ではmacOSにインストールできないので、Expo Clientから実行させることはできなさそうです。Expoでビルドして作成したipaファイルをAd-Hoc等で配布等するしかなさそうです。もしも今後Expo ClientアプリがmacOSに対応してインストールできるようになれば、Expo Clientアプリを通して簡単に検証できるようになったりするかもしれません。
 

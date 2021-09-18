@@ -38,9 +38,9 @@ export default props => (
 )
 
 
-<ImageWrapper width="100%">
-  <img alt="Before After" src="/posts/2020-08-04-custom-font-line-gap/beforeAfter.png" width={"100%"} height="auto" />
-</ImageWrapper>
+
+<ImageWrapper width="100%" maxWidth={500} alt="Before After" sourceUri="/posts/2020-08-04-custom-font-line-gap/beforeAfter.png"  />
+
 
 ## 要約
 - カスタムフォントによって行間が大きく開いてしまうことがある
@@ -55,15 +55,14 @@ React Nativeでカスタムフォントを使った場合、font-familyによっ
 
 例えば、[筑紫A丸ゴシック R](https://fontworks.co.jp/fontsearch/TsukuARdGothicStd-R/) を使った場合の例を挙げます。以下のように行間がかなり開いてしまいます。
 
-<ImageWrapper width="50%">
-  <img alt="筑紫A丸ゴシックの例. 行間が開いている" src="/posts/2020-08-04-custom-font-line-gap/line-gap1.jpg" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={500} alt="筑紫A丸ゴシックの例. 行間が開いている" sourceUri="/posts/2020-08-04-custom-font-line-gap/line-gap1.jpg"  />
+
 
 iOSのデフォルトのシステムフォントを指定した場合は以下のようになります。行間がほとんど開いていません。
 
-<ImageWrapper width="50%">
-  <img alt="システムフォントの例: 行間が開いていない" src="/posts/2020-08-04-custom-font-line-gap/system-font.jpg" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={500} alt="システムフォントの例: 行間が開いていない" sourceUri="/posts/2020-08-04-custom-font-line-gap/system-font.jpg"  />
+
+
 
 この行間のギャップはlineHeightを指定しても縮めることはできず、heightを指定すると複数行のテキストを表示することができなくなってしまいます。
 
@@ -133,9 +132,9 @@ ftxdumperfuser --table hhea --auto f font-file.otf
 
 行間が縮まっているのが確認できました!
 
-<ImageWrapper width="50%">
-  <img alt="更新後の例. 行間が縮まっている" src="/posts/2020-08-04-custom-font-line-gap/line-gap2.jpg" width={"100%"} height="auto" />
-</ImageWrapper>
+
+<ImageWrapper width="80%" maxWidth={500} alt="更新後の例. 行間が縮まっている" sourceUri="/posts/2020-08-04-custom-font-line-gap/line-gap2.jpg"  />
+
 
 
 ## 参照

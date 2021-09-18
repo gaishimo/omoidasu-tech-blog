@@ -38,22 +38,22 @@ Firestoreを利用している場合に、悩ましいのが増えていくイ�
 
 
 アプリからインデックスがない状態でクエリを実行すると、以下のようなエラーが出ます。
-```
+```bash
 Uncaught (in promise) FirebaseError: The query requires an index. You can create it here: https://console.firebase.google.com/v1/r/project/xxxxxxxxxx/firestore/indexes?create_composite=xxxxxxxxxx
 ```
 
 このリンクにアクセスすると以下のような画面が表示され、ここからインデックスを作成することができます。
 
-<ImageWrapper width="70%">
-  <img alt="Before After" src="/posts/2020-09-02-firestore-indexes/firestore-create-index.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="70%" maxWidth={500} alt="インデックス作成ページ" sourceUri="/posts/2020-09-02-firestore-indexes/firestore-create-index.png"  />
+
+
 
 
 ただ毎回画面から手動で作ってしまうと、dev環境・production環境等のように複数のfirebaseプロジェクトを使っている場合、別の環境にまたに手動でインデックス設定を移さないといけなくなります。
 
 ですのでこの画面から作成するのではなくインデックス定義用のjsonファイルを置いておき、firebase CLI を使って更新するのがおすすめです。
 
-firestore.indexes.json のようなJSONファイルをプロジェクト内に配置します。フォーマットは以下のようになります。作成画面の内容を見ながら記述すると楽です。
+firestore.indexes.json のようなJSONファイルをプロジェクト内に配置します。フォーマットは以下のようになります。
 
 ```js
 {
@@ -76,9 +76,16 @@ firestore.indexes.json のようなJSONファイルをプロジェクト内に�
 }
 ```
 
+もしも、既にコンソール画面から追加したインデックスがある場合は、以下のコマンドでインデックスファイルのフォーマットを出力することができます。
+
+```bash
+firebase firestore:indexes
+```
+
+
 firebase CLIからデプロイする際にインデックスファイルの場所がわかるように、firebase.jsonに以下のように定義します。
 
-```
+```json
 {
   "firestore": {
     "indexes": "./firestore.indexes.json"
@@ -87,13 +94,13 @@ firebase CLIからデプロイする際にインデックスファイルの場�
 ```
 
 
-そして以下のスクリプトを実行するとインデックスがデプロイされます。
+以下のコマンドを実行するとインデックスがデプロイされます。
 
-```
-firebase deploy --only firestore:rules --project $PROJECT_NAME
+```bash
+firebase deploy --only firestore:rules
 ```
 
-このようにしておけば別の環境にインデックスを反映させる場合もコマンド一発で住みます。
+このようにしておけば別の環境にインデックスを反映させる場合もコマンド一発で済みます。
 
 
 インデックスが10, 20とかどんどん増えていった場合に手動で行っていると管理できなくなってくるので、このようにコードで定義しておいて自動で更新する方法がおすすめです。

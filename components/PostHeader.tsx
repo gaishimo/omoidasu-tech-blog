@@ -38,7 +38,7 @@ export function PostHeader(props: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { marginBottom: 0, paddingTop: 48 },
+  container: { marginBottom: 24, paddingTop: 48 },
   creationTime: { marginBottom: 16 },
   creationTimeText: {
     color: Colors.textColor2,

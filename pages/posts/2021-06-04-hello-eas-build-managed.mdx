@@ -221,10 +221,7 @@ https://expo.io/register-device/<省略>
 
 ターミナル上にQRコードが表示されるためデバイスからQRコードを読み取ってアクセスします。
 
-
-<ImageWrapper width={180}>
-  <img alt="Provisioning Profileをダウンロード" src="/posts/2021-06-04-hello-eas-build-managed/downloadProfile.jpeg" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={180} alt="Provisioning Profileをダウンロード" sourceUri="/posts/2021-06-04-hello-eas-build-managed/downloadProfile.jpeg"  />
 
 この画面からProvisioning Profileがインストールできるため、ダウンロードし設定からインストールします。
 
@@ -355,30 +352,23 @@ Waiting for build to complete. You can press Ctrl+C to exit.
 
 ビルドが成功したらビルドページに端末でアクセスしInstallボタンをタップします。
 
-
-<ImageWrapper width={180}>
-  <img alt="EASビルド画面からアプリをダウンロード" src="/posts/2021-06-04-hello-eas-build-managed/installApp.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={180} alt="EASビルド画面からアプリをダウンロード" sourceUri="/posts/2021-06-04-hello-eas-build-managed/installApp.png"  />
 
 アプリがインストールされホーム画面に追加されるため、起動してみます。
 
 
-<ImageWrapper width={180}>
-  <img alt="端末ホーム画面に追加されたアプリ" src="/posts/2021-06-04-hello-eas-build-managed/installedApp.jpeg" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={180} alt="端末ホーム画面に追加されたアプリ" sourceUri="/posts/2021-06-04-hello-eas-build-managed/installedApp.jpeg"  />
+
 
 問題なく起動できました!
 
-
-<ImageWrapper width={180}>
-  <img alt="起動されたアプリ" src="/posts/2021-06-04-hello-eas-build-managed/launchedApp.jpeg" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={180} alt="起動されたアプリ" sourceUri="/posts/2021-06-04-hello-eas-build-managed/launchedApp.jpeg"  />
 
 そして驚くべきはアプリサイズです。
 
-<ImageWrapper width={260}>
-  <img alt="起動されたアプリ" src="/posts/2021-06-04-hello-eas-build-managed/appSize.png" width={"100%"} height="auto" />
-</ImageWrapper>
+<ImageWrapper width="80%" maxWidth={260} alt="アプリサイズ" sourceUri="/posts/2021-06-04-hello-eas-build-managed/appSize.png"  />
+
+
 
 サイズがわずか9.6MBです。 Classicビルドの場合最低でも40MB近くになってしまうのと比べると、特質すべき小ささです。ClassicビルドのManagedワークフローの場合、仕組み上必要になりそうな最低限のライブラリセットがすべて含まれてしまうため、どうしてもサイズが大きくなってしまいます。EASビルドでは必要なライブラリのみを含めるため、この小ささが実現できています。
 
@@ -422,9 +412,9 @@ Publish complete
 
 publishが完了したらアプリを2度立ち上げ直します(OTA Updateはデフォルトではバックグラウンドで反映されるため)。
 
-<ImageWrapper width={180}>
-  <img alt="更新されたアプリ" src="/posts/2021-06-04-hello-eas-build-managed/updatedApp.jpeg" width={"100%"} height="auto" />
-</ImageWrapper>
+
+<ImageWrapper width="80%" maxWidth={180} alt="更新されたアプリ" sourceUri="/posts/2021-06-04-hello-eas-build-managed/updatedApp.jpeg"  />
+
 
 メッセージが変わっていることが確認できました!
 
