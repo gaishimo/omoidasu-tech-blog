@@ -43,8 +43,9 @@ export default function IndexPage(props: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    width: 500,
+    maxWidth: 500,
     paddingTop: 40,
+    paddingHorizontal: 8,
   },
   desc: { alignItems: "center" },
   descText: { color: Colors.textColor1 },

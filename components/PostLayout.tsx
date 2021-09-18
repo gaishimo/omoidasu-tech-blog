@@ -1,6 +1,7 @@
 import { format } from "date-fns"
 import { Fragment, ReactNode } from "react"
 import { StyleSheet, Text, View } from "react-native"
+import useMedia from "use-media"
 import { Colors } from "../libs/colors"
 import { BaseLayout } from "./BaseLayout"
 import { PostHeader } from "./PostHeader"
@@ -15,6 +16,8 @@ type Props = {
 }
 
 export function PostLayout(props: Props) {
+  const isSmallScreen = useMedia({ maxWidth: 700 })
+  const isMediumScreen = useMedia({ minWidth: 700, maxWidth: 1200 })
   const renderHeadline = (headline: Headline) => (
     <Fragment key={headline.title}>
       <View style={styles.headlineItem}>
@@ -40,8 +43,14 @@ export function PostLayout(props: Props) {
       description={props.meta.description}
       imagePath={props.meta.imagePath}
     >
-      <View style={styles.container}>
-        <View style={styles.article}>
+      <View style={[styles.container, isSmallScreen && styles.containerSmall]}>
+        <View
+          style={[
+            styles.article,
+            isSmallScreen && styles.articleSmall,
+            isMediumScreen && styles.articleMedium,
+          ]}
+        >
           <View style={styles.articleBody}>
             <PostHeader {...props.meta} />
             {props.children}
@@ -82,15 +91,17 @@ export function PostLayout(props: Props) {
               </View>
             </View>
           </View>
-          <View style={styles.sidebar}>
-            <View style={styles.headlinesPanel}>
-              <View style={styles.headlineList}>
-                {props.headlines.map((headline: Headline) =>
-                  renderHeadline(headline),
-                )}
+          {!isSmallScreen && !isMediumScreen && (
+            <View style={styles.sidebar}>
+              <View style={styles.headlinesPanel}>
+                <View style={styles.headlineList}>
+                  {props.headlines.map((headline: Headline) =>
+                    renderHeadline(headline),
+                  )}
+                </View>
               </View>
             </View>
-          </View>
+          )}
         </View>
       </View>
     </BaseLayout>
@@ -99,7 +110,16 @@ export function PostLayout(props: Props) {
 
 const styles = StyleSheet.create({
   container: { alignItems: "center" },
+  containerSmall: { width: "100%" },
   article: { width: 1160, flexDirection: "row" },
+  articleMedium: {
+    width: "90%",
+    paddingHorizontal: 8,
+  },
+  articleSmall: {
+    width: "100%",
+    paddingHorizontal: 8,
+  },
   footer: {
     marginTop: 56,
     paddingTop: 24,
@@ -109,7 +129,7 @@ const styles = StyleSheet.create({
   footerRow: { marginBottom: 8 },
   footerText: { color: Colors.textColor3, fontSize: 13 },
   linkText: { color: "rgb(60, 26, 130)" },
-  articleBody: { flex: 1 },
+  articleBody: { flex: 1, width: "100%" },
   sidebar: { width: 280, paddingLeft: 30 },
   headlinesPanel: {
     borderWidth: 1,
