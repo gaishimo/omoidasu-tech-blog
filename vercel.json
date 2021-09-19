@@ -1,6 +1,10 @@
 {
   "functions": {
-    "pages/feed.xml.tsx": "pages/posts/**",
-    "pages/sitemap.xml.tsx": "pages/posts/**"
+    "pages/feed.xml.tsx": {
+      "includeFiles": "pages/posts/**"
+    },
+    "pages/sitemap.xml.tsx": {
+      "includeFiles": "pages/posts/**"
+    }
   }
 }
