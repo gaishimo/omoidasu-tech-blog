@@ -57,6 +57,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["remark-slug", "npm:6.1.0"],
             ["typescript", "patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=32657b"],
             ["use-media", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.4.0"],
+            ["xml-js", "npm:1.6.11"],
             ["yarn", "npm:1.22.11"]
           ],
           "linkType": "SOFT",
@@ -4740,6 +4741,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["remark-slug", "npm:6.1.0"],
             ["typescript", "patch:typescript@npm%3A4.4.3#~builtin<compat/typescript>::version=4.4.3&hash=32657b"],
             ["use-media", "virtual:dc3fc578bfa5e06182a4d2be39ede0bc5b74940b1ffe0d70c26892ab140a4699787750fba175dc306292e80b4aa2c8c5f68c2a821e69b2c37e360c0dff36ff66#npm:1.4.0"],
+            ["xml-js", "npm:1.6.11"],
             ["yarn", "npm:1.22.11"]
           ],
           "linkType": "SOFT",
@@ -4766,6 +4768,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/safer-buffer-npm-2.1.2-8d5c0b705e-cab8f25ae6.zip/node_modules/safer-buffer/",
           "packageDependencies": [
             ["safer-buffer", "npm:2.1.2"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["sax", [
+        ["npm:1.2.4", {
+          "packageLocation": "./.yarn/cache/sax-npm-1.2.4-178f05f12f-d3df7d32b8.zip/node_modules/sax/",
+          "packageDependencies": [
+            ["sax", "npm:1.2.4"]
           ],
           "linkType": "HARD",
         }]
@@ -5853,6 +5864,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/wrappy-npm-1.0.2-916de4d4b3-159da4805f.zip/node_modules/wrappy/",
           "packageDependencies": [
             ["wrappy", "npm:1.0.2"]
+          ],
+          "linkType": "HARD",
+        }]
+      ]],
+      ["xml-js", [
+        ["npm:1.6.11", {
+          "packageLocation": "./.yarn/cache/xml-js-npm-1.6.11-56742b7fb0-24a5547991.zip/node_modules/xml-js/",
+          "packageDependencies": [
+            ["xml-js", "npm:1.6.11"],
+            ["sax", "npm:1.2.4"]
           ],
           "linkType": "HARD",
         }]
