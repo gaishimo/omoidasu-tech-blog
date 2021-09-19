@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@mdx-js/loader": "^1.6.22",
+    "@mdx-js/react": "^1.6.22",
     "@next/mdx": "^11.1.2",
     "add": "^2.0.6",
     "date-fns": "^2.23.0",
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@mapbox/rehype-prism": "^0.7.0",
     "@types/next": "^9.0.0",
+    "@types/node": "^16.9.2",
     "@types/react": "^17.0.20",
     "@types/react-native": "^0.65.0",
     "babel-plugin-react-native-web": "^0.13.14",
