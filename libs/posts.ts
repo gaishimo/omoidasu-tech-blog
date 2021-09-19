@@ -9,6 +9,7 @@ export async function getAllPosts(): Promise<Post[]> {
     const mdxFileNames = fs.readdirSync(postsDir)
     const posts = mdxFileNames
       .map(fileName => {
+        console.log("require:", fileName)
         const { meta } = require(`../pages/posts/${fileName}`)
         return {
           ...meta,
