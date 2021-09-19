@@ -30,6 +30,7 @@ const withMDX = require("@next/mdx")({
 })
 
 module.exports = withPlugins([withMDX], {
+  experimental: { nftTracing: true },
   pageExtensions: ["tsx", "mdx"],
   webpack: config => {
     config.resolve.alias = {
