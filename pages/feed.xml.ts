@@ -1,6 +1,8 @@
 import "@mdx-js/react"
 import { format } from "date-fns"
 import { NextPageContext } from "next"
+import "react-native"
+import "use-media"
 import { js2xml } from "xml-js"
 import { getAllPosts } from "../libs/posts"
 
