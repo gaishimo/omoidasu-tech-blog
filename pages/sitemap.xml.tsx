@@ -1,3 +1,4 @@
+import "@mdx-js/react"
 import { format } from "date-fns"
 import { NextPageContext } from "next"
 import { js2xml } from "xml-js"
