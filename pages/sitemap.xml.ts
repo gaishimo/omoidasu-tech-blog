@@ -6,6 +6,8 @@ import "use-media"
 import { js2xml } from "xml-js"
 import { getAllPosts } from "../libs/posts"
 
+// いくつかimportが無いとmdx require時にエラーになるため追加
+
 export default function sitemapXml() {
   return null
 }
