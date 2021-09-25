@@ -27,6 +27,7 @@ export function PressableExample() {
   return (
     <View style={styles.example}>
       <Pressable
+        accessibilityRole="button"
         pressRetentionOffset={20}
         style={styles.pressable}
         delayLongPress={1000}
