@@ -34,7 +34,10 @@ export function BaseLayout(props: Props) {
     <View style={styles.container}>
       <Head>
         <title>{props.title || DEFAULT_TITLE}</title>
-        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+        <meta
+          name="viewport"
+          content="initial-scale=1.0, maximum-scale=1, width=device-width"
+        />
         <meta name="description" content={props.description || DEFAULT_DESC} />
         <meta property="og:title" content={props.title || DEFAULT_TITLE} />
         <meta property="og:type" content="website" />
