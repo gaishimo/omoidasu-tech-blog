@@ -36,16 +36,16 @@ export function BaseLayout(props: Props) {
         <title>{props.title || DEFAULT_TITLE}</title>
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
         <meta name="description" content={props.description || DEFAULT_DESC} />
-        <meta name="og:title" content={props.title || DEFAULT_TITLE} />
-        <meta name="og:type" content="website" />
-        <meta name="og:site_name" content="Omoidasu Tech Blog" />
+        <meta property="og:title" content={props.title || DEFAULT_TITLE} />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Omoidasu Tech Blog" />
         <meta
-          name="og:description"
+          property="og:description"
           content={props.description || DEFAULT_DESC}
         />
-        <meta name="og:image" content={ogImageUrl} />
-        <meta name="og:locale" content="ja_JP" />
-        <meta name="og:url" content={`https://${currentHostName}`} />
+        <meta property="og:image" content={ogImageUrl} />
+        <meta property="og:locale" content="ja_JP" />
+        <meta property="og:url" content={`https://${currentHostName}`} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={props.title || DEFAULT_TITLE} />
         <meta
