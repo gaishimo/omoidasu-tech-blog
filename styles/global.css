@@ -85,7 +85,7 @@ pre {
   font-size: 0.75rem;
   letter-spacing: 0;
   width: 92%;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
 
@@ -96,7 +96,7 @@ pre code {
 }
 
 pre[class*=language-] {
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
 
 code {
