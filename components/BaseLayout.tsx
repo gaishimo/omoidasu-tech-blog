@@ -23,7 +23,7 @@ const PRISM_CSS_URL =
 
 // OGPのボット等からリクエストがきた場合windowが無いので注意
 const currentHostName = isBrowser()
-  ? window.location.hostname
+  ? window.location.hostname || Constants.SITE_HOSTNAME
   : Constants.SITE_HOSTNAME
 
 export function BaseLayout(props: Props) {
