@@ -111,9 +111,9 @@ export function PostLayout(props: Props) {
 const styles = StyleSheet.create({
   container: { alignItems: "center" },
   containerSmall: { width: "100%" },
-  article: { width: 1160, flexDirection: "row" },
+  article: { width: 1000, flexDirection: "row" },
   articleMedium: {
-    width: "90%",
+    width: "80%",
     paddingHorizontal: 8,
   },
   articleSmall: {

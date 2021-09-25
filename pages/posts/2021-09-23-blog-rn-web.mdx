@@ -1,0 +1,226 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { PressableExample } from "../../components/pages/2021-09-23-blog-rn-web/PressableExample.tsx"
+
+export const meta = {
+  title: "当ブログにReact Native for Webを導入しました",
+  tagNames: ["react-native", "react-native-web", "next.js"],
+  color1: "#1977f2",
+  color2: "rgb(100, 120, 180)",
+  createdAt: parse(
+    "2021-09-25 10:50:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "当ブログ(Next.js)にReact Native for Webを導入しました。",
+  imagePath: "/posts/2021-08-28-eas-iap/expo-iap-image.png",
+  lastUpdatedAt: parse(
+    "2021-09-25 10:50:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [
+  { title: "はじめに" },
+  { title: "React Native for Webとは" },
+  { title: "Next.jsへの導入" },
+  { title: "試しにReact Nativeのコードを書いてみる" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+## はじめに
+
+この度、当ブログに[React Native for Web](https://necolas.github.io/react-native-web/) を導入しました。
+
+[以前の記事](/posts/2020-06-13-blog-opened)でも書いたんですがこのブログはNext.jsで構築されています。記事を書く時は[MDX](https://mdxjs.com/)で記述しMarkdown内にJSXを埋め込めるようにしています。今までそれで特に問題はなかったのですが、React Nativeに関する記事を多めに書いているのもあり、React Nativeのコンポーネントを記事のJSXに記述して、それをそのまま動作させたいという欲が出てきました。以下のような感じ記事内に記載したら、
+
+```jsx
+<View>
+  <Button title="Button" onPress={() => { Alert.alert("", "Hello React Native") }} />
+</View>
+```
+
+それがそのページ上で直接描画されて動くというイメージです。Next.js + React Native for Web ってどんな感じだろうかという好奇心もあり、react-native-webを導入することにしました。
+
+
+## React Native for Webとは
+
+React Native for WebはReact NativeのUIをWeb上で動かすためのライブラリです。React Nativeの標準コンポーネント・モジュール群と同じものをWeb用に提供しており、ViewやTextInput、AlertなどReact Nativeの標準で用意されているものはモバイルと同様に利用することができます。React Native for Webの位置付けについては、以下の記事がわかりやすいです。<br />[React NativeをWebに持ってくることの意味 - ナカザンドットネット](https://blog.nkzn.net/entry/2018/05/29/210030)
+
+
+以下のようにReact Nativeで利用されるスタイルシステムも利用することができます。
+
+```jsx
+<View style={styles.block} />
+
+const styles = StyleSheet.create({
+  block: {
+    width: 300,
+    height: 100,
+    flexDirection: "row",
+    alignItems: "center",
+  }
+})
+```
+
+React Native for WebのコンポーネントはReact DOM上で動作するため、通常のReactコンポーネントと扱いは同じです。DOMを表すReact要素の`<div />`や`<h1 />` 等のコンポーネントと混在させることもできます。通常のReactのコンポーネント集を提供していると考えるのがわかりやすいと思います。
+
+```jsx
+<div>
+  <View />
+</div>
+```
+
+一部はCSS Modulesでスタイル指定して、一部はReact Nativeのスタイルシステムを利用するなんてことも可能です。React Native for Webを利用するのであればすべてReact Nativeのコンポーネント・スタイル指定で統一した方が良いと思いますが、混在させても問題はありません。
+
+
+## Next.jsへの導入
+
+Next.jsへReact Native for Webを導入する手順です。今回はExpoは使いません。
+
+まずreact-native-webライブラリをインストールします。
+
+```bash
+yarn add react-native-web
+```
+
+その後、next.config.js に以下の設定を追加します。
+
+```js
+module.exports = {
+  // ...
+
+  // 追加
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      // Transform all direct `react-native` imports to `react-native-web`
+      'react-native$': 'react-native-web',
+    }
+    return config
+  }
+}
+```
+
+コード上で以下のようにreact-nativeからimportしたときは、
+```js
+import { View } from "react-native"
+```
+
+通常react-nativeが存在しないのでエラーになりますが、上記設定で解決先をreact-native-webに置き換えることで、そちらを参照してくれるようになります。クロスプラットフォームでないWebだけのプロジェクトであれば以下のようにreact-native-webから直接importしても特に問題はないです(その場合は上記のnext.config.jsの設定は必ずしも必要ではないです)。
+```js
+import { View } from "react-native-web"
+```
+
+ただWebだけのプロジェクトの場合でも、react-nativeからimportする形に統一した方が実行環境を意識せず抽象化できるので望ましいのではないかと思います。
+
+### 導入の参考
+
+- React Native for Webを導入したサンプル (Next.jsの公式リポジトリ)
+https://github.com/vercel/next.js/tree/master/examples/with-react-native-web
+- Media Queryを使う [Media Queries with React Native for iOS, Android, and Web | by Evan Bacon | Exposition](https://blog.expo.dev/media-queries-with-react-native-for-ios-android-and-web-e0b73ed5777b)
+
+
+## 試しにReact Nativeのコードを書いてみる
+
+では試しにこの記事内にReact Nativeで記述したコンポーネントを載せてみたいと思います。Webであまり無さそうなReact Nativeっぽいものが良さそうということで、[Pressable](https://reactnative.dev/docs/pressable)を使ったサンプルを表示してみます。Pressableは他のコンポーネントをラップして使うもので、子コンポーネントに対してのプレスした場合に各段階のイベントを検出することができます。
+
+
+```jsx
+import { useCallback, useState } from "react"
+import { Pressable, StyleSheet, Text, View } from "react-native"
+
+const textMapping = {
+  ready: "PRESSABLE",
+  pressing: "PRESSING",
+  longPressing: "LONG PRESSING",
+}
+
+export function PressableExample() {
+  const [status, setStatus] = useState<"ready" | "pressing" | "longPressing">(
+    "ready",
+  )
+
+  const onPressIn = useCallback(() => setStatus("pressing"), [])
+  const onLongPress = useCallback(() => setStatus("longPressing"), [])
+  const onPressOut = useCallback(() => setStatus("ready"), [])
+
+  const styleMapping = {
+    ready: null,
+    pressing: styles.buttonPressing,
+    longPressing: styles.buttonLongPressing,
+  }
+
+  return (
+    <View style={styles.example}>
+      <Pressable
+        pressRetentionOffset={20}
+        style={styles.pressable}
+        delayLongPress={1000}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        onLongPress={onLongPress}
+      >
+        <View style={[styles.button, styleMapping[status]]}>
+          <Text style={styles.text}>{textMapping[status]}</Text>
+        </View>
+      </Pressable>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  example: { marginTop: 32, alignItems: "flex-start" },
+  pressable: {},
+  button: {
+    width: 120,
+    height: 120,
+    margin: 16,
+    backgroundColor: "rgb(0, 120, 180)",
+    borderRadius: 90,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+  },
+  buttonPressing: {
+    transform: [{ scale: 1.1 }],
+    backgroundColor: "rgb(0, 100, 160)",
+  },
+  buttonLongPressing: {
+    transform: [{ scale: 1.2 }],
+    backgroundColor: "rgb(0, 60, 120)",
+  },
+  text: {
+    textAlign: "center",
+    color: "white",
+    fontWeight: "normal",
+    fontSize: 14,
+    letterSpacing: 1,
+  },
+})
+```
+
+このコンポーネントをmdx内に記述します。
+
+```jsx
+<PressableExample />
+```
+
+
+<PressableExample />
+
+タップ(クリック)するとボタンの状態が変化しそのまま長押しし続けると更に変化します。簡単なものですが、このようなアプリっぽいインタラクティブを用意に記述できます。
+
+今後もこのブログに、React Nativeの動きのあるサンプルをどんどん載せていきたいと思います。
+
