@@ -36,7 +36,9 @@ export function PressableExample() {
         onLongPress={onLongPress}
       >
         <View style={[styles.button, styleMapping[status]]}>
-          <Text style={styles.text}>{textMapping[status]}</Text>
+          <Text selectable={false} style={styles.text}>
+            {textMapping[status]}
+          </Text>
         </View>
       </Pressable>
     </View>
