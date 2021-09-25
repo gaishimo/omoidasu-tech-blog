@@ -18,7 +18,7 @@ export const meta = {
     "当ブログ(Next.js)にReact Native for Webを導入しました。",
   imagePath: "/posts/2021-09-23-blog-rn-web/pressableExample.gif",
   lastUpdatedAt: parse(
-    "2021-09-25 10:50:00 +09:00",
+    "2021-09-25 19:10:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
@@ -164,6 +164,7 @@ export function PressableExample() {
   return (
     <View style={styles.example}>
       <Pressable
+        selectable={false}
         pressRetentionOffset={20}
         style={styles.pressable}
         delayLongPress={1000}
@@ -220,7 +221,12 @@ const styles = StyleSheet.create({
 
 <PressableExample />
 
-タップ(クリック)するとボタンの状態が変化しそのまま長押しし続けると更に変化します。簡単なものですが、このようなアプリっぽいインタラクティブを用意に記述できます。今後もこのブログに、React Nativeの動きのあるサンプルをどんどん載せていきたいと思います。
+タップ(クリック)するとボタンの状態が変化しそのまま長押しし続けると更に変化します。
+
+*iOSで長押しすると、テキスト選択モードになってしまいうまくonLongPressが発火されないようです。2本指で長押しすると発火できます。
+
+
+簡単なものですが、このようなアプリっぽいインタラクティブを用意に記述できます。今後もこのブログに、React Nativeの動きのあるサンプルをどんどん載せていきたいと思います。
 
 *このブログのコードはGithubで見ることができます。
 https://github.com/gaishimo/omoidasu-tech-blog
