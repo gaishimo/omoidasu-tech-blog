@@ -20,7 +20,7 @@
     "yarn": "^1.22.11"
   },
   "devDependencies": {
-    "@mapbox/rehype-prism": "^0.7.0",
+    "@mapbox/rehype-prism": "^0.8.0",
     "@types/next": "^9.0.0",
     "@types/node": "^16.9.2",
     "@types/react": "^17.0.20",
