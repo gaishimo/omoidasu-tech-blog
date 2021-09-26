@@ -14,7 +14,7 @@
     "next": "11.1.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-native-web": "^0.13.14",
+    "react-native-web": "^0.17.1",
     "use-media": "^1.4.0",
     "xml-js": "^1.6.11",
     "yarn": "^1.22.11"
