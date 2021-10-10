@@ -7,7 +7,7 @@ const remarkAutolinkHeadings = require("remark-autolink-headings")
 const withMDX = require("@next/mdx")({
   extension: /\.mdx$/,
   options: {
-    rehypePlugins: [rehypePrism],
+    // rehypePlugins: [rehypePrism],
     remarkPlugins: [
       remarkSlug,
       [
