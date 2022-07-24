@@ -1,0 +1,631 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+
+export const meta = {
+  title: "Expo (EAS Build)でAndroid・iOSのWidgetを作成した",
+  tagNames: ["react-native", "expo", "EAS Build", "widget", "extension"],
+  color1: "#1977f2",
+  color2: "rgb(100, 120, 180)",
+  createdAt: parse(
+    "2022-07-24 11:45:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description: "ExpoのManaged WorkflowでWidget(iOS / Android)を作成する方法について説明します。",
+  imagePath: "/posts/2022-07-25-eas-widget/widget_image.jpeg",
+  lastUpdatedAt: parse(
+    "2022-07-24 11:45:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [
+  { title: "Managed Workflowのままウィジェットを作成できる?" },
+  {
+    title: "Widgetの実装",
+    children: [
+      { title: "prebuild" },
+      {
+        title: "AndroidのWidget作成",
+        children: [
+          { title: "AndroidManifest.xml" },
+          { title: "build.gradle" },
+          { title: "その他のファイル" },
+          { title: "Androidのprebuild検証" },
+        ]
+      },
+      {
+        title: "iOSのWidget作成",
+        children: [
+          { title: "ファイルの配置" },
+          { title: "pbxprojファイルの更新" },
+          { title: "その他のファイル" },
+          { title: "iOSのprebuild検証" },
+        ]
+      },
+      { title: "EAS Buildに必要な設定" },
+      { title: "終わりに" },
+    ]
+  }
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+## Managed Workflowのままウィジェットを作成できる?
+
+現在運用中のアプリでユーザさんから度々機能要望をいただくのですが、その中で多いのがウィジェットを追加してほしいというものです。
+
+<ImageWrapper width="80%" maxWidth={240} alt="ウィジェットのイメージ" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/widget_image.jpeg" />
+
+
+ウィジェット要望が多いのは意外だったのですが、iOS14からiOSでもウィジェットが使えるようになったのもあり、思った以上にユーザに浸透しているように思います。端末を触っているときホームスクリーン上で内容を確認できるため、アプリを起動せずとも都度内容が簡単に確認できるという点が魅力です。また、常に目にするため通知を受け取らなくても必要なタイミングに気づけるというものあります。
+
+
+
+要望が点を踏まえアプリの新機能としてウィジェットを追加したいと考えたのですが、一つのネックになったのがアプリの開発・運用をExpoのManaged Workflowで行っているという点でした。ExpoでWidgetを作成する機能は[公式には対応されていません](https://expo.canny.io/feature-requests/p/widget-support)(2022年7月時点)。
+
+最初はEjectするしかないと思ったんですが、ExpoのEAS BuildではPrebuildフェーズで`ios`フォルダ`android`フォルダの中身を自由に書き換えることができるため、widgetを作成してそのコードやassetsをConfig Pluginでフォルダに配置すれば物理的にはできるのではないかと考えました。ただiOSに関しては単純にファイルを配置するだけではだめで、xcodeのプロジェクトデータである`pbxproj`ファイルを書き換える必要があります。これを直接書き換えるのは至難の技に思えたので、良い方法がないかをExpoのForumで[質問](https://forums.expo.dev/t/ios-widget-extension-on-eas-build/63064)してみることにしました。
+
+質問に対しExpo Teamの方が返答してくれて、[onesignal-expo-plugin](https://github.com/OneSignal/onesignal-expo-plugin) で似たようなことをしているので参考にしてみてはということだったので、コードを見てみました。onesignal-expo-pluginではNSE(Notification Service Extension)を作成するためのConfig Pluginがあり、そこで[XCodeの更新](https://github.com/OneSignal/onesignal-expo-plugin/blob/8d86d4cdd8d458d0861ece93a730920f9fb42cad/onesignal/withOneSignalIos.ts#L155-L245)をしている箇所がありました。[xcode](https://github.com/apache/cordova-node-xcode) というnpmライブラリを使ってpbxprojファイルを更新しているようです。
+
+pbxprojファイルを更新できればなんとか作れそうな気がしたので、実際に作成してみることにしてました。実際に作成するのは大変でしたが、実際に作成して本番リリースすることができました。この記事では、以下で作成したときの手順を簡単なwidgetを例に再現・説明していきます。
+
+少し残念なお知らせですが、Widgetのコード自体はReact Nativeのビューではなく、通常のネイティブの方法(Kotlin / Swift UI)で作成しています。Android、iOSともにリソースの制限があるため、React Nativeのビューを使って実装するのは現実的でないと思ったためです。(それに関してトライ自体していません。)
+
+
+## Widgetの実装
+
+Expo SDK 45が前提です。以下の流れで開発していきます。
+
+1. prebuildした状態でwidgetを作成
+2. Managed Workflowの状態で、1とファイル構成が同じになるようにConfig Pluginを作成
+
+最初にWidget自体を作成するにはBare Workflowの状態から行う必要があります。Widgetを作成した後、必要なファイル・変更点を洗い出しておいて、その差分をConfig Pluginで適用していきます。
+
+手っ取り早く結果を確認したい方は以下のGithubのコードをご確認ください。
+https://github.com/gaishimo/eas-widget-example
+
+### prebuild
+
+まず一度Managed Workflowの状態からprebuild(eject)します。
+
+```bash
+expo prebuild
+```
+
+実行するとBare Workflowの状態となり、`android/` `ios/` フォルダが扱える状態になります。
+
+### AndroidのWidget作成
+
+
+Android Studioから作成します。プロジェクトのappフォルダを右クリックし、"New" - "Widget" - "App Widget" を選択します。
+
+
+<ImageWrapper width="80%" alt="Android StudioでのWidgetの追加1" style={{ marginVertical: 24 }} sourceUri="/posts/2022-07-25-eas-widget/android_studio_add_widget1.png" />
+
+<ImageWrapper width="80%" maxWidth={500} alt="Android StudioでのWidgetの追加2" style={{ marginVertical: 24 }} sourceUri="/posts/2022-07-25-eas-widget/android_studio_add_widget2.png" />
+
+
+作成すると、以下のファイルが追加・変更されます。(*)が変更された箇所で、それ以外は新規に追加されたファイルです。
+
+```txt
+build.gradle (*)
+app/build.gradle (*)
+app/src/main/AndroidManifest.xml (*)
+app/src/main/java/com/gaishimo/example1/SampleWidget.kt
+app/src/main/res/drawable-nodpi/example_appwidget_preview.png
+app/src/main/res/drawable-v21/app_widget_background.xml
+app/src/main/res/drawable-v21/app_widget_inner_view_background.xml
+app/src/main/res/layout/sample_widget.xml
+app/src/main/res/values-night-v31/themes.xml
+app/src/main/res/values-v21/styles.xml
+app/src/main/res/values-v31/styles.xml
+app/src/main/res/values-v31/themes.xml
+app/src/main/res/values/attrs.xml
+app/src/main/res/values/colors.xml (*)
+app/src/main/res/values/dimens.xml
+app/src/main/res/values/strings.xml (*)
+app/src/main/res/values/styles.xml (*)
+app/src/main/res/values/themes.xml
+app/src/main/res/xml/sample_widget_info.xml
+```
+
+#### AndroidManifest.xml
+
+AndroidManifest.xmlの差分を確認すると、MainApplicationのapplication要素の配下にreceiverの記述が追加されています。
+
+```xml
+<application android:name=".MainApplication" ...>
+  <!-- 以下が追加されている -->
+  <receiver
+      android:name=".SampleWidget"
+      android:exported="false">
+      <intent-filter>
+          <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+      </intent-filter>
+
+      <meta-data
+          android:name="android.appwidget.provider"
+          android:resource="@xml/sample_widget_info" />
+  </receiver>
+  ...
+</application>
+```
+
+Config Pluginではこれらの記述が自動的に追加されるようにします。
+
+```ts
+import {
+  AndroidConfig,
+  ConfigPlugin,
+  withAndroidManifest,
+} from "@expo/config-plugins"
+
+export const withWidgetManifest: ConfigPlugin = config => {
+  return withAndroidManifest(config, async newConfig => {
+    const mainApplication = AndroidConfig.Manifest.getMainApplicationOrThrow(
+      newConfig.modResults,
+    )
+    const widgetReceivers = await buildWidgetsReceivers()
+    mainApplication.receiver = widgetReceivers
+    return newConfig
+  })
+}
+
+async function buildWidgetsReceivers() {
+  return [
+    {
+      $: {
+        "android:name": ".SampleWidget",
+        "android:exported": "false" as const,
+      },
+      "intent-filter": [
+        {
+          action: [
+            {
+              $: {
+                "android:name": "android.appwidget.action.APPWIDGET_UPDATE",
+              },
+            },
+          ],
+        },
+      ],
+      "meta-data": [
+        {
+          $: {
+            "android:name": "android.appwidget.provider",
+            "android:resource": "@xml/sample_widget_info",
+          },
+        },
+      ],
+    },
+  ]
+}
+```
+
+
+
+#### build.gradle
+
+build.gradle、app/build.gradle の差分を見ると、kotlin関連の記述が追加されています。また、viewBindingに関して記述が追加されていますが、今回は[ビューバインディング](https://developer.android.com/topic/libraries/view-binding?hl=ja)は使わないので無視します。
+
+```diff
+index 7aa686b..bdee94c 100644
+--- a/android/build.gradle
++++ b/android/build.gradle
+@@ -29,6 +29,7 @@ buildscript {
+         classpath('com.android.tools.build:gradle:7.0.4')
+         classpath('com.facebook.react:react-native-gradle-plugin')
+         classpath('de.undercouch:gradle-download-task:4.1.2')
++        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10'
+         // NOTE: Do not place your application dependencies here; they belong
+         // in the individual module build.gradle files
+     }
+```
+
+app/build.gradleでは
+
+```diff
+index ed165ff..1dcf497 100644
+--- a/android/app/build.gradle
++++ b/android/app/build.gradle
+@@ -248,6 +248,9 @@ android {
+             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+         }
+     }
++    buildFeatures {
++        viewBinding true
++    }
+
+     // applicationVariants are e.g. debug, release
+     applicationVariants.all { variant ->
+@@ -355,7 +358,8 @@ task copyDownloadableDepsToLibs(type: Copy) {
+     into 'libs'
+ }
+
+-apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute(null, rootDir).text.trim(), "../native_modules.gradle");
++apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute(null, rootDir).text.trim(), "../native_modules.gradle")
++apply plugin: 'org.jetbrains.kotlin.android';
+ applyNativeModulesAppBuildGradle(project)
+ ```
+
+Config Pluginでこれらの記述を自動的に追加します。
+
+
+build.gradle
+```ts
+import { ConfigPlugin, withProjectBuildGradle } from "@expo/config-plugins"
+
+export const withWidgetProjectBuildGradle: ConfigPlugin = config => {
+  return withProjectBuildGradle(config, async newConfig => {
+    const buildGradle = newConfig.modResults.contents
+    const search = /dependencies\s?{/
+    const replace = `dependencies {
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.10'`
+    const newBuildGradle = buildGradle.replace(search, replace)
+    newConfig.modResults.contents = newBuildGradle
+    return newConfig
+  })
+}
+```
+
+app/build.gradle
+```ts
+import { ConfigPlugin, withAppBuildGradle } from "@expo/config-plugins"
+
+export const withWidgetAppBuildGradle: ConfigPlugin = config => {
+  return withAppBuildGradle(config, async newConfig => {
+    const buildGradle = newConfig.modResults.contents
+    const search = /(apply plugin: "com\.android\.application"\n)/gm
+    const replace = `$1apply plugin: "kotlin-android"\n`
+    const newBuildGradle = buildGradle.replace(search, replace)
+    newConfig.modResults.contents = newBuildGradle
+    return newConfig
+  })
+}
+```
+
+build.gradleの更新については正規表現での力技です..
+
+
+#### その他のファイル
+
+Widget用のresourceファイル(xml)がいくつか追加・変更されていますが、変更されているものついてはファイルを分割しアプリ本体のものとwidget用のものに分けます。
+
+```txt
+app/src/main/res/values/colors.xml
+app/src/main/res/values/strings.xml
+app/src/main/res/values/styles.xml
+
+↓
+
+app/src/main/res/values/colors.xml
+app/src/main/res/values/colors-widget.xml
+app/src/main/res/values/strings.xml
+app/src/main/res/values/strings-widget.xml
+app/src/main/res/values/styles.xml
+app/src/main/res/values/styles-widget.xml
+```
+
+ファイルを分割しているのは、Config Pluginでwidget用のファイルをただコピーするだけで済むようにするためです。またReact Nativeのバージョンが変わりこれらのファイルの内容が変更された場合にも対応がしやすくなります。
+
+これらのファイルをプロジェクトの配下(今回はwidgetフォルダ)にテンプレートとして配置しておき、Config Pluginでそこからandroid配下にコピーしていきます。テンプレートのフォルダ上ではパッケージ名部分のフォルダ名はpackage_nameとしておき、Config Pluginでコピーする際にフォルダ名を実際のpackage名に変更しています。
+
+
+```ts
+import { ConfigPlugin, withDangerousMod } from "@expo/config-plugins"
+import fs from "fs-extra"
+import glob from "glob"
+import path from "path"
+
+export const withWidgetSourceCodes: ConfigPlugin = config => {
+  return withDangerousMod(config, [
+    "android",
+    async newConfig => {
+      const projectRoot = newConfig.modRequest.projectRoot
+      const platformRoot = newConfig.modRequest.platformProjectRoot
+      const widgetDir = path.join(projectRoot, "widget")
+      copyResourceFiles(widgetDir, platformRoot)
+
+      const packageName = config.android?.package
+      prepareSourceCodes(widgetDir, platformRoot, packageName!)
+
+      return newConfig
+    },
+  ])
+}
+
+function copyResourceFiles(widgetSourceDir: string, platformRoot: string) {
+  const source = path.join(widgetSourceDir, "android", "src", "main", "res")
+  const resDest = path.join(platformRoot, "app", "src", "main", "res")
+
+  console.log(`copy the res files from ${source} to ${resDest}`)
+  fs.copySync(source, resDest)
+}
+
+async function prepareSourceCodes(
+  widgetSourceDir: string,
+  platformRoot: string,
+  packageName: string,
+) {
+  const packageDirPath = packageName.replace(/\./g, "/")
+
+  const source = path.join(
+    widgetSourceDir,
+    `android/src/main/java/package_name`,
+  )
+  const dest = path.join(platformRoot, "app/src/main/java", packageDirPath)
+  console.log(`copy the kotlin codes from ${source} to ${dest}`)
+  fs.copySync(source, dest)
+}
+```
+
+### Androidのprebuild検証
+
+Config Pluginができたら、`expo prebuild`を実行し作成した部分が問題なく動作することを確認します。実行後にアプリをビルド・起動してみて、Widgetがうまく追加・起動できれば成功です。
+
+<ImageWrapper width="90%" maxWidth={240} alt="AndroidでのWidget起動" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/android_widget_home.png" />
+
+
+
+
+### iOSのWidget作成
+
+次はiOSのWidgetを作成します。prebuildされた状態からXCodeでWidgetを作成します。
+Targetを追加しWidget Extensionを選択します。
+
+<ImageWrapper width="80%" alt="XCodeでWidgetを追加1" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/xcode_add_target1.png" />
+
+<ImageWrapper width="80%"  alt="XCodeでWidgetを追加2" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/xcode_add_target2.png" />
+
+
+
+
+作成すると以下のファイルが自動で追加されます。
+
+```txt
+ios/EASWidgetExample.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+ios/widget/Assets.xcassets/AccentColor.colorset/Contents.json
+ios/widget/Assets.xcassets/AppIcon.appiconset/Contents.json
+ios/widget/Assets.xcassets/Contents.json
+ios/widget/Assets.xcassets/WidgetBackground.colorset/Contents.json
+ios/widget/Info.plist
+ios/widget/widget.swift
+```
+
+またXCodeのプロジェクトファイル(`ios/EASWidgetExample.xcodeproj/project.pbxproj`)が更新されます。
+
+### ファイルの配置
+
+pbxprojファイル以外の新規追加されたファイルについてはandroidの場合と同様にテンプレートとして配置しておき、Config Pluginからそれをコピーしてiosフォルダ配下に配置するようにします。
+
+
+```ts
+export const withWidgetXCode: ConfigPlugin<WithWidgetProps> = (
+  config,
+  options: WithWidgetProps,
+) => {
+  return withXcodeProject(config, async newConfig => {
+    try {
+      const projectName = newConfig.modRequest.projectName
+      const projectPath = newConfig.modRequest.projectRoot
+      const platformProjectPath = newConfig.modRequest.platformProjectRoot
+      const widgetSourceDirPath = path.join(
+        projectPath,
+        "widget",
+        "ios",
+        "widget",
+      )
+      const extensionFilesDir = path.join(
+        platformProjectPath,
+        EXTENSION_TARGET_NAME,
+      )
+      fs.copySync(widgetSourceDirPath, extensionFilesDir)
+      return newConfig
+    } catch (e) {
+      console.error(e)
+      throw e
+    }
+  })
+}
+```
+
+### pbxprojファイルの更新
+
+pbxprojファイルは大量に差分が出ているためそれらをConfig Pluginで適用してあげる必要があります。
+
+
+以下は差分の一部です。
+
+```txt
+diff --git a/ios/EASWidgetExample.xcodeproj/project.pbxproj b/ios/EASWidgetExample.xcodeproj/project.pbxproj
+index 10741c4..f4fafc1 100644
+--- a/ios/EASWidgetExample.xcodeproj/project.pbxproj
++++ b/ios/EASWidgetExample.xcodeproj/project.pbxproj
+@@ -11,12 +11,41 @@
+ 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
+ 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+ 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
++		3CFF60DE28868D7F000092BD /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CFF60DD28868D7F000092BD /* WidgetKit.framework */; };
++		3CFF60E028868D7F000092BD /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3CFF60DF28868D7F000092BD /* SwiftUI.framework */; };
++		3CFF60E328868D7F000092BD /* widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CFF60E228868D7F000092BD /* widget.swift */; };
++		3CFF60E528868D82000092BD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CFF60E428868D82000092BD /* Assets.xcassets */; };
++		3CFF60E928868D82000092BD /* widgetExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 3CFF60DC28868D7F000092BD /* widgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+ 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
+ 		96905EF65AED1B983A6B3ABC /* libPods-EASWidgetExample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-EASWidgetExample.a */; };
+ 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
+ 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
+ /* End PBXBuildFile section */
+...
+```
+
+ファイルの更新は[xcode](https://github.com/apache/cordova-node-xcode)ライブラリを使います。
+
+以下のようにプロジェクトファイルのパスを指定して読み込み、parseした後変更を行っていき、最後に書き込みをして反映させます。
+
+```ts
+const xcodeProject = xcode.project(projPath)
+
+xcodeProject.parse(() => {
+  // xcodeProjectに対して変更処理を呼び出し
+
+  fs.writeFileSync(projPath, xcodeProject.writeSync())
+})
+```
+
+更新処理はまず今回追加したファイルがXCode上のファイルツリーで見えるようにする必要があります。あとはpbxprojファイルの実際の差分を見ながら、中身が同じになるように地道に検証をしながら追加をおこなっていきます。特定の処理を追加した後、都度XCodeを開いてみておかしくなっていないか確認しながらやるとよい気がします。それぞれの処理を説明していくのが困難なので、、実際のコードを提示します。[onesignal-expo-plugin](https://github.com/OneSignal/onesignal-expo-plugin/blob/main/onesignal/withOneSignalIos.ts)をかなり参考にしています。
+
+
+```ts
+async function updateXCodeProj(
+  projPath: string,
+  widgetBundleId: string,
+  developmentTeamId: string,
+) {
+  console.log({ projPath })
+
+  const xcodeProject = xcode.project(projPath)
+
+  xcodeProject.parse(() => {
+    const pbxGroup = xcodeProject.addPbxGroup(
+      TOP_LEVEL_FILES,
+      EXTENSION_TARGET_NAME,
+      EXTENSION_TARGET_NAME,
+    )
+
+    // Add the new PBXGroup to the top level group. This makes the
+    // files / folder appear in the file explorer in Xcode.
+    const groups = xcodeProject.hash.project.objects.PBXGroup
+    Object.keys(groups).forEach(function (groupKey) {
+      if (groups[groupKey].name === undefined) {
+        console.log("new PBXGroup added to the top level group", groupKey)
+        xcodeProject.addToPbxGroup(pbxGroup.uuid, groupKey)
+      }
+    })
+
+    // // WORK AROUND for codeProject.addTarget BUG
+    // // Xcode projects don't contain these if there is only one target
+    // // An upstream fix should be made to the code referenced in this link:
+    // //   - https://github.com/apache/cordova-node-xcode/blob/8b98cabc5978359db88dc9ff2d4c015cba40f150/lib/pbxProject.js#L860
+    const projObjects = xcodeProject.hash.project.objects
+    projObjects["PBXTargetDependency"] =
+      projObjects["PBXTargetDependency"] || {}
+    projObjects["PBXContainerItemProxy"] =
+      projObjects["PBXTargetDependency"] || {}
+
+    // // add target
+    const widgetTarget = xcodeProject.addTarget(
+      EXTENSION_TARGET_NAME,
+      "app_extension",
+      EXTENSION_TARGET_NAME,
+      widgetBundleId,
+    )
+
+    // add build phase
+    xcodeProject.addBuildPhase(
+      ["widget.swift"],
+      "PBXSourcesBuildPhase",
+      "Sources",
+      widgetTarget.uuid,
+      undefined,
+      "widget",
+    )
+    xcodeProject.addBuildPhase(
+      ["SwiftUI.framework", "WidgetKit.framework"],
+      "PBXFrameworksBuildPhase",
+      "Frameworks",
+      widgetTarget.uuid,
+    )
+    const resourcesBuildPhase = xcodeProject.addBuildPhase(
+      ["Assets.xcassets"],
+      "PBXResourcesBuildPhase",
+      "Resources",
+      widgetTarget.uuid,
+      undefined,
+      "widget",
+    )
+    console.log(
+      "resourcesBuildPhase:",
+      JSON.stringify(resourcesBuildPhase, null, 2),
+    )
+
+    /* Update build configurations */
+    const configurations = xcodeProject.pbxXCBuildConfigurationSection()
+
+    for (const key in configurations) {
+      if (typeof configurations[key].buildSettings !== "undefined") {
+        const productName = configurations[key].buildSettings.PRODUCT_NAME
+        if (productName === `"${EXTENSION_TARGET_NAME}"`) {
+          configurations[key].buildSettings = {
+            ...configurations[key].buildSettings,
+            ...BUILD_CONFIGURATION_SETTINGS,
+            DEVELOPMENT_TEAM: developmentTeamId,
+            PRODUCT_BUNDLE_IDENTIFIER: widgetBundleId,
+          }
+        }
+      }
+    }
+
+    fs.writeFileSync(projPath, xcodeProject.writeSync())
+  })
+```
+
+
+### iOSのprebuild検証
+
+Androidの場合と同様に`expo prebuild`を行い、作成した部分が問題なく動作することを確認します。実行後、アプリをビルド・起動してみて、Widgetがうまく追加・起動できれば成功です。
+
+
+<ImageWrapper width="90%" maxWidth={300} alt="iOSでのWidget起動" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/ios_widget1.png" />
+
+<ImageWrapper width="90%" maxWidth={300} alt="iOSでのWidget起動" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/ios_widget2.png" />
+
+
+
+
+## EAS Buildに必要な設定
+
+prebuildして手元で動作することを確認できましたが、そのままEAS BuildするとiOSの場合にWidgetのcredentialsが設定されてないためエラーとなってしまいます。
+
+app.json で以下の設定を追加しcredentialsが自動で生成されるようにします。
+
+```js
+  "extra": {
+    "eas": {
+      "build": {
+        "experimental": {
+          "ios": {
+            "appExtensions": [
+              {
+                "targetName": "widget",
+                "bundleIdentifier": "<WidgetのバンドルID>"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+```
+
+この設定はexperimentalのため、いずれ変更されるかもしれません。
+
+参考: https://forums.expo.dev/t/ios-widget-extension-on-eas-build/63064/2?u=gaishimo-omoidasu
+
+
+## 終わりに
+
+Config Pluginでやることは基本的に必要なファイルを配置して特定の状態になるようにする作業であり、インフラ構築の際にAnsible等を使ってプロビジョニングする作業と似ている気がします。
+
+XCodeファイル(pbxproj)の更新が大変ですが、そこさえクリアできればなんとかなるという印象です。React Nativeをアップグレードする時にpbxprojの差分を確認しないといけないケースがありますが、その作業が少し怖くなくなった気がします^^
+
+今回は最小限のWidgetの例ですが、実際にリリースしようとなるとアプリの更新を即時反映したり、Shared Group等を利用してアプリとWidgetでデータを共有したり、より複雑になります。iOSについてはswiftファイルやフォントファイル、ローカライゼーション等追加される可能性があるため、XCodeファイルの更新がより複雑になると思います。これらは手間ではありますが、Widgetは一度作成したらアプリほど頻繁に変更する必要はないと思うので、作成する価値はあると思います。
+
+React NativeやFlutterでアプリを作成するケースは増えていますが、Widgetは簡単に作成する手段が用意されていないため、Widgetを提供しているアプリは少なく、提供しているアプリはネイティブで作成されているものが多い印象です。その分React NativeでWidgetを提供することはアプリの一つの強みになると思います。

@@ -4,14 +4,17 @@ import {
   ImageLoadEventData,
   LayoutChangeEvent,
   NativeSyntheticEvent,
+  StyleProp,
   StyleSheet,
   View,
+  ViewStyle,
 } from "react-native"
 
 type Props = {
   width: number | string
   maxWidth: number
   alt?: string
+  style?: StyleProp<ViewStyle>
   sourceUri: string
 }
 
@@ -50,7 +53,11 @@ export function ImageWrapper(props: Props) {
 
   return (
     <View
-      style={[styles.wrapper, { width: props.width, maxWidth: props.maxWidth }]}
+      style={[
+        styles.wrapper,
+        props.style,
+        { width: props.width, maxWidth: props.maxWidth },
+      ]}
       onLayout={onLayout}
     >
       <Image
