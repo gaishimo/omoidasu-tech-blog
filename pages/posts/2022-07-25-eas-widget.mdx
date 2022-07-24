@@ -230,7 +230,6 @@ index 7aa686b..bdee94c 100644
      }
 ```
 
-app/build.gradleでは
 
 ```diff
 index ed165ff..1dcf497 100644
@@ -312,6 +311,39 @@ app/src/main/res/values/strings.xml
 app/src/main/res/values/strings-widget.xml
 app/src/main/res/values/styles.xml
 app/src/main/res/values/styles-widget.xml
+```
+
+例えばcolors.xmlであれば、以下のように一つになっていたものを
+```xml
+<resources>
+    <color name="splashscreen_background">#ffffff</color>
+    <color name="iconBackground">#FFFFFF</color>
+    <color name="colorPrimary">#023c69</color>
+    <color name="colorPrimaryDark">#ffffff</color>
+    <color name="light_blue_50">#FFE1F5FE</color>
+    <color name="light_blue_200">#FF81D4FA</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="light_blue_900">#FF01579B</color>
+</resources>
+```
+
+以下のように元々あった記述とWidget用に追加された記述を分けます。
+```xml
+<!-- colors.xml -->
+<resources>
+    <color name="splashscreen_background">#ffffff</color>
+    <color name="iconBackground">#FFFFFF</color>
+    <color name="colorPrimary">#023c69</color>
+    <color name="colorPrimaryDark">#ffffff</color>
+</resources>
+
+<!-- colors_widget.xml -->
+<resources>
+    <color name="light_blue_50">#FFE1F5FE</color>
+    <color name="light_blue_200">#FF81D4FA</color>
+    <color name="light_blue_600">#FF039BE5</color>
+    <color name="light_blue_900">#FF01579B</color>
+</resources>
 ```
 
 ファイルを分割しているのは、Config Pluginでwidget用のファイルをただコピーするだけで済むようにするためです。またReact Nativeのバージョンが変わりこれらのファイルの内容が変更された場合にも対応がしやすくなります。
