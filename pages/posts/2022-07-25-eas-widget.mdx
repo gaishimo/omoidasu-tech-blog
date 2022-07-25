@@ -69,11 +69,11 @@ export default props => (
 
 
 
-要望が点を踏まえアプリの新機能としてウィジェットを追加したいと考えたのですが、一つのネックになったのがアプリの開発・運用をExpoのManaged Workflowで行っているという点でした。ExpoでWidgetを作成する機能は[公式には対応されていません](https://expo.canny.io/feature-requests/p/widget-support)(2022年7月時点)。
+要望を踏まえアプリの新機能としてウィジェットを追加したいと考えたのですが、一つのネックがアプリの開発・運用をExpoのManaged Workflowで行っているという点でした。ExpoでWidgetを作成する機能は[公式には対応されていません](https://expo.canny.io/feature-requests/p/widget-support)(2022年7月時点)。
 
-最初はEjectするしかないと思ったんですが、ExpoのEAS BuildではPrebuildフェーズで`ios`フォルダ`android`フォルダの中身を自由に書き換えることができるため、widgetを作成してそのコードやassetsをConfig Pluginでフォルダに配置すれば物理的にはできるのではないかと考えました。ただiOSに関しては単純にファイルを配置するだけではだめで、xcodeのプロジェクトデータである`pbxproj`ファイルを書き換える必要があります。これを直接書き換えるのは至難の技に思えたので、良い方法がないかをExpoのForumで[質問](https://forums.expo.dev/t/ios-widget-extension-on-eas-build/63064)してみることにしました。
+最初はEjectするしかないと思ったんですが、ExpoのEAS BuildではPrebuildフェーズで`ios`フォルダ`android`フォルダの中身を自由に書き換えることができます。widgetを作成してそのコードやassetsをPrebuild時にConfig Pluginでフォルダに配置すれば物理的にはできるのではないかと考えました。ただiOSに関しては単純にファイルを配置するだけではだめで、xcodeのプロジェクトデータである`pbxproj`ファイルを書き換える必要があります。これを直接書き換えるのは至難の技に思えたので、良い方法がないかをExpoのForumで[質問](https://forums.expo.dev/t/ios-widget-extension-on-eas-build/63064)してみることにしました。
 
-質問に対しExpo Teamの方が返答してくれて、[onesignal-expo-plugin](https://github.com/OneSignal/onesignal-expo-plugin) で似たようなことをしているので参考にしてみてはということだったので、コードを見てみました。onesignal-expo-pluginではNSE(Notification Service Extension)を作成するためのConfig Pluginがあり、そこで[XCodeの更新](https://github.com/OneSignal/onesignal-expo-plugin/blob/8d86d4cdd8d458d0861ece93a730920f9fb42cad/onesignal/withOneSignalIos.ts#L155-L245)をしている箇所がありました。[xcode](https://github.com/apache/cordova-node-xcode) というnpmライブラリを使ってpbxprojファイルを更新しているようです。
+質問に対しExpo Teamの方が返答してくれて、[onesignal-expo-plugin](https://github.com/OneSignal/onesignal-expo-plugin) で似たようなことをしているので参考にしてみてはということでした。onesignal-expo-pluginではNSE(Notification Service Extension)を作成するためのConfig Pluginがあり、そこで[XCodeの更新](https://github.com/OneSignal/onesignal-expo-plugin/blob/8d86d4cdd8d458d0861ece93a730920f9fb42cad/onesignal/withOneSignalIos.ts#L155-L245)をしている箇所がありました。[xcode](https://github.com/apache/cordova-node-xcode) というnpmライブラリを使ってpbxprojファイルを更新しているようです。
 
 pbxprojファイルを更新できればなんとか作れそうな気がしたので、実際に作成してみることにしてました。実際に作成するのは大変でしたが、実際に作成して本番リリースすることができました。この記事では、以下で作成したときの手順を簡単なwidgetを例に再現・説明していきます。
 
@@ -87,14 +87,14 @@ Expo SDK 45が前提です。以下の流れで開発していきます。
 1. prebuildした状態でwidgetを作成
 2. Managed Workflowの状態で、1とファイル構成が同じになるようにConfig Pluginを作成
 
-最初にWidget自体を作成するにはBare Workflowの状態から行う必要があります。Widgetを作成した後、必要なファイル・変更点を洗い出しておいて、その差分をConfig Pluginで適用していきます。
+最初にWidget自体を作成するにはBare Workflow(素のReact Nativeプロジェクト)の状態から行う必要があります。Widgetを作成した後、必要なファイル・変更点を洗い出しておいて、その差分をConfig Pluginで適用していきます。
 
 手っ取り早く結果を確認したい方は以下のGithubのコードをご確認ください。
 https://github.com/gaishimo/eas-widget-example
 
 ### prebuild
 
-まず一度Managed Workflowの状態からprebuild(eject)します。
+まず一度Managed Workflowの状態からprebuild(eject)します。これは一時的にするだけなので修正自体はcommitしません。
 
 ```bash
 expo prebuild
@@ -346,9 +346,9 @@ app/src/main/res/values/styles-widget.xml
 </resources>
 ```
 
-ファイルを分割しているのは、Config Pluginでwidget用のファイルをただコピーするだけで済むようにするためです。またReact Nativeのバージョンが変わりこれらのファイルの内容が変更された場合にも対応がしやすくなります。
+ファイルを分割しているのは、Config Pluginでwidget用のファイルをただコピーするだけで済むようにするためです。ファイルを更新するよりも楽です。またReact Nativeのバージョンが変わりこれらのファイルの内容が変更された場合にも対応がしやすくなります。
 
-これらのファイルをプロジェクトの配下(今回はwidgetフォルダ)にテンプレートとして配置しておき、Config Pluginでそこからandroid配下にコピーしていきます。テンプレートのフォルダ上ではパッケージ名部分のフォルダ名はpackage_nameとしておき、Config Pluginでコピーする際にフォルダ名を実際のpackage名に変更しています。
+これらのファイルをプロジェクトの配下(今回はwidgetフォルダ)にテンプレートとして配置しておき、Config Pluginでそこから`android`フォルダ配下にコピーしていきます。テンプレートのフォルダ上ではパッケージ名部分のフォルダ名は`package_name`としておき、Config Pluginでコピーする際にフォルダ名を実際のpackage名に変更しています。
 
 
 ```ts
