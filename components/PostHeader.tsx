@@ -28,7 +28,12 @@ export function PostHeader(props: Props) {
       </View>
       <View style={styles.tags}>
         {props.tagNames.map((tagName, i) => (
-          <View key={i} style={styles.tag}>
+          <View
+            key={i}
+            style={styles.tag}
+            accessibilityRole="link"
+            href={`/tags/${tagName}`}
+          >
             <Tag name={tagName} />
           </View>
         ))}

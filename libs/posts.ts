@@ -5,7 +5,6 @@ export async function getAllPosts(): Promise<Post[]> {
   try {
     const postsDir = path.resolve(process.cwd(), "pages", "posts")
 
-    console.log("postsDir:", postsDir)
     const mdxFileNames = fs.readdirSync(postsDir)
     const posts = mdxFileNames
       .map(fileName => {

@@ -5,6 +5,7 @@ import "react-native"
 import "use-media"
 import { js2xml } from "xml-js"
 import { getAllPosts } from "../libs/posts"
+import { getTags } from "../libs/tags"
 
 // いくつかimportが無いとmdx require時にエラーになるため追加
 
@@ -16,6 +17,7 @@ const BASE_URL = "https://blog.omoidasu.dev"
 
 export async function getServerSideProps({ req, res }: NextPageContext) {
   const posts = await getAllPosts()
+  const tagMap = await getTags()
   const lastUpdated = posts
     .map(post => post.lastUpdatedAt)
     .reduce(
@@ -80,6 +82,34 @@ export async function getServerSideProps({ req, res }: NextPageContext) {
                   {
                     type: "text",
                     text: format(post.lastUpdatedAt, "yyyy-MM-dd"),
+                  },
+                ],
+              },
+              {
+                type: "element",
+                name: "priority",
+                elements: [{ type: "text", text: "0.5" }],
+              },
+            ],
+          })),
+          ...Object.entries(tagMap).map(([tagName, tagData]) => ({
+            type: "element",
+            name: "url",
+            elements: [
+              {
+                type: "element",
+                name: "loc",
+                elements: [
+                  { type: "text", text: `${BASE_URL}/tags/${tagName}` },
+                ],
+              },
+              {
+                type: "element",
+                name: "lastmod",
+                elements: [
+                  {
+                    type: "text",
+                    text: format(tagData.lastUpdatedAt, "yyyy-MM-dd"),
                   },
                 ],
               },

@@ -19,3 +19,10 @@ type Post = PostMeta & {
   createdAt: string
   lastUpdatedAt: string
 }
+
+type TagMap = {
+  [tag: string]: {
+    pages: number
+    lastUpdatedAt: Date
+  }
+}
