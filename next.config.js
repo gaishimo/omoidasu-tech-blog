@@ -5,6 +5,7 @@ const remarkSlug = require("remark-slug")
 const remarkAutolinkHeadings = require("remark-autolink-headings")
 const CopyPlugin = require("copy-webpack-plugin")
 const path = require("path")
+const webpack = require("webpack")
 
 const withMDX = require("@next/mdx")({
   extension: /\.mdx$/,
@@ -31,10 +32,23 @@ const withMDX = require("@next/mdx")({
   },
 })
 
-module.exports = withPlugins([withMDX], {
+const withTM = require("next-transpile-modules")([
+  "react-native-reanimated",
+  "@shopify/react-native-skia",
+])
+
+module.exports = withPlugins([withTM, withMDX], {
   experimental: { nftTracing: true },
   pageExtensions: ["ts", "tsx", "mdx"],
   webpack: config => {
+    const originEntry = config.entry
+    config.entry = async () => {
+      const entryConfig = await originEntry()
+      return {
+        // ["babel-polyfill"]: [],
+        ...entryConfig,
+      }
+    }
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
       // Transform all direct `react-native` imports to `react-native-web`
@@ -45,10 +59,6 @@ module.exports = withPlugins([withMDX], {
       // where we end up with two different react modules. This should
       // NOT be necessary in production when installing from NPM.
       react: path.resolve(__dirname, "./node_modules/react"),
-      "react-native-web": path.resolve(
-        __dirname,
-        "./node_modules/react-native-web",
-      ),
     }
     config.resolve.extensions = [
       ".web.js",
@@ -60,22 +70,31 @@ module.exports = withPlugins([withMDX], {
       fs: false,
       path: false,
     }
+
+    config.module.rules.push({
+      test: /\.(jpe?g|png|svg|gif|ico|eot|ttf|woff|woff2|mp4|pdf|webm|otf)$/,
+      type: "asset",
+      generator: {
+        filename: "static/chunks/[path][name].[hash][ext]",
+      },
+    })
+
     config.plugins = [
       ...config.plugins,
       new CopyPlugin({
         patterns: [
           {
             from: "node_modules/canvaskit-wasm/bin/full/canvaskit.wasm",
+            to: "static/chunks/pages/posts/canvaskit.wasm",
           },
         ],
       }),
+      /* for reanimated */
+      new webpack.DefinePlugin({
+        // See: <https://github.com/necolas/react-native-web/issues/349>
+        __DEV__: JSON.stringify(true),
+      }),
     ]
-    // config.externals = {
-    //   // ...config.externals,
-    //   "react-native-reanimated": "require('react-native-reanimated')",
-    //   "react-native-reanimated/lib/reanimated2/core":
-    //     "require('react-native-reanimated/lib/reanimated2/core')",
-    // }
     return config
   },
 })

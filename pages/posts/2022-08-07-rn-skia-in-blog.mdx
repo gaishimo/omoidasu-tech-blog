@@ -1,0 +1,277 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { View, Text, ActivityIndicator } from "react-native"
+import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web"
+
+export const meta = {
+  title: "ブログにreact-native-skiaを導入しました🎨",
+  tagNames: ["react-native-skia", "next.js", "react-native", "skia"],
+  color1: "#4CC8F0",
+  color2: "#3B8FFD",
+  createdAt: parse(
+    "2022-08-07 11:12:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description: "2DグラフィックライブラリをReact Nativeで扱うためのreact-native-skiaを当ブログに導入しました",
+  imagePath: "/posts/2022-08-07-rn-skia-in-blog/image.png",
+  lastUpdatedAt: parse(
+    "2022-08-07 11:12:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [
+  { title: "ブログへの導入" },
+  { title: "実際にreact-native-skiaで描画してみる" },
+  { title: "所感" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+[react-native-skia](https://github.com/Shopify/react-native-skia)がExpo GoとWebでサポートされたそうです。
+
+> React Native Skia is now supported in Expo Go and on web. Skia is a high-performance 2D graphics library used by Chrome, among many other great tools, and React Native Skia provides an idiomatic React API for using Skia in your apps. This library raises the ceiling over what you can do in React Native — it’s truly a “game changer” for producing performant visual effects with React. React Native Skia is built by William Candillon and Christian Falch with support from Shopify.
+
+[Expo SDK 46. | by Brent Vatne | Aug, 2022 | Exposition](https://blog.expo.dev/expo-sdk-46-c2a1655f63f7)
+
+
+[Skia](https://skia.org/)はGoogleが開発しているOSSの2Dグラフィックライブラリです。ブラウザやAndroid等、様々なプラットフォームで利用することができます。FlutterはUIの描画エンジンにSkiaを使っています。
+
+React Nativeでは2D描画をしたい場合、有力な手段がSVGしかなく表現力に限界がありました。例えば[シャドウやぼかしといった効果が使えなかったり](https://github.com/react-native-svg/react-native-svg/issues/150)するのもその一例です。SVGを利用した場合描画のパフォーマンスにも課題がありました。
+
+これに対し[react-native-skia](https://github.com/Shopify/react-native-skia)が提供されたことにより、React Nativeでさまざまな2D描画を実行することができるようになりました。React Nativeの新しいアーキテクチャであるJSIを利用しておりパフォーマンスも期待できそうです。またFlutterのAPIと100％互換になっているそうです。Web版ではFlutterと同様にCanvasKit (WASM)が利用されています。このあたりもFlutterと同じAPIにしている理由がありそうです。
+
+以下はreact-native-skiaの記事・動画・開発者のTwitterアカウント等のリンクです。
+
+- [React Native Skia—For Us, For You, and For Fun — Mobile (2022)](https://shopify.engineering/react-native-skia-shopify)
+- [Pedal to the Metal - YouTube](https://www.youtube.com/watch?v=uvLQ5f3KDXk)
+- [React Native Skia - YouTube](https://www.youtube.com/watch?v=EHxEX78alZE&t=1541s)
+- [Christian Falch（@chrfalch) / Twitter](https://twitter.com/chrfalch)
+- [William Candillon（@wcandillon) / Twitter](https://twitter.com/wcandillon)
+- [Shopify Engineering（@ShopifyEng） / Twitter](https://twitter.com/ShopifyEng)
+
+
+## ブログへの導入
+
+
+当ブログはreact-native-webを導入しているので記事のMarkdown内でReact Nativeのコンポーネントを表示することができます([以前の記事: "当ブログにReact Native for Webを導入しました"](https://blog.omoidasu.dev/posts/2021-09-24-blog-rn-web) )。これに加えSkiaでの2D描画が使えれば記事内で更に色々な表現ができそうなので早速導入してみることにしました。
+
+
+Webでのreact-native-skiaのセットアップ方法は以下の公式ドキュメントに従います。
+
+
+[Web Support | React Native Skia](https://shopify.github.io/react-native-skia/docs/getting-started/web)
+
+
+まずライブラリ自体をインストールします。
+
+```bash
+yarn add @shopify/react-native-skia
+```
+
+その後WebPackの設定が必要になりますが、このブログはnext.jsを利用しているためnext.config.jsで設定を追加しました。
+
+
+```js
+const configs = {
+  webpack: config => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      // Transform all direct `react-native` imports to `react-native-web`
+      "react-native$": "react-native-web",
+      // (1)
+      react: path.resolve(__dirname, "./node_modules/react"),
+      "react-native-web": path.resolve(
+        __dirname,
+        "./node_modules/react-native-web",
+      ),
+    }
+    // (2)
+    config.resolve.fallback = {
+      fs: false,
+      path: false,
+    }
+    // (3)
+    config.plugins = [
+      ...config.plugins,
+      new CopyPlugin({
+        patterns: [
+          {
+            from: "node_modules/canvaskit-wasm/bin/full/canvaskit.wasm",
+            to: "static/chunks/pages/posts/canvaskit.wasm",
+          },
+        ],
+      }),
+    ]
+    // (4)
+    config.externals = {
+      ...config.externals,
+      "react-native-reanimated": "require('react-native-reanimated')",
+      "react-native-reanimated/lib/reanimated2/core":
+        "require('react-native-reanimated/lib/reanimated2/core')",
+    }
+    return config
+  },
+}
+```
+
+(1)の`resolve.alias`の部分はreactの混在により`"Hooks can only be called inside the body of a function component"`とエラーが出るためその回避のためです。
+
+(2)の`config.resolve.fallback`は、canvaskit-wasmで`cannot resolve fs`のエラーを回避するための設定です。
+
+(3)のCopyPluginの箇所ではcanvaskit.wasmをビルドディレクトリにコピーしています。Webpackのそのままの設定だとnode_modules配下のwasmファイルが公開されないためコピーする必要があります。今回コピー先を`static/chunks/pages/posts`にしているのですが、 Next.jsでそのままトップにコピーした場合、canvaskit.wasmを取得するリクエスト先のパスが`/pages/posts/canvaskit.wasm` のように該当ページのフォルダの下になってしまうため、配下に直接コピーしています。(トップに置いてうまく取得先のパスを変えられればよいのですが、方法がわからなかったため今回はこの形にしました)
+
+(4)の`config.externals`の設定はreanimatedをインストールしていない場合に必要です。
+
+また、`node_modules/@shopify/react-native-skia`をtranspileする必要があるため、next-transpile-modulesを使います。transpileしないとJSXの記述でsyntaxエラーが出ます。
+
+```js
+const withTM = require("next-transpile-modules")([
+  "@shopify/react-native-skia",
+])
+
+withTM(configs)
+```
+
+webpackの設定で迷った場合は、[react-native-skiaのexampleの設定](https://github.com/Shopify/react-native-skia/blob/main/example/webpack.config.js)等を参考にするとよいと思います。また、このブログのnext.config.jsは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/blob/main/next.config.js)で確認可能です。
+
+
+実際にReactでSkiaのComponentを描画するには`<WithSkiaWeb />`で`getComponent`propを指定し該当のコンポーネントをdynamic importで読み込みます。こうすることで全体が待ち状態になることなく、Skiaのロードが終わった後にコンポーネントを読み込んで描画することができます。
+
+```jsx
+<WithSkiaWeb
+  getComponent={() => import("./MySkiaComponent")}
+  fallback={<Text>Loading Skia...</Text>} />
+```
+
+全体を遅延させてもよい場合は`LoadSkiaWeb()`を利用します。詳しくは公式ドキュメントを参考にしてください。[Web Support | React Native Skia](https://shopify.github.io/react-native-skia/docs/getting-started/web#loading-skia)
+
+
+## 実際にreact-native-skiaで描画してみる
+
+さっそくSkiaで描画を試してみます。星を`<Path />`で描いてグラデーションをつけてみました。長押しするとぼかし効果が入るようにアニメーションを設定しています。
+
+
+<View style={{ marginTop: 16 }}>
+  <WithSkiaWeb
+    getComponent={() =>
+      import("../../components/pages/2022-08-07-rn-skia-in-blog/SkiaStar")
+    }
+    fallback={<ActivityIndicator color="gray" size="small" />}
+  />
+</View>
+
+
+```jsx
+  const onTouch = useTouchHandler({
+    onStart: () => {
+      runTiming(value, 10, {
+        duration: 600,
+      })
+    },
+    onEnd: () => {
+      runTiming(value, 0, {
+        duration: 1000,
+      })
+    },
+  })
+  return (
+    <Canvas onTouch={onTouch}>
+      <Group>
+        <Path
+          strokeCap={"round"}
+          strokeWidth={10}
+          style="fill"
+          path="M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
+        >
+          <Blur blur={value} />
+          <LinearGradient
+            start={vec(0, 0)}
+            end={vec(280, 280)}
+            colors={["#30cfd0", "#330867"]}
+          />
+        </Path>
+      </Group>
+    </Canvas>
+  )
+```
+
+グラデーションやぼかし効果が簡単に行えるのが驚きです。
+
+ついでにグラデーションボタンも作ってみました。
+
+<View style={{ marginBottom: 16 }}>
+  <WithSkiaWeb
+    getComponent={() =>
+      import("../../components/pages/2022-08-07-rn-skia-in-blog/LinearGradientButton")
+    }
+    fallback={<ActivityIndicator color="gray" size="small" />}
+  />
+</View>
+
+
+```jsx
+<TouchableOpacity>
+  <View
+    style={{
+      alignItems: "center",
+      justifyContent: "center",
+      width: 256,
+      height: 48,
+    }}
+  >
+    <Canvas
+      style={[StyleSheet.absoluteFill, { width: "100%", height: "100%" }]}
+    >
+      <RoundedRect x={0} y={0} width={256} height={48} r={8}>
+        <LinearGradient
+          start={vec(0, 10)}
+          end={vec(256, 38)}
+          colors={["#10408E", "#11A4FF"]}
+        />
+      </RoundedRect>
+    </Canvas>
+    <View
+      style={[
+        StyleSheet.absoluteFill,
+        {
+          width: "100%",
+          height: "100%",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      ]}
+    >
+      <Text
+        style={{
+          color: "white",
+          fontWeight: "500",
+          fontSize: 16,
+          letterSpacing: 2,
+        }}
+      >
+        Title
+      </Text>
+    </View>
+  </View>
+</TouchableOpacity>
+```
+
+## 所感
+
+
+今までReact Nativeで特定の表現のUIを実装しようとした場合、労力を要することが多々ありました。例えばグラデーションの描画をしたい場合[react-native-linear-gradient](https://github.com/react-native-linear-gradient/react-native-linear-gradient)等、iOS/Androidネイティブの機能をブリッジしたライブラリをインストールして使う必要があり、グラデーションボタン1つ作るのに一苦労でした。
+
+react-native-skiaが提供されたことによりUI表現に関するこれらのネックが大幅に解消されそうです。今後はReact NativeのUIの作り方も変わってくるのではないかと思います。表現や効果、アニメーション等がより充実したアプリ等が作れるようになったのはとてもありがたいです。
+
+
+

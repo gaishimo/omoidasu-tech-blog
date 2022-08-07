@@ -1,0 +1,48 @@
+diff --git a/node_modules/react-native-reanimated/plugin.js b/node_modules/react-native-reanimated/plugin.js
+--- a/node_modules/react-native-reanimated/plugin.js
++++ b/node_modules/react-native-reanimated/plugin.js
+@@ -7,6 +7,7 @@
+  * holds a map of function names as keys and array of argument indexes as values which should be automatically workletized(they have to be functions)(starting from 0)
+  */
+ const functionArgsToWorkletize = new Map([
++  ['useFrameCallback', [0]],
+   ['useAnimatedStyle', [0]],
+   ['useAnimatedProps', [0]],
+   ['createAnimatedPropAdapter', [0]],
+@@ -64,12 +65,15 @@
+   'Map',
+   'Set',
+   '_log',
+-  '_updateProps',
++  '_updatePropsPaper',
++  '_updatePropsFabric',
++  '_removeShadowNodeFromRegistry',
+   'RegExp',
+   'Error',
+   'global',
+   '_measure',
+   '_scrollTo',
++  '_dispatchCommand',
+   '_setGestureState',
+   '_getCurrentTime',
+   '_eventTimestamp',
+@@ -305,13 +309,14 @@
+     },
+   });
+
++  const expression = fun.program.body.find(
++    ({ type }) => type === 'ExpressionStatement'
++  ).expression;
++
+   const workletFunction = t.functionExpression(
+     t.identifier(name),
+-    fun.program.body[0].expression.params,
+-    prependClosureVariablesIfNecessary(
+-      closureVariables,
+-      fun.program.body[0].expression.body
+-    )
++    expression.params,
++    prependClosureVariablesIfNecessary(closureVariables, expression.body)
+   );
+
+   return generate(workletFunction, { compact: true }).code;
