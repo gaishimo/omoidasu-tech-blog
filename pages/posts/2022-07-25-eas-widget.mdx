@@ -14,9 +14,9 @@ export const meta = {
   ),
   author: "@gaishimo",
   description: "ExpoのManaged WorkflowでWidget(iOS / Android)を作成する方法について説明します。",
-  imagePath: "/posts/2022-07-25-eas-widget/widget_image.jpeg",
+  imagePath: "/posts/2022-07-25-eas-widget/widget_image.webp",
   lastUpdatedAt: parse(
-    "2022-07-24 11:45:00 +09:00",
+    "2022-08-07 11:45:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
@@ -62,7 +62,7 @@ export default props => (
 
 現在運用中のアプリでユーザさんから度々機能要望をいただくのですが、その中で多いのがウィジェットを追加してほしいというものです。
 
-<ImageWrapper width="80%" maxWidth={240} alt="ウィジェットのイメージ" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/widget_image.jpeg" />
+<ImageWrapper width="80%" maxWidth={240} alt="ウィジェットのイメージ" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/widget_image.webp" />
 
 
 ウィジェット要望が多いのは意外だったのですが、iOS14からiOSでもウィジェットが使えるようになったのもあり、思った以上にユーザに浸透しているように思います。端末を触っているときホームスクリーン上で内容を確認できるため、アプリを起動せずとも都度内容が簡単に確認できるという点が魅力です。また、常に目にするため通知を受け取らなくても必要なタイミングに気づけるというものあります。
@@ -108,9 +108,9 @@ expo prebuild
 Android Studioから作成します。プロジェクトのappフォルダを右クリックし、"New" - "Widget" - "App Widget" を選択します。
 
 
-<ImageWrapper width="80%" alt="Android StudioでのWidgetの追加1" style={{ marginVertical: 24 }} sourceUri="/posts/2022-07-25-eas-widget/android_studio_add_widget1.png" />
+<ImageWrapper width="80%" alt="Android StudioでのWidgetの追加1" style={{ marginVertical: 24 }} sourceUri="/posts/2022-07-25-eas-widget/android_studio_add_widget1.webp" />
 
-<ImageWrapper width="80%" maxWidth={500} alt="Android StudioでのWidgetの追加2" style={{ marginVertical: 24 }} sourceUri="/posts/2022-07-25-eas-widget/android_studio_add_widget2.png" />
+<ImageWrapper width="80%" maxWidth={500} alt="Android StudioでのWidgetの追加2" style={{ marginVertical: 24 }} sourceUri="/posts/2022-07-25-eas-widget/android_studio_add_widget2.webp" />
 
 
 作成すると、以下のファイルが追加・変更されます。(*)が変更された箇所で、それ以外は新規に追加されたファイルです。
@@ -120,7 +120,7 @@ build.gradle (*)
 app/build.gradle (*)
 app/src/main/AndroidManifest.xml (*)
 app/src/main/java/com/gaishimo/example1/SampleWidget.kt
-app/src/main/res/drawable-nodpi/example_appwidget_preview.png
+app/src/main/res/drawable-nodpi/example_appwidget_preview.webp
 app/src/main/res/drawable-v21/app_widget_background.xml
 app/src/main/res/drawable-v21/app_widget_inner_view_background.xml
 app/src/main/res/layout/sample_widget.xml
@@ -403,7 +403,7 @@ async function prepareSourceCodes(
 
 Config Pluginができたら、`expo prebuild`を実行し作成した部分が問題なく動作することを確認します。実行後にアプリをビルド・起動してみて、Widgetがうまく追加・起動できれば成功です。
 
-<ImageWrapper width="90%" maxWidth={240} alt="AndroidでのWidget起動" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/android_widget_home.png" />
+<ImageWrapper width="90%" maxWidth={240} alt="AndroidでのWidget起動" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/android_widget_home.webp" />
 
 
 
@@ -413,9 +413,9 @@ Config Pluginができたら、`expo prebuild`を実行し作成した部分が�
 次はiOSのWidgetを作成します。prebuildされた状態からXCodeでWidgetを作成します。
 Targetを追加しWidget Extensionを選択します。
 
-<ImageWrapper width="80%" alt="XCodeでWidgetを追加1" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/xcode_add_target1.png" />
+<ImageWrapper width="80%" alt="XCodeでWidgetを追加1" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/xcode_add_target1.webp" />
 
-<ImageWrapper width="80%"  alt="XCodeでWidgetを追加2" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/xcode_add_target2.png" />
+<ImageWrapper width="80%"  alt="XCodeでWidgetを追加2" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/xcode_add_target2.webp" />
 
 
 
@@ -615,9 +615,9 @@ async function updateXCodeProj(
 Androidの場合と同様に`expo prebuild`を行い、作成した部分が問題なく動作することを確認します。実行後、アプリをビルド・起動してみて、Widgetがうまく追加・起動できれば成功です。
 
 
-<ImageWrapper width="90%" maxWidth={300} alt="iOSでのWidget起動" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/ios_widget1.png" />
+<ImageWrapper width="90%" maxWidth={300} alt="iOSでのWidget起動" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/ios_widget1.webp" />
 
-<ImageWrapper width="90%" maxWidth={300} alt="iOSでのWidget起動" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/ios_widget2.png" />
+<ImageWrapper width="90%" maxWidth={300} alt="iOSでのWidget起動" style={{ marginVertical: 40 }} sourceUri="/posts/2022-07-25-eas-widget/ios_widget2.webp" />
 
 
 
