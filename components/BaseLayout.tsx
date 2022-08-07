@@ -58,39 +58,18 @@ export function BaseLayout(props: Props) {
         <meta name="twitter:image" content={ogImageUrl} />
         <meta name="theme-color" content="#00D5FF" />
 
-        {Constants.GA_TRACKING_ID != null && (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${Constants.GA_TRACKING_ID}`}
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${Constants.GA_TRACKING_ID}', {
-              page_path: window.location.pathname,
-            });
-          `,
-              }}
-            />
-          </>
-        )}
-
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/favicon.png" />
         {/* render-blockingを防ぐため2つ記述する */}
         {/* https://qiita.com/rana_kualu/items/95a7adf8420ea2b9f657 */}
-        <link rel="preload" href={WEB_FONT_URL} as="style" />
+        {/* <link rel="preload" href={WEB_FONT_URL} as="style" />
         <link
           rel="stylesheet"
           href={WEB_FONT_URL}
           media="print"
           // @ts-ignore
           onLoad="this.media = 'all'"
-        />
+        /> */}
 
         <link href={PRISM_CSS_URL} rel="preload" as="style" />
         <link
@@ -114,6 +93,27 @@ export function BaseLayout(props: Props) {
 
         <Footer />
       </ScrollView>
+
+      {Constants.GA_TRACKING_ID != null && (
+        <>
+          <script
+            async
+            src={`https://www.googletagmanager.com/gtag/js?id=${Constants.GA_TRACKING_ID}`}
+          />
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${Constants.GA_TRACKING_ID}', {
+              page_path: window.location.pathname,
+            });
+          `,
+            }}
+          />
+        </>
+      )}
     </View>
   )
 }
