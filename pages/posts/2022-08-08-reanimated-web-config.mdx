@@ -1,0 +1,276 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
+import { View, Text, ActivityIndicator } from "react-native"
+
+export const meta = {
+  title: "Webでreact-native-reanimatedの設定を行う🎨",
+  tagNames: ["react-native-web", "next.js", "react-native-reanimated"],
+  color1: "#233A9E",
+  color2: "#239E71",
+  createdAt: parse(
+    "2022-08-08 12:40:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "React Native Webでのreact-native-reanimatedの設定が意外と大変だったため、記録として残します。",
+  lastUpdatedAt: parse(
+    "2022-08-08 12:40:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [
+  { title: "基本設定" },
+  { title: "Web固有の設定", children: [
+    { title: "WebPack DefinePluginの追加" },
+    { title: "requestAnimationFrameのpolyfillを追加" },
+    { title: "reanimatedのtranspile" },
+    { title: "babel moduleの追加" },
+    { title: "reanimate 2.9.1のエラー" },
+    { title: "Module not foundエラー" },
+  ]},
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+Next.js (React Native Web)でreact-native-reanimatedを使えるようにする設定が思いの外大変だったので、記録として残します。
+
+
+## 基本設定
+
+基本的な設定については[Reanimatedのドキュメント](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/installation)を参考にします。
+
+
+ライブラリをインストールし、
+```bash
+yarn add react-native-reanimated
+```
+
+babel.config.jsの設定を追加します。
+
+```js
+module.exports = {
+    ...
+    plugins: [
+        ...
+        'react-native-reanimated/plugin',
+    ],
+};
+```
+
+## Web固有の設定
+
+Reanimatedの[Web設定のドキュメント](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/web-support) にWebpackの設定が載っているため、これを参考にします。
+
+
+### WebPack DefinePluginの追加
+
+next.config.jsでWebpack Pluginの設定を追加します。
+
+```js
+const nextConfig = {
+  webpack: config => {
+    config.plugins = [
+      ...config.plugins,
+      new webpack.EnvironmentPlugin({ JEST_WORKER_ID: null }),
+      new webpack.DefinePlugin({
+        __DEV__: process.env.NODE_ENV === 'development',
+      }),
+    ]
+    return config
+  }
+}
+module.exports = nextConfig
+```
+
+[ドキュメント](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/web-support)だとDefinePluginの部分は以下のようになっているのですが、Next.jsの場合、これではenvの値がクリアされないため、 `__DEV__`を明示的に指定する必要があります。
+```js
+new webpack.DefinePlugin({ process: { env: {} } })
+```
+
+### requestAnimationFrameのpolyfillを追加
+
+また[ドキュメント](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/web-support)ではbabel-polyfillの設定がありますがこれが無いとサーバサイドレンダリングでrequestAnimationFrameが呼び出された時にundefinedエラーになります。今回は[Moti + Next.js](https://moti.fyi/next)を参考にbabel-polyfillではなく、`raf/polyfill`を pages/_app.tsxでimportします。
+
+```js
+import "raf/polyfill"
+```
+
+### reanimatedのtranspile
+
+next.jsのデフォルトの設定のままだとreanimatedがtranspileされずコンパイル時にエラーが発生してしまうため[next-transpile-module](https://github.com/martpie/next-transpile-modules)を利用してtranspileされるようにします。
+
+```js
+const withTM = require("next-transpile-modules")(["react-native-reanimated"])
+
+
+module.exports = withTM(nextConfig)
+```
+
+### babel moduleの追加
+
+そのままreanimatedを実行しようとするとbabelのモジュールが無いと言われるため、エラーが出たものを都度インストールしていきます。
+
+```bash
+yarn add --dev @babel/plugin-transform-shorthand-properties @babel/plugin-transform-arrow-functions @babel/plugin-proposal-optional-chaining @babel/plugin-proposal-nullish-coalescing-operator @babel/plugin-transform-template-literals
+```
+
+
+### reanimate 2.9.1のエラー
+
+reanimated 2.9.1では以下のエラーが発生します。
+
+```js
+./node_modules/react-native-reanimated/lib/reanimated2/layoutReanimation/animationBuilder/Keyframe.js
+TypeError: Cannot read properties of undefined (reading 'params')
+```
+
+[バグのようなので](https://github.com/software-mansion/react-native-reanimated/issues/3027)以下のパッチを適用したら発生しなくなりました。
+
+
+```diff
+diff --git a/node_modules/react-native-reanimated/plugin.js b/node_modules/react-native-reanimated/plugin.js
+--- a/node_modules/react-native-reanimated/plugin.js
++++ b/node_modules/react-native-reanimated/plugin.js
+@@ -7,6 +7,7 @@
+  * holds a map of function names as keys and array of argument indexes as values which should be automatically workletized(they have to be functions)(starting from 0)
+  */
+ const functionArgsToWorkletize = new Map([
++  ['useFrameCallback', [0]],
+   ['useAnimatedStyle', [0]],
+   ['useAnimatedProps', [0]],
+   ['createAnimatedPropAdapter', [0]],
+@@ -64,12 +65,15 @@
+   'Map',
+   'Set',
+   '_log',
+-  '_updateProps',
++  '_updatePropsPaper',
++  '_updatePropsFabric',
++  '_removeShadowNodeFromRegistry',
+   'RegExp',
+   'Error',
+   'global',
+   '_measure',
+   '_scrollTo',
++  '_dispatchCommand',
+   '_setGestureState',
+   '_getCurrentTime',
+   '_eventTimestamp',
+@@ -305,13 +309,14 @@
+     },
+   });
+
++  const expression = fun.program.body.find(
++    ({ type }) => type === 'ExpressionStatement'
++  ).expression;
++
+   const workletFunction = t.functionExpression(
+     t.identifier(name),
+-    fun.program.body[0].expression.params,
+-    prependClosureVariablesIfNecessary(
+-      closureVariables,
+-      fun.program.body[0].expression.body
+-    )
++    expression.params,
++    prependClosureVariablesIfNecessary(closureVariables, expression.body)
+   );
+
+   return generate(workletFunction, { compact: true }).code;
+```
+
+### Module not foundエラー
+
+今度は次のエラーが出ました。
+
+```txt
+error - ./node_modules/react-native-reanimated/lib/reanimated2/platform-specific/RNRenderer.js:3:0
+Module not found: Can't resolve 'react-native/Libraries/Renderer/shims/ReactNative'
+
+Import trace for requested module:
+./node_modules/react-native-reanimated/lib/createAnimatedComponent.js
+./node_modules/react-native-reanimated/lib/Animated.js
+./node_modules/react-native-reanimated/lib/index.js
+./components/Sample.tsx
+./pages/index.tsx
+```
+
+Webpackの設定で以下を追加したら解決しました。
+
+```js
+  config.resolve.extensions = [
+    ".web.js",
+    ".web.ts",
+    ".web.tsx",
+    ...config.resolve.extensions,
+  ]
+```
+
+## reanimatedを実際に動かしてみる
+
+やっとエラーがでなくなったので、実際にReanimatedの簡単なサンプルを動かしてみます。
+
+
+<View style={{ marginTop: 32 }}>
+  <ReanimatedSample />
+</View>
+
+ボタンを押すと横にランダムでSpringアニメーションします。
+
+```tsx
+import { useCallback } from "react"
+import { Button, StyleSheet, View } from "react-native"
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from "react-native-reanimated"
+
+export function ReanimatedSample() {
+  const offset = useSharedValue(0)
+
+  const animatedStyles = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateX: offset.value }],
+    }
+  }, [offset])
+
+  return (
+    <View>
+      <Animated.View style={[styles.box, animatedStyles]} />
+      <View style={styles.buttonWrapper}>
+        <Button
+          title="Move"
+          onPress={useCallback(() => {
+            console.log("onPress()")
+            offset.value = withSpring(Math.random() * 255)
+          }, [offset])}
+        />
+      </View>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  box: {
+    width: 100,
+    height: 100,
+    borderRadius: 16,
+    backgroundColor: "lightblue",
+  },
+  buttonWrapper: { marginTop: 24, width: 100 },
+})
+```
+
+都度エラーが出るので心が折れそうになりましたが、なんとか動かすことができました。
+
