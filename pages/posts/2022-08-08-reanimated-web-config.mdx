@@ -5,7 +5,7 @@ import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-w
 import { View, Text, ActivityIndicator } from "react-native"
 
 export const meta = {
-  title: "Webでreact-native-reanimatedの設定を行う🎨",
+  title: "Webでreact-native-reanimatedの設定を行う",
   tagNames: ["react-native-web", "next.js", "react-native-reanimated"],
   color1: "#233A9E",
   color2: "#239E71",
@@ -34,6 +34,7 @@ export const headlines = [
     { title: "reanimate 2.9.1のエラー" },
     { title: "Module not foundエラー" },
   ]},
+  { title: "reanimatedを実際に動かしてみる" }
 ]
 
 export default props => (
@@ -44,6 +45,18 @@ export default props => (
 
 
 Next.js (React Native Web)でreact-native-reanimatedを使えるようにする設定が思いの外大変だったので、記録として残します。
+
+
+<View style={{ marginTop: 32, marginBottom: 40 }}>
+  <ReanimatedSample />
+</View>
+
+ライブラリのバージョンは以下です。
+- Next.js: 12.2.3
+- react: 18.0.2
+- react-native-reanimated: 2.9.1
+
+React Native Webの設定については[以前の記事](/posts/2021-09-24-blog-rn-web)を参考にしてください。
 
 
 ## 基本設定
@@ -93,14 +106,14 @@ const nextConfig = {
 module.exports = nextConfig
 ```
 
-[ドキュメント](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/web-support)だとDefinePluginの部分は以下のようになっているのですが、Next.jsの場合、これではenvの値がクリアされないため、 `__DEV__`を明示的に指定する必要があります。
+[ドキュメント](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/web-support)だとDefinePluginの部分は以下のようになっているのですが、Next.jsの場合これではenvの値がクリアされないため、 `__DEV__`を明示的に指定する必要があります。
 ```js
 new webpack.DefinePlugin({ process: { env: {} } })
 ```
 
 ### requestAnimationFrameのpolyfillを追加
 
-また[ドキュメント](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/web-support)ではbabel-polyfillの設定がありますがこれが無いとサーバサイドレンダリングでrequestAnimationFrameが呼び出された時にundefinedエラーになります。今回は[Moti + Next.js](https://moti.fyi/next)を参考にbabel-polyfillではなく、`raf/polyfill`を pages/_app.tsxでimportします。
+[ドキュメント](https://docs.swmansion.com/react-native-reanimated/docs/fundamentals/web-support)ではbabel-polyfillの設定がありますがこれが無いとサーバサイドレンダリングでrequestAnimationFrameが呼び出された時にundefinedエラーになります。今回は[Moti + Next.js](https://moti.fyi/next)を参考にbabel-polyfillではなく、`raf/polyfill`を pages/_app.tsxでimportします。
 
 ```js
 import "raf/polyfill"
@@ -274,3 +287,5 @@ const styles = StyleSheet.create({
 
 都度エラーが出るので心が折れそうになりましたが、なんとか動かすことができました。
 
+当ブログの設定・コードは以下で確認可能です。
+https://github.com/gaishimo/omoidasu-tech-blog

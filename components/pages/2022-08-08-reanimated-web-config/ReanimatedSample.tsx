@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   box: {
     width: 100,
     height: 100,
-    borderRadius: 16,
+    borderRadius: 50,
     backgroundColor: "lightblue",
   },
   buttonWrapper: { marginTop: 24, width: 100 },
