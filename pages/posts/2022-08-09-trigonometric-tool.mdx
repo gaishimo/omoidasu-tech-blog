@@ -1,0 +1,55 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
+import { View, Text, ActivityIndicator } from "react-native"
+import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web"
+
+export const meta = {
+  title: "三角関数計算ツール📐",
+  tagNames: ["react-native-skia", "三角関数", "数学"],
+  color1: "#7BEAD9",
+  color2: "#C1FF93",
+  createdAt: parse(
+    "2022-08-09 12:00:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "三角関数の計算をおこなうためのツールをSkiaで作成してみました。角度と半径を元にsin, cosの計算を行います。",
+  lastUpdatedAt: parse(
+    "2022-08-09 12:00:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [{ title: "コード" }]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+三角関数のsin,cosを計算するツールです。下の入力値を変更すると半径、角度の値を変更することができます。
+
+
+<View style={{ marginBottom: 16 }}>
+  <WithSkiaWeb
+    getComponent={() =>
+      import("../../components/pages/2022-08-09-trigonometric-tool/TrigonometricTool")
+    }
+    fallback={<ActivityIndicator color="gray" size="small" />}
+  />
+</View>
+
+## コード
+
+図の部分はreact-native-skiaで描画しています。コードは以下で確認することが可能です。
+
+[omoidasu-tech-blog/TrigonometricTool.tsx at main · gaishimo/omoidasu-tech-blog](https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2022-08-09-trigonometric-tool/TrigonometricTool.tsx)
+
+今後、ドラッグで角度を変更できるようにしたり等していこうかと思います。
