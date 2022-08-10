@@ -88,8 +88,6 @@ runTiming(pos, 180, { duration: 3000 })
 Canvasで動かしたいシェイプを囲んだ`<Group>`に対し`translateX`、`translateY`を指定します。`interpolate`で`pos`の値を元に移動量を割り当てます。 `translateX`は`pos`が増えると等分に横に移動していき、`translateY`は作成しておいたY座標位置の配列を元に移動させます。
 
 ```jsx
-  const pos = useValue(1)
-
   return (
     <Canvas style={{ flex: 1 }}>
       <Group
