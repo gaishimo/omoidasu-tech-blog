@@ -1,0 +1,131 @@
+import { parse, parseISO } from "date-fns"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
+import { View, Text, ActivityIndicator } from "react-native"
+import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web"
+
+export const meta = {
+  title: "Skiaで放物線の動きを描く",
+  tagNames: ["react-native-skia", "三角関数", "数学"],
+  color1: "#479AD6",
+  color2: "#FB8DB9",
+  createdAt: parse(
+    "2022-08-10 14:05:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "",
+  lastUpdatedAt: parse(
+    "2022-08-10 14:05:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [{ title: "放物線の動きサンプル" }, { title: "実装方法" }]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+## 放物線の動きサンプル
+
+Skiaで物体が放物線の動きを描いて移動していくサンプルです。"RUN"ボタンを押すと実行されます。
+
+<View style={{ marginTop: 32, marginBottom: 16 }}>
+  <WithSkiaWeb
+    getComponent={() =>
+      import("../../components/pages/2022-08-10-parabola-move/ParabolaMove.tsx")
+    }
+    fallback={<ActivityIndicator color="gray" size="small" />}
+  />
+</View>
+
+
+## 実装方法
+
+静的な放物線を描画するだけであれば`<Path />`の曲線を使えばよさそうです。ただ動的に位置を移動させるとなると各移動位置の座標が必要そうなため、三角関数のsinカーブで放物線の座標を計算することにしました。X軸がθ(角度)でY軸がsinθのグラフの場合、θが0〜180の場合に上向きの放物線になるため、それを利用します。
+
+以下でXが1から180までの場合のY座標の位置をそれぞれ取得し配列にしておきます。
+```js
+  const curveYPath = useMemo(() => {
+    const curveHeight = canvasSize.height - 200
+    return range(1, 180 + 1).map(degree => {
+      const sin = Math.sin(toRadian(degree)) * curveHeight
+      return -sin
+    })
+  }, [])
+```
+
+`-sin`しているのは、CanvasではYが上から下に向けて値が大きくなっていたため、縦位置をマイナスにする必要があるためです。
+
+`toRadian`は、`Math.sin`を呼び出す時にラジアンで指定する必要があるため、度からラジアンに変換するための関数です。
+
+```js
+export function toRadian(degree: number): number {
+  return (degree * Math.PI) / 180
+}
+```
+
+動的に変化する値として`pos`というvalueを用意しておき、
+
+```js
+const pos = useValue(1)
+```
+
+移動させるタイミングで`pos`の値を1から180に変化させます。
+```js
+runTiming(pos, 180, { duration: 3000 })
+```
+
+
+Canvasで動かしたいシェイプを囲んだ`<Group>`に対し`translateX`、`translateY`を指定します。`interpolate`で`pos`の値を元に移動量を割り当てます。 `translateX`は`pos`が増えると等分に横に移動していき、`translateY`は作成しておいたY座標位置の配列を元に移動させます。
+
+```jsx
+  const pos = useValue(1)
+
+  return (
+    <Canvas style={{ flex: 1 }}>
+      <Group
+        transform={useComputedValue(() => {
+          return [
+            {
+              translateX: interpolate(
+                pos.current,
+                [1, 180],
+                [0, canvasSize.width - ballRadius * 2],
+              ),
+            },
+            {
+              translateY: interpolate(
+                pos.current,
+                range(1, 180 + 1),
+                curveYPath,
+              ),
+            },
+          ]
+        }, [pos])}
+      >
+        <Circle
+          r={ballRadius}
+          cx={startPos.x}
+          cy={startPos.y}
+          color="lightblue"
+          style="fill"
+        />
+      </Group>
+    </Canvas>
+  )
+```
+
+全体のコードは以下で確認できます。
+
+https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2022-08-10-parabola-move/ParabolaMove.tsx
+
+
