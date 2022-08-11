@@ -14,7 +14,7 @@ import { toRadian } from "../../../utils/mathUtils"
 
 const ballRadius = 20
 
-const canvasSize = { width: 400, height: 700 }
+const canvasSize = { width: 340, height: 700 }
 
 export default function ParabolaMove() {
   const startPos = { x: ballRadius, y: canvasSize.height - 30 }
