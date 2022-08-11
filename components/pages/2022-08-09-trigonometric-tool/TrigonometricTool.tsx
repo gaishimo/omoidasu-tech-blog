@@ -36,7 +36,7 @@ export default function TrigonometricTool() {
 
   return (
     <View style={{ width: toolWidth }}>
-      <Canvas style={[styles.canvas]} key={`${actualRadius}-${degree}`}>
+      <Canvas style={[styles.canvas]}>
         {/* X, Y軸 */}
         <Paint
           ref={xyLineRef}
