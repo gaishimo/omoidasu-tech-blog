@@ -1,5 +1,3 @@
-import "node-window-polyfill/register"
-
 import Head from "next/head"
 import "raf/polyfill"
 import "../styles/global.css"
