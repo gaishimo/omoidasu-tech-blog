@@ -1,0 +1,139 @@
+import { parse, parseISO } from "date-fns"
+import dynamic from 'next/dynamic'
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
+import { View, Text, ActivityIndicator } from "react-native"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+
+export const meta = {
+  title: "Agletの無限に横に移動するアニメーションを再現してみる",
+  tagNames: ["react-native-skia", "アニメーション"],
+  color1: "#A615FF",
+  color2: "rgb(210, 210, 210)",
+  createdAt: parse(
+    "2022-08-13 17:05:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "",
+  lastUpdatedAt: parse(
+    "2022-08-13 17:05:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}
+
+export const headlines = [
+  {
+    title: "実装方法",
+    children: [
+      { title: "テキストを横に並べて画面を埋める" },
+      { title: "横に移動するアニメーションを作成" },
+      { title: "斜めになるように全体の角度を変更する" },
+    ]
+  },
+  { title: "実際のコード" },
+]
+
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+Agletというスニーカーを集めるアプリで新たにアイテムが手に入った時に流れるアニメーションのインパクトが強かったため、react-native-skiaで再現してみました。ロゴとテキストが斜め横に無限に移動し続けます。
+
+<View style={{ marginTop: 32, marginBottom: 16 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-13-aglet-animation/AgletLikeAnimation/index.tsx")
+    }
+    fallback={() => <LoadingRect width={340} height={700} bgColor={"#A415FF"} />}
+  />
+</View>
+
+テキストとロゴは適当なものに変えています。
+
+
+## 実装方法
+
+実装順序としては
+1. テキストを横に並べて画面を埋める
+2. 横に移動するアニメーションを作成
+3. 斜めになるように全体の角度を変更する
+
+という流れです。
+
+### テキストを横に並べて画面を埋める
+
+テキストを画面に並べて横まで埋まるようにします。事前にテキスト(＋ロゴ)の横幅を計算しておきます。以下のように、横に並べる数を画面サイズに応じて計算します。斜めになっても途切れないように、少し画面幅よりも多めに計算します。
+```js
+Math.floor((windowSize.width * 1.3) / Constants.messageGroupWidth) + 1
+```
+
+そして横移動が無限ループに見えるように、グループを横にもう一つ追加します。なぜもうひとつ横並びにするかについては、以下の記事を読むと仕組みがわかりやすいです。
+
+[写真が画面の端から端へ流れる無限ループするアニメーション | chocolat | Freelance Frontend Developer based in Tokyo, Japan.](https://chocolat5.com/tips/loop-image-animation/)
+
+左方向に移動する場合には右に追加のグループを配置し、右方向に移動する場合は左に追加のグループを配置するようにします。このように配置しておき、横に移動させた後また元の位置に戻り移動を繰り返すと無限ループしているように見えます。
+
+こうして作成した行を一定の間隔で縦に並べ画面を埋めます。
+
+### 横に移動するアニメーションを作成
+
+react-native-skiaの場合、以下でアニメーションをループさせることができます。
+
+```js
+const progress = useTiming(
+  { loop: true, yoyo: false },
+  { duration: 5000 }),
+```
+
+progressの値は0.0から1.0まで変化するのを繰り返します。
+
+オプションの`yoyo`はfalseにします。trueにすると一度進みきったところから戻るアニメーションが発生してしまうためです。なぜ`yoyo`というのかわかりませんが、これは日本語のヨーヨーを指しているのかもしれません(一度進んだら戻ってくる)。
+
+
+この`progress`の値を元にしてグループに対して横移動をかけます。値が0のときは移動せず、値が1のときは画面幅の分、横に移動します。左に移動する場合はマイナスします。
+
+```jsx
+  const transform = useComputedValue(() => {
+    const distance = props.progress.current * groupWidth
+    return [
+      {
+        translateX: distance * (props.direction === "left" ? -1 : 1),
+      },
+    ]
+  }, [props.progress, props.direction])
+
+  return (
+    <Group transform={transform}>
+      ...
+    </Group>
+  )
+```
+
+### 斜めになるように全体の角度を変更する
+
+角度を斜めにするには、全体をグループで覆ってtransformをかければOKです。
+
+```jsx
+<Group transform={[{ rotate: Math.PI / 12 }]} origin={{ x: 0, y: 0 }}>
+  ...
+</Group>
+```
+
+これで完成です。
+
+
+## 実際のコード
+
+実際のコードは以下で確認できます。
+
+https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2022-08-13-aglet-animation/AgletLikeAnimation/index.tsx

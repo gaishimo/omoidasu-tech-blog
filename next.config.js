@@ -4,6 +4,7 @@ const rehypePrism = require("@mapbox/rehype-prism")
 const remarkSlug = require("remark-slug")
 const remarkAutolinkHeadings = require("remark-autolink-headings")
 const CopyPlugin = require("copy-webpack-plugin")
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 const path = require("path")
 const webpack = require("webpack")
 
@@ -94,6 +95,7 @@ module.exports = withPlugins([withTM, withMDX], {
         // See: <https://github.com/necolas/react-native-web/issues/349>
         __DEV__: JSON.stringify(true),
       }),
+      new NodePolyfillPlugin(),
     ]
     return config
   },

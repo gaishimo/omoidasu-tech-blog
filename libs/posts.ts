@@ -3,12 +3,11 @@ import * as path from "path"
 
 export async function getAllPosts(): Promise<Post[]> {
   try {
-    const postsDir = path.resolve(process.cwd(), "pages", "posts")
+    const postsDir = path.resolve(".", "pages", "posts")
 
     const mdxFileNames = fs.readdirSync(postsDir)
     const posts = mdxFileNames
       .map(fileName => {
-        console.log("require:", fileName)
         const { meta } = require(`../pages/posts/${fileName}`)
         return {
           ...meta,

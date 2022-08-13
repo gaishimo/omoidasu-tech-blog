@@ -1,10 +1,5 @@
-import { useCallback } from "react"
-import { Button, StyleSheet, View } from "react-native"
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-} from "react-native-reanimated"
+import { StyleSheet, View } from "react-native"
+import { useAnimatedStyle, useSharedValue } from "react-native-reanimated"
 
 export default function SamplePage() {
   const offset = useSharedValue(10)
@@ -17,16 +12,14 @@ export default function SamplePage() {
 
   return (
     <View>
-      <Animated.View style={[styles.box, animatedStyles]} />
-      <View style={styles.buttonWrapper}>
-        <Button
-          title="Move"
-          onPress={useCallback(() => {
-            console.log("onPress()")
-            offset.value = withSpring(Math.random() * 255)
-          }, [offset])}
-        />
-      </View>
+      {/* <WithSkia
+        fallback={<Text>Loading Skia...</Text>}
+        getComponent={() =>
+          import(
+            "../components/pages/2022-08-13-aglet-animation/AgletLikeAnimation/index"
+          )
+        }
+      /> */}
     </View>
   )
 }

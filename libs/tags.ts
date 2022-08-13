@@ -2,7 +2,7 @@ import * as fs from "fs"
 import * as path from "path"
 
 export async function getTags(): Promise<TagMap> {
-  const postsDir = path.resolve(process.cwd(), "pages", "posts")
+  const postsDir = path.resolve(".", "pages", "posts")
   const mdxFileNames = fs.readdirSync(postsDir)
 
   let tagMap: TagMap = {}
