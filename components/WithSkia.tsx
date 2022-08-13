@@ -2,7 +2,6 @@ import { CanvasKitInitOptions } from "canvaskit-wasm"
 import CanvasKitInit from "canvaskit-wasm/bin/full/canvaskit"
 import dynamic, { DynamicOptionsLoadingProps } from "next/dynamic"
 import { ComponentType, Suspense, useMemo } from "react"
-import { wait } from "../utils/wait"
 
 type Props = {
   getComponent: () => Promise<{ default: ComponentType }>
@@ -17,7 +16,6 @@ export function WithSkia(props: Props) {
   const Inner = useMemo(() => {
     return dynamic(
       async () => {
-        await wait(5000)
         await LoadSkiaWeb(props.opts)
         return props.getComponent()
       },
