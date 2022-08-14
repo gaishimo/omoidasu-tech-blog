@@ -13,7 +13,7 @@ import { range } from "../../../../utils/arrayUtils"
 import { Constants } from "./Constants"
 import { Row } from "./Row"
 
-const windowSize = { width: 340, height: 700 }
+const windowSize = { width: 320, height: 640 }
 
 export default function AgletLikeAnimation() {
   const [paused, setPaused] = useState(true)
@@ -37,8 +37,8 @@ export default function AgletLikeAnimation() {
   if (font == null) return null
 
   return (
-    <View style={{ width: windowSize.width, height: windowSize.height }}>
-      <Canvas style={StyleSheet.absoluteFill}>
+    <View style={{ ...windowSize }}>
+      <Canvas style={[StyleSheet.absoluteFill, windowSize]}>
         <RoundedRect
           x={0}
           y={0}

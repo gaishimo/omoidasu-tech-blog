@@ -13,7 +13,7 @@ import { range } from "../../../utils/arrayUtils"
 
 const ballRadius = 20
 
-const canvasSize = { width: 340, height: 700 }
+const canvasSize = { width: 340, height: 600 }
 
 export default function ParabolaMove() {
   const startPos = { x: ballRadius, y: canvasSize.height - 30 }
@@ -48,14 +48,13 @@ export default function ParabolaMove() {
     <View
       style={{
         width: canvasSize.width + 16,
-        height: 700,
         borderWidth: 1,
         borderColor: "lightblue",
         padding: 8,
       }}
     >
       <Button title="RUN" onPress={run} />
-      <Canvas style={{ flex: 1 }}>
+      <Canvas style={canvasSize}>
         <Group
           transform={useComputedValue(() => {
             return [
