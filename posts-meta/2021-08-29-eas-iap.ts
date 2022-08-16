@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "ExpoのManaged Workflowでアプリ内課金を実装する",
   tagNames: ["expo", "react-native", "eas"],
   color1: "rgb(67,49,230)",

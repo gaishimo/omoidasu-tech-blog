@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "AndroidのExpo ClientアプリをAPKで直接インストールする",
   tagNames: ["expo", "react-native"],
   color1: "#1364B1",

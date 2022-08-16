@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "Omoidasu Techブログを開設しました!",
   tagNames: ["blog", "next.js", "mdx"],
   color1: "#00D5FF",

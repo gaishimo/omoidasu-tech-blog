@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "Expo(React Native)のリンク集",
   tagNames: ["expo", "react-native"],
   color1: "rgb(50, 50, 50)",

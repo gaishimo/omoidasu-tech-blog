@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title:
     "React Nativeでカスタムフォントの行間がやたら拡がってしまう場合の調整方法",
   tagNames: ["react-native", "font", "custom font", "styling"],

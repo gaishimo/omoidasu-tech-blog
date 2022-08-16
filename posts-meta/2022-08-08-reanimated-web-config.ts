@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "Webでreact-native-reanimatedの設定を行う",
   tagNames: ["react-native-web", "next.js", "react-native-reanimated"],
   color1: "#233A9E",

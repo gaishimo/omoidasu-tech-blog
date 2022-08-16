@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "Skiaで放物線の動きを描く",
   tagNames: ["react-native-skia", "三角関数", "数学"],
   color1: "#479AD6",

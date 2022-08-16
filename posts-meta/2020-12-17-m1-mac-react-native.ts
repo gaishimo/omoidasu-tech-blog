@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "M1 Mac上でReact Nativeアプリを実行・検証してみる",
   tagNames: ["expo", "react-native"],
   color1: "#5ED4F4",

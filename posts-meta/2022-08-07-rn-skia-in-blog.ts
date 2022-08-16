@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "ブログにreact-native-skiaを導入しました🎨",
   tagNames: [
     "react-native-skia",

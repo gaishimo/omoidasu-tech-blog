@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "firestoreのindexを自動で管理する",
   tagNames: ["firebase", "firestore"],
   color1: "#EE7E0C",

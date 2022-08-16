@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "Expo (EAS Build)でAndroid・iOSのWidgetを作成した",
   tagNames: ["react-native", "expo", "EAS Build", "widget", "extension"],
   color1: "#1977f2",

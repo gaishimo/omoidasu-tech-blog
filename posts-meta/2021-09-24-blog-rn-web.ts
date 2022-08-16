@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "当ブログにReact Native for Webを導入しました",
   tagNames: ["react-native", "react-native-web", "next.js"],
   color1: "#1977f2",

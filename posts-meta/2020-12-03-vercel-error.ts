@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title:
     "Next.js Vercelデプロイ時にエラー should NOT have fewer than 1 properties",
   tagNames: ["vercel", "next.js"],

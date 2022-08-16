@@ -1,6 +1,7 @@
-import { parse } from "date-fns"
+// @ts-ignore
+const { parse } = require("date-fns")
 
-export const meta = {
+exports.meta = {
   title: "Expoの設定(app.json)をtypescriptで動的に記述する",
   tagNames: ["expo", "react-native", "typescript"],
   color1: "#0887C3",
