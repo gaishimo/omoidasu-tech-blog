@@ -1,12 +1,11 @@
 {
   "private": true,
-  "type": "module",
   "scripts": {
     "dev": "next",
     "build": "next build",
     "start": "next start",
     "postinstall": "patch-package && yarn generate-data-json",
-    "generate-data-json": "node --loader ts-node/esm scripts/generatePostsAndTagsJson.ts"
+    "generate-data-json": "node scripts/generatePostsAndTagsJson.js"
   },
   "dependencies": {
     "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
