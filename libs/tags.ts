@@ -1,5 +1,6 @@
 import * as fs from "fs"
 import * as path from "path"
+import { TagMap } from "../typings/TagMap"
 
 export async function getTags(): Promise<TagMap> {
   const postsDir = path.resolve(".", "posts-meta")

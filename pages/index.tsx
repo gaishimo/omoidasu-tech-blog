@@ -3,6 +3,7 @@ import { BaseLayout } from "../components/BaseLayout"
 import { PostItem } from "../components/PostItem"
 import { Colors } from "../libs/colors"
 import { getAllPosts } from "../libs/posts"
+import { Post } from "../typings/Post"
 
 type Props = {
   posts: Post[]

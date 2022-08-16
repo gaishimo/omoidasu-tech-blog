@@ -6,6 +6,7 @@ import { PostItem } from "../../components/PostItem"
 import { Colors } from "../../libs/colors"
 import { getAllPosts } from "../../libs/posts"
 import { getTags } from "../../libs/tags"
+import { Post } from "../../typings/Post"
 
 export async function getStaticProps() {
   const posts = await getAllPosts()

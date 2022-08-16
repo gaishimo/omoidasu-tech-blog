@@ -1,5 +1,6 @@
 import * as fs from "fs"
 import * as path from "path"
+import { Post, PostMeta } from "../typings/Post"
 
 export async function getAllPosts(): Promise<Post[]> {
   try {
