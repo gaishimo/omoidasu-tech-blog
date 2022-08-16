@@ -7,8 +7,8 @@ export async function getTags(): Promise<TagMap> {
 
   let tagMap: TagMap = {}
 
-  mdxFileNames.forEach(fileName => {
-    const { meta } = require(`../posts-meta/${fileName}`)
+  for (const fileName of mdxFileNames) {
+    const { meta } = await import(`../posts-meta/${fileName}`)
     meta.tagNames.forEach(tag => {
       const pages = (tagMap[tag]?.pages || 0) + 1
       const lastUpdatedAt =
@@ -24,6 +24,7 @@ export async function getTags(): Promise<TagMap> {
         },
       }
     })
-  })
+  }
+
   return tagMap
 }

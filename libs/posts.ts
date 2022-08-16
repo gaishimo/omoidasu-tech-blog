@@ -6,20 +6,21 @@ export async function getAllPosts(): Promise<Post[]> {
     const postsDir = path.resolve(".", "posts-meta")
 
     const fileNames = fs.readdirSync(postsDir)
-    const posts = fileNames
-      .map(fileName => {
-        const { meta } = require(`../posts-meta/${fileName}`)
-        return {
-          ...meta,
-          id: fileName.replace(/.ts$/, ""),
-        }
+
+    const posts: Post[] = []
+    for (const fileName of fileNames) {
+      const { meta } = await import(`../posts-meta/${fileName}`)
+      posts.push({
+        ...meta,
+        id: fileName.replace(/.ts$/, ""),
       })
+    }
+    return posts
       .slice()
       .sort(
         (a: PostMeta, b: PostMeta) =>
           b.createdAt.getTime() - a.createdAt.getTime(),
       )
-    return posts
   } catch (e) {
     console.error(e)
     throw e
