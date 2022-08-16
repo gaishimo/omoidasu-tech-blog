@@ -3,8 +3,10 @@ import { Fragment, ReactNode } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import useMedia from "use-media"
 import { Colors } from "../libs/colors"
+import { PostMeta } from "../typings/Post"
 import { BaseLayout } from "./BaseLayout"
 import { PostHeader } from "./PostHeader"
+import { RecentPostsPanel } from "./RecentPostsPanel"
 
 type Headline = { title: string; children: Headline[] }
 
@@ -93,12 +95,15 @@ export function PostLayout(props: Props) {
           </View>
           {!isSmallScreen && !isMediumScreen && (
             <View style={styles.sidebar}>
-              <View style={styles.headlinesPanel}>
-                <View style={styles.headlineList}>
-                  {props.headlines.map((headline: Headline) =>
-                    renderHeadline(headline),
-                  )}
+              <View style={styles.stick}>
+                <View style={styles.headlinesPanel}>
+                  <View style={styles.headlineList}>
+                    {props.headlines.map((headline: Headline) =>
+                      renderHeadline(headline),
+                    )}
+                  </View>
                 </View>
+                <RecentPostsPanel style={styles.recentPostsPanel} />
               </View>
             </View>
           )}
@@ -131,15 +136,17 @@ const styles = StyleSheet.create({
   linkText: { color: "rgb(60, 26, 130)" },
   articleBody: { flex: 1, width: "100%" },
   sidebar: { width: 280, paddingLeft: 30 },
+  stick: {
+    // @ts-ignore
+    position: "sticky",
+    top: 160,
+  },
   headlinesPanel: {
     borderWidth: 1,
     borderColor: "rgba(210, 210, 210, 0.5)",
     backgroundColor: "rgba(255, 255, 255, 0.5)",
     paddingVertical: 12,
     paddingHorizontal: 12,
-    // @ts-ignore
-    position: "sticky",
-    top: 160,
   },
   headlineList: {
     paddingLeft: 10,
@@ -151,6 +158,9 @@ const styles = StyleSheet.create({
   headlineLink: {
     color: Colors.textColor1,
     fontSize: 13,
+  },
+  recentPostsPanel: {
+    marginTop: 64,
   },
 })
 

@@ -1,6 +1,7 @@
 import { format } from "date-fns"
 import { StyleSheet, Text, View } from "react-native"
 import { Colors } from "../libs/colors"
+import { Post } from "../typings/Post"
 import { ShapeSymbol } from "./atoms/ShapeSymbol"
 import { Tag } from "./atoms/Tag"
 
