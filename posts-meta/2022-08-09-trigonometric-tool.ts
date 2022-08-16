@@ -1,3 +1,4 @@
+// @ts-ignore
 const { parse } = require("date-fns")
 
 exports.meta = {
