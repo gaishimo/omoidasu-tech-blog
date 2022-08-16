@@ -2,15 +2,14 @@ import * as fs from "fs"
 import * as path from "path"
 
 export async function getTags(): Promise<TagMap> {
-  const postsDir = path.resolve(".", "pages", "posts")
+  const postsDir = path.resolve(".", "posts-meta")
   const mdxFileNames = fs.readdirSync(postsDir)
 
   let tagMap: TagMap = {}
 
   mdxFileNames.forEach(fileName => {
-    const { meta } = require(`../pages/posts/${fileName}`)
+    const { meta } = require(`../posts-meta/${fileName}`)
     meta.tagNames.forEach(tag => {
-      const { meta } = require(`../pages/posts/${fileName}`)
       const pages = (tagMap[tag]?.pages || 0) + 1
       const lastUpdatedAt =
         meta.lastUpdatedAt.getTime() > (tagMap[tag]?.lastUpdatedAt || 0)

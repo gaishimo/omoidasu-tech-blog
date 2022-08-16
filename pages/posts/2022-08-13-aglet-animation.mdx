@@ -1,31 +1,13 @@
 import { parse, parseISO } from "date-fns"
 import dynamic from 'next/dynamic'
+import { getAllPosts } from "../../libs/posts"
 import { PostLayout } from "../../components/PostLayout"
 import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
 import { View, Text, ActivityIndicator } from "react-native"
 import { WithSkia } from "../../components/WithSkia"
 import { LoadingRect } from "../../components/LoadingRect"
-
-export const meta = {
-  title: "Agletの無限に横に移動するアニメーションを再現してみる",
-  tagNames: ["react-native-skia", "アニメーション"],
-  color1: "#A615FF",
-  color2: "rgb(210, 210, 210)",
-  createdAt: parse(
-    "2022-08-13 17:05:00 +09:00",
-    "yyyy-MM-dd HH:mm:ss XXX",
-    new Date(),
-  ),
-  author: "@gaishimo",
-  description:
-    "",
-  lastUpdatedAt: parse(
-    "2022-08-15 10:50:00 +09:00",
-    "yyyy-MM-dd HH:mm:ss XXX",
-    new Date(),
-  ),
-}
+import { meta } from "../../posts-meta/2022-08-13-aglet-animation"
 
 export const headlines = [
   {
@@ -40,11 +22,14 @@ export const headlines = [
 ]
 
 
-export default props => (
-  <PostLayout headlines={headlines} meta={meta}>
-    {props.children}
-  </PostLayout>
-)
+export default props => {
+  console.log("props:", props.posts)
+  return (
+    <PostLayout headlines={headlines} meta={meta}>
+      {props.children}
+    </PostLayout>
+  )
+}
 
 
 [Aglet](https://www.aglet.app/)というスニーカーを集めるアプリがありますが、そのアプリで新たにアイテムが手に入った時に流れるアニメーションのインパクトが強かったため、react-native-skiaで再現してみました。ロゴとテキストが斜め横に無限に移動し続けます。
