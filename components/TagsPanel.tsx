@@ -60,9 +60,9 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   item: {
-    marginHorizontal: 4,
+    marginHorizontal: 2,
     paddingVertical: 4,
     flexDirection: "row",
   },
-  itemText: { marginLeft: 12, fontSize: 12 },
+  itemText: { marginLeft: 12, fontSize: 12, letterSpacing: -0.2 },
 })
