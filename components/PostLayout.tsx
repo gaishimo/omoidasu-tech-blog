@@ -1,12 +1,13 @@
 import { format } from "date-fns"
 import { Fragment, ReactNode } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
 import useMedia from "use-media"
 import { Colors } from "../libs/colors"
 import { PostMeta } from "../typings/Post"
 import { BaseLayout } from "./BaseLayout"
 import { PostHeader } from "./PostHeader"
 import { RecentPostsPanel } from "./RecentPostsPanel"
+import { TagsPanel } from "./TagsPanel"
 
 type Headline = { title: string; children: Headline[] }
 
@@ -103,7 +104,10 @@ export function PostLayout(props: Props) {
                     )}
                   </View>
                 </View>
-                <RecentPostsPanel style={styles.recentPostsPanel} />
+                <ScrollView>
+                  <RecentPostsPanel style={styles.recentPostsPanel} />
+                  <TagsPanel style={styles.tagsPanel} />
+                </ScrollView>
               </View>
             </View>
           )}
@@ -138,7 +142,7 @@ const styles = StyleSheet.create({
   sidebar: { width: 280, paddingLeft: 30 },
   stick: {
     // @ts-ignore
-    position: "sticky",
+    // position: "sticky",
     top: 160,
   },
   headlinesPanel: {
@@ -160,7 +164,10 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   recentPostsPanel: {
-    marginTop: 64,
+    marginTop: 100,
+  },
+  tagsPanel: {
+    marginTop: 40,
   },
 })
 
