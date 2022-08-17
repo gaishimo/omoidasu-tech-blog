@@ -1,7 +1,6 @@
 import "@mdx-js/react"
 import { format } from "date-fns"
 import { NextPageContext } from "next"
-import fs from "node:fs"
 import "react-native"
 import "use-media"
 import { js2xml } from "xml-js"
@@ -137,10 +136,8 @@ export async function getServerSideProps({ req, res }: NextPageContext) {
 
     return { props: {} }
   } catch (e) {
+    console.error(e)
     res.write(e.toString())
-
-    const files = fs.readdirSync("/var/task")
-    res.write(files.join(","))
     res.end()
 
     return { props: {} }

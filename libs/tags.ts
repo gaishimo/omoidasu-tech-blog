@@ -1,15 +1,13 @@
-import * as fs from "fs"
-import * as path from "path"
 import { TagMap } from "../typings/TagMap"
+const postsData = require("../_generated/posts.json")
 
 export async function getTags(): Promise<TagMap> {
-  const postsDir = path.resolve(".", "posts-meta")
-  const mdxFileNames = fs.readdirSync(postsDir)
+  const ids = postsData.map(d => d.id)
 
   let tagMap: TagMap = {}
 
-  for (const fileName of mdxFileNames) {
-    const { meta } = await import(`../posts-meta/${fileName}`)
+  for (const id of ids) {
+    const { meta } = await import(`../posts-meta/${id}`)
     meta.tagNames.forEach(tag => {
       const pages = (tagMap[tag]?.pages || 0) + 1
       const lastUpdatedAt =

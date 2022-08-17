@@ -1,19 +1,19 @@
-import * as fs from "fs"
-import * as path from "path"
 import { Post, PostMeta } from "../typings/Post"
+const postsData = require("../_generated/posts.json")
 
 export async function getAllPosts(): Promise<Post[]> {
   try {
-    const postsDir = path.resolve(".", "posts-meta")
+    // const postsDir = path.resolve(".", "posts-meta")
+    // const fileNames = fs.readdirSync(postsDir)
 
-    const fileNames = fs.readdirSync(postsDir)
+    const ids = postsData.map(d => d.id)
 
     const posts: Post[] = []
-    for (const fileName of fileNames) {
-      const { meta } = await import(`../posts-meta/${fileName}`)
+    for (const id of ids) {
+      const { meta } = await import(`../posts-meta/${id}`)
       posts.push({
         ...meta,
-        id: fileName.replace(/.ts$/, ""),
+        id: id.replace(/.ts$/, ""),
       })
     }
     return posts
