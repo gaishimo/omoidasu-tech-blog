@@ -1,0 +1,205 @@
+
+import { parse, parseISO } from "date-fns"
+import dynamic from 'next/dynamic'
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
+import { View, Text, ActivityIndicator } from "react-native"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { meta } from "../../posts-meta/2022-08-17-skia-arc"
+
+
+export const headlines = [
+  { title: "円弧を描く方法" },
+  { title: "円弧をアニメーションで変更する" },
+]
+
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+react-native-skiaで円弧を描く方法です。
+
+
+## 円弧を描く方法
+
+<View style={{ marginTop: 32, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-17-skia-arc/StaticArc.tsx")
+    }
+    fallback={() => <LoadingRect width={280} height={280} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+`path.addArc()`を使います。
+
+```tsx
+const arcRect = {
+  x: centerPos.x - radius,
+  y: centerPos.y - radius,
+  width: radius * 2,
+  height: radius * 2,
+}
+path.addArc(arcRect, -90, 60)
+```
+
+最初の引数(`oval`)に円全体の位置とサイズを指定するための矩形を設定します。
+
+2つ目の引数(`startAngle`)には円弧を開始する角度を指定します。角度は時計回りなので注意が必要です(下が90度、左が180度, 上が270度)。
+
+3つ目の引数(`sweepAngle`)は、開始角度からどれだけ円弧の角度を進めるかを指定します。
+
+
+こちらはXamarinのドキュメントですがAPIの形式は同じであるため参考になると思います。
+[円弧を描画する 3 つの方法 - Xamarin | Microsoft Docs](https://docs.microsoft.com/ja-jp/xamarin/xamarin-forms/user-interface/graphics/skiasharp/curves/arcs#the-angle-arc)
+
+
+以下は全体のコードです。
+
+
+```tsx
+  const path = Skia.Path.Make()
+  path.moveTo(centerPos.x, centerPos.y)
+
+  const arcRect = {
+    x: centerPos.x - radius,
+    y: centerPos.y - radius,
+    width: radius * 2,
+    height: radius * 2,
+  }
+  const startDegree = -90
+  path.addArc(arcRect, startDegree, 60)
+  path.lineTo(centerPos.x, centerPos.y).close()
+
+  return (
+    <Canvas style={[styles.canvas, { ...canvasSize }]}>
+      <Circle
+        cx={centerPos.x}
+        cy={centerPos.y}
+        r={radius}
+        color="lightblue"
+        style="stroke"
+        strokeWidth={2}
+      />
+      <Path path={path} color="lightblue" style="fill" strokeWidth={2} />
+    </Canvas>
+  )
+```
+
+## 円弧をアニメーションで変更する
+
+円弧の角度を増やしていくタイマーのようなアニメーションを実装してみます。STARTを押すと開始します。
+
+<View style={{ marginTop: 32, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-17-skia-arc/DynamicArc.tsx")
+    }
+    fallback={() => <LoadingRect width={280} height={280} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+まずアニメーションの進捗用のSkiaValueを用意します。この値を進捗に応じて0〜360まで変化させます。
+
+```ts
+const progress = useValue(0)
+```
+
+開始するときは`runTiming`で360まで変化させます。
+
+```ts
+runTiming(progress, 360, { duration: 6000 })
+```
+
+`progress`の変化に応じて画面を変更するには、`useComputedValue`を使います。`addArc`の3つ目の引数に`progress.current`を指定しています。
+
+```ts
+const path = useComputedValue(() => {
+  const path = Skia.Path.Make()
+
+  // ...
+
+  const arcRect = {
+    x: centerPos.x - radius,
+    y: centerPos.y - radius,
+    width: radius * 2,
+    height: radius * 2,
+  }
+  const startDegree = -90
+  path.addArc(arcRect, startDegree, progress.current)
+
+  // ...
+
+  return path
+}, [progress])
+```
+
+全体のコードは以下です。
+
+```js
+export default function DynamicArc() {
+  const [animating, setAnimating] = useState(false)
+  const progress = useValue(0)
+
+  const path = useComputedValue(() => {
+    const path = Skia.Path.Make()
+    path.moveTo(centerPos.x, centerPos.y)
+
+    const arcRect = {
+      x: centerPos.x - radius,
+      y: centerPos.y - radius,
+      width: radius * 2,
+      height: radius * 2,
+    }
+    const startDegree = -90
+    path.addArc(arcRect, startDegree, progress.current)
+    path.lineTo(centerPos.x, centerPos.y).close()
+    return path
+  }, [progress])
+
+  const start = useCallback(() => {
+    if (animating) return
+    setAnimating(true)
+    runTiming(progress, 360, { duration: 6000 }, () => {
+      setTimeout(() => {
+        progress.current = 0
+        setAnimating(false)
+      }, 500)
+    })
+  }, [progress, animating])
+
+  return (
+    <View style={[styles.container, canvasSize]}>
+      <Canvas style={[styles.canvas, { ...canvasSize }]}>
+        <Circle
+          cx={centerPos.x}
+          cy={centerPos.y}
+          r={radius}
+          color="lightblue"
+          style="stroke"
+          strokeWidth={2}
+        />
+        <Path path={path} color="lightblue" style="fill" strokeWidth={2} />
+      </Canvas>
+      {!animating && (
+        <TouchableOpacity
+          onPress={start}
+          style={[StyleSheet.absoluteFill, styles.overlay]}
+        >
+          <Text style={styles.startText}>START</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  )
+}
+```
+
+コード全体は[Github](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-08-15-skia-arc)から確認可能です。
+
+
+

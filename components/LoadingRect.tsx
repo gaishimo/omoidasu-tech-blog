@@ -4,6 +4,7 @@ type Props = {
   width: number
   height: number
   bgColor: string
+  textColor?: string
 }
 
 export function LoadingRect(props: Props) {
@@ -19,7 +20,11 @@ export function LoadingRect(props: Props) {
         },
       ]}
     >
-      <Text style={styles.text}>Loading Skia..</Text>
+      <Text
+        style={[styles.text, props.textColor && { color: props.textColor }]}
+      >
+        Loading Skia..
+      </Text>
     </View>
   )
 }
