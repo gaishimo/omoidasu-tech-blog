@@ -5,12 +5,12 @@ async function main() {
   const { posts, tags } = await getPostsAndTags()
 
   fs.writeFileSync(
-    path.relative("_generated", "posts.json"),
+    path.join(".", "_generated", "posts.json"),
     JSON.stringify(posts, null, 2),
   )
   console.log("create _generated/posts.json")
   fs.writeFileSync(
-    path.relative("_generated", "tags.json"),
+    path.join(".", "_generated", "tags.json"),
     JSON.stringify(tags, null, 2),
   )
   console.log("create _generated/tags.json")
