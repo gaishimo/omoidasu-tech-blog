@@ -1,0 +1,166 @@
+
+import { parse, parseISO } from "date-fns"
+import dynamic from 'next/dynamic'
+import Image from 'next/image'
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { View, Text, ActivityIndicator } from "react-native"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { meta } from "../../posts-meta/2022-08-20-rn-skia-shadow"
+
+
+export const headlines = [
+  { title: "React Nativeでのスタイル指定の問題" },
+  { title: "react-native-skiaを使ったシャドウ指定" },
+  { title: "skiaを利用する場合の注意点" },
+]
+
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+## React Nativeでのスタイル指定の問題
+
+
+React Nativeでドロップシャドウをつけたい場合スタイルで以下のように指定できます。
+
+```js
+  shadowColor: "black",
+  shadowOpacity: 0.3,
+  shadowOffset: { width: 0, height: 4 },
+  shadowRadius: 2,
+```
+
+[Shadow Props · React Native](https://reactnative.dev/docs/shadow-props)
+
+
+ただしこれらはiOSの場合しか効かないため、Androidでは[elevation](https://reactnative.dev/docs/0.66/view-style-props#elevation-android)スタイルを指定する必要があります。
+
+```js
+  elevation: 3
+```
+
+elevationで浮き上がったように見せることはできますが、シャドウのスタイル詳細を指定できず影の色や位置・ぼかし方等を指定することができません。
+
+代替として[react-native-skia](https://github.com/Shopify/react-native-skia)を使ったシャドウの指定について説明します。
+
+
+## react-native-skiaを使ったシャドウ指定
+
+react-native-skiaでシャドウをつける場合、`<Shadow />`を使います。
+
+[Shadows | React Native Skia](https://shopify.github.io/react-native-skia/docs/image-filters/shadows/#drop-shadow)
+
+
+```jsx
+  <RoundedRect
+    x={margin}
+    y={margin}
+    {...buttonSize}
+    r={buttonSize.height / 2}
+    color="#39B1F0"
+  >
+    <Shadow dx={0} dy={4} blur={2} color="rgba(0, 0, 0, 0.3)" />
+  </RoundedRect>
+```
+
+以下のようにシャドウが表示されます。
+
+
+<View style={{ width: 300, marginBottom: 40 }}>
+  <Image src="/posts/2022-08-20-rn-skia-shadow/shadow1.png" width={300} height={100} objectFit="contain" alt="シャドウをつけたボタン1" />
+</View>
+
+
+試しにシャドウの設定を変更してみます。シャドウの色を少し変え、位置・ぼかし方を変えています。
+
+
+```jsx
+  <RoundedRect
+    x={margin}
+    y={margin}
+    {...buttonSize}
+    r={buttonSize.height / 2}
+    color="#39B1F0"
+  >
+    <Shadow dx={0} dy={0} blur={6} color="rgba(0, 0, 100, 0.5)" />
+  </RoundedRect>
+```
+
+
+<View style={{ top: -30, width: 300,  marginBottom: 40 }}>
+  <Image src="/posts/2022-08-20-rn-skia-shadow/shadow2.png" width={300} height={200} objectFit="contain" alt="シャドウをつけたボタン2" />
+</View>
+
+このようにAndroidでも問題なくシャドウを設定できます。
+
+
+以下はボタン全体のコードです。
+
+```tsx
+import { Canvas, RoundedRect, Shadow } from "@shopify/react-native-skia"
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+
+const buttonSize = { width: 200, height: 40 }
+const margin = 8
+
+export function ButtonWithShadow() {
+  const size = {
+    width: buttonSize.width + margin * 2,
+    height: buttonSize.height + margin * 2,
+  }
+  return (
+    <TouchableOpacity>
+      <View style={[styles.button, size]}>
+        <Canvas
+          style={[
+            styles.canvas,
+            {
+              ...size,
+            },
+          ]}
+        >
+          <RoundedRect
+            x={margin}
+            y={margin}
+            {...buttonSize}
+            r={buttonSize.height / 2}
+            color="#39B1F0"
+          >
+            <Shadow dx={0} dy={0} blur={6} color="rgba(0, 0, 100, 0.5)" />
+          </RoundedRect>
+        </Canvas>
+        <Text style={styles.titleText}>ボタン</Text>
+      </View>
+    </TouchableOpacity>
+  )
+}
+
+const styles = StyleSheet.create({
+  button: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  canvas: { position: "absolute" },
+  titleText: { color: "white", fontWeight: "bold" },
+})
+```
+
+## skiaを利用する場合の注意点
+
+skiaをつかう場合キャンバスにwidthとheightを指定する必要があります。幅と高さが固定の場合は問題ありませんが、動的に指定したい場合は`View`の`onLayout`で幅と高さを取得する必要があります。
+
+
+
+
+
+
+
+
+
+
