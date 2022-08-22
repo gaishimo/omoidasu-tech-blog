@@ -14,6 +14,7 @@ exports.meta = {
   author: "@gaishimo",
   description:
     "React Nativeでカスタムフォントを利用した時に、Textに指定したweightに応じて変化させる方法です。",
+  imagePath: "/posts/2022-08-22-custom-font-weight/font-weights.jpeg",
   lastUpdatedAt: parse(
     "2022-08-22 11:30:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",

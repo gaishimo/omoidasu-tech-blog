@@ -11,7 +11,8 @@ import { LoadingRect } from "../../components/LoadingRect"
 import { meta } from "../../posts-meta/2022-08-22-custom-font-weight"
 
 export const headlines = [
-  { title: "xxxxxxx" },
+  { title: "expo-fontsでのfontWeight指定" },
+  { title: "fontWeightに応じてfontFamilyを変更する" },
 ]
 
 
@@ -21,11 +22,12 @@ export default props => (
   </PostLayout>
 )
 
+## expo-fontsでのfontWeight指定
 
 [expo-fonts](https://docs.expo.dev/versions/latest/sdk/font/)を使うとアプリでカスタムフォントを利用することができます。
 
 
-ただ、一つのfontFamilyのみを使いfontWeightを指定した場合、iOSだとweightが自動で変わってくれません。
+ただ、一つのfontFamilyのみではiOSの場合にweightが自動で変わってくれません。
 
 例えば以下のようにカスタムフォントを指定、利用した場合です。
 
@@ -40,16 +42,16 @@ useFonts({ NotoSansJP: require("./assets/fonts/NotoSansJP-Regular.otf") })
 </Text>
 ```
 
-Androidの場合はフォントファイルの末尾が`_bold`、`_italic`、`_bold_italic`になっていれば自動で読み込んでくれるためoldに変わってくれるのですが、iOSの場合はboldになってくれません。また、Androidの場合でもweightを`"100"`〜`"900"`で細かく指定したくてもすることはできません。
+Androidの場合はフォントファイルの末尾が`_bold`、`_italic`、`_bold_italic`になっていれば自動で読み込んでくれるため、bold用のフォントファイルを配置しておけばboldに変わってくれるのですが、iOSの場合はboldになってくれません。また、Androidの場合でも`weight`を`"100"`〜`"900"`で細かく指定したくてもすることはできません。
 
 [How to add fonts for different font weights for react-native android project? - Stack Overflow](https://stackoverflow.com/questions/38815234/how-to-add-fonts-for-different-font-weights-for-react-native-android-project/38820631#38820631)
 
-ではどのようにしたらよいかですが、以下のIssueで対処法があったためこれを参考にしてweightを指定可能にしてみたいと思います。
+ではどのようにしたらよいかですが以下のIssueで対処法があったためこれを参考にしてweightを指定可能にしてみたいと思います。
 
 [Props font-weight doesn't work on iOS by use expo-font and custom font · Issue #9149 · expo/expo](https://github.com/expo/expo/issues/9149)
 
 
-## fontWeightに応じてfontFamilyを変更する方法
+## fontWeightに応じてfontFamilyを変更する
 
 NotoSansJPを利用すると仮定して進めます。
 
