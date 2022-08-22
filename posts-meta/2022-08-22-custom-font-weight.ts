@@ -1,0 +1,22 @@
+// @ts-ignore
+const { parse } = require("date-fns")
+
+exports.meta = {
+  title: "React Nativeでカスタムフォントのweight設定をする",
+  tagNames: ["react-native", "font", "カスタムフォント"],
+  color1: "rgb(220, 220, 220)",
+  color2: "rgb(120, 120, 120)",
+  createdAt: parse(
+    "2022-08-22 10:30:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+  author: "@gaishimo",
+  description:
+    "React Nativeでカスタムフォントを利用した時に、Textに指定したweightに応じて変化させる方法です。",
+  lastUpdatedAt: parse(
+    "2022-08-22 11:30:00 +09:00",
+    "yyyy-MM-dd HH:mm:ss XXX",
+    new Date(),
+  ),
+}

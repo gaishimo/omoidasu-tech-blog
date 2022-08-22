@@ -1,0 +1,153 @@
+
+import { parse, parseISO } from "date-fns"
+import dynamic from 'next/dynamic'
+import Image from 'next/image'
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import useMedia from "use-media"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { meta } from "../../posts-meta/2022-08-22-custom-font-weight"
+
+export const headlines = [
+  { title: "xxxxxxx" },
+]
+
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+[expo-fonts](https://docs.expo.dev/versions/latest/sdk/font/)を使うとアプリでカスタムフォントを利用することができます。
+
+
+ただ、一つのfontFamilyのみを使いfontWeightを指定した場合、iOSだとweightが自動で変わってくれません。
+
+例えば以下のようにカスタムフォントを指定、利用した場合です。
+
+```jsx
+useFonts({ NotoSansJP: require("./assets/fonts/NotoSansJP-Regular.otf") })
+
+<Text style={{ fontFamily: "NotoSansJP", fontWeight: "normal" }}>
+  Normal
+</Text>
+<Text style={{ fontFamily: "NotoSansJP", fontWeight: "bold" }}>
+  Bold
+</Text>
+```
+
+Androidの場合はフォントファイルの末尾が`_bold`、`_italic`、`_bold_italic`になっていれば自動で読み込んでくれるためoldに変わってくれるのですが、iOSの場合はboldになってくれません。また、Androidの場合でもweightを`"100"`〜`"900"`で細かく指定したくてもすることはできません。
+
+[How to add fonts for different font weights for react-native android project? - Stack Overflow](https://stackoverflow.com/questions/38815234/how-to-add-fonts-for-different-font-weights-for-react-native-android-project/38820631#38820631)
+
+ではどのようにしたらよいかですが、以下のIssueで対処法があったためこれを参考にしてweightを指定可能にしてみたいと思います。
+
+[Props font-weight doesn't work on iOS by use expo-font and custom font · Issue #9149 · expo/expo](https://github.com/expo/expo/issues/9149)
+
+
+## fontWeightに応じてfontFamilyを変更する方法
+
+NotoSansJPを利用すると仮定して進めます。
+
+フォントのロード時にすべてのフォントファイルを個別のfontFamilyとしてロードします。
+```js
+useFonts({
+    NotoSansJPRegular: require("./assets/fonts/NotoSansJP-Regular.otf"),
+    NotoSansJPBold: require("./assets/fonts/NotoSansJP-Bold.otf"),
+    NotoSansJPBlack: require("./assets/fonts/NotoSansJP-Black.otf"),
+    NotoSansJPThin: require("./assets/fonts/NotoSansJP-Thin.otf"),
+    NotoSansJPMedium: require("./assets/fonts/NotoSansJP-Medium.otf"),
+    NotoSansJPLight: require("./assets/fonts/NotoSansJP-Light.otf"),
+  })
+```
+
+プロジェクトに一つ`Text`コンポーネントを用意します。各画面からはReact Nativeの`Text`ではなくこのコンポーネントを常に使うようにします。
+
+```tsx
+import { ComponentProps } from "react"
+import { StyleProp, StyleSheet, Text as RnText, TextStyle } from "react-native"
+
+export function Text(props: ComponentProps<typeof RnText>) {
+  return <RnText {...props} style={withFontFamilyStyle(props.style)} />
+}
+
+const FONT_MAPPING: { [key in TextStyle["fontWeight"]]: string } = {
+  "100": "NotoSansJPThin",
+  "200": "NotoSansJPLight",
+  "300": "NotoSansJPLight",
+  "400": "NotoSansJPRegular",
+  "500": "NotoSansJPMedium",
+  "600": "NotoSansJPMedium",
+  "700": "NotoSansJPBold",
+  "800": "NotoSansJPBlack",
+  "900": "NotoSansJPBlack",
+  normal: "NotoSansJPRegular",
+  bold: "NotoSansJPBold",
+}
+
+function withFontFamilyStyle(
+  style: StyleProp<TextStyle>,
+): StyleProp<TextStyle> {
+  if (style == null) return style
+  const flattened = StyleSheet.flatten(style)
+  const fontWeight = flattened?.fontWeight
+  if (fontWeight == null) return style
+
+  const fontFamily = FONT_MAPPING[fontWeight]
+  if (fontFamily == null) return style
+
+  return [style, { fontFamily }]
+}
+
+```
+
+`withFontFamilyStyle()`でスタイルの中身をチェックし`fontWeight`の値に応じて`fontFamily`を指定したスタイルを付加します。
+
+`StyleSheet.flatten(style)` は、スタイルが配列の形になっていたり入れ子になってたりする場合に対応するため必要です。例えばスタイルが`[{}, [{}, {}]]`のような形式になっていた場合でも、一つのオブジェクトにしてくれます。また、`[{ fontWeight: "bold" }, { .fontWeight: "normal" }]`のように、後から追加されたスタイルで打ち消されている場合も、後から指定したものを優先してくれます。
+
+
+それでは以下のようにそれぞれのfontWeightの値を指定して表示してみます。
+```jsx
+import { Text } from "./Text"
+
+  {[
+    "100",
+    "200",
+    "300",
+    "400",
+    "500",
+    "600",
+    "700",
+    "800",
+    "900",
+    "normal",
+    "bold",
+  ].map(weight => (
+    <Text
+      key={weight}
+      style={{ fontSize: 16, fontWeight: weight }}
+    >
+      {weight}
+    </Text>
+  ))}
+```
+
+fontWeightに応じて太さが変わって表示されるようになりました。
+
+<View style={{ width: useMedia({ maxWidth: 700 }) ? "100%" : "70%", marginBottom: 40, borderWidth: 1, borderColor: "rgb(220, 220, 220)", borderRadius: 8, padding: 8 }}>
+  <Image width={330} height={300} objectFit="contain" src="/posts/2022-08-22-custom-font-weight/font-weights.jpeg" />
+</View>
+
+
+
+
+
+
+
+
+
+
