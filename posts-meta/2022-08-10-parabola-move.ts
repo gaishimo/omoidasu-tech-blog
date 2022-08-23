@@ -12,7 +12,7 @@ exports.meta = {
     new Date(),
   ),
   author: "@gaishimo",
-  description: "",
+  description: "react-native-skiaで放物線の動きを描く方法についてです。",
   lastUpdatedAt: parse(
     "2022-08-14 10:11:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",

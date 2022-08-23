@@ -12,7 +12,7 @@ exports.meta = {
     new Date(),
   ),
   author: "@gaishimo",
-  description: "",
+  description: "react-native-skiaで円弧を描く方法についてです。",
   lastUpdatedAt: parse(
     "2022-08-17 09:15:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",

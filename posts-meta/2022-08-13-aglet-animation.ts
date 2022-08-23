@@ -2,8 +2,8 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
-  title: "Agletの無限に横に移動するアニメーションを再現してみる",
-  tagNames: ["react-native-skia", "アニメーション"],
+  title: "Agletの無限に斜め横に移動するアニメーションを再現してみる",
+  tagNames: ["react-native-skia", "アニメーション", "アニメーション再現"],
   color1: "#A615FF",
   color2: "rgb(210, 210, 210)",
   createdAt: parse(
@@ -12,9 +12,10 @@ exports.meta = {
     new Date(),
   ),
   author: "@gaishimo",
-  description: "",
+  description:
+    "スニーカーを集めるアプリAgletで使われているアニメーションをreact-native-skiaで再現してみます。",
   lastUpdatedAt: parse(
-    "2022-08-15 10:50:00 +09:00",
+    "2022-08-23 10:07:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
