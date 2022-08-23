@@ -8,6 +8,7 @@ import { PostLayout } from "../../components/PostLayout"
 import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { WithSkia } from "../../components/WithSkia"
 import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
 import { meta } from "../../posts-meta/2022-08-22-custom-font-weight"
 
 export const headlines = [
@@ -26,10 +27,7 @@ export default props => (
 
 [expo-fonts](https://docs.expo.dev/versions/latest/sdk/font/)を使うとアプリでカスタムフォントを利用することができます。
 
-
-ただ、一つのfontFamilyのみではiOSの場合にweightが自動で変わってくれません。
-
-例えば以下のようにカスタムフォントを指定、利用した場合です。
+ただ、`fontWeight`で太さを変えたい場合に一つの`fontFamily`指定ではうまくいきません。例えば以下のようにカスタムフォントを指定した場合です。
 
 ```jsx
 useFonts({ NotoSansJP: require("./assets/fonts/NotoSansJP-Regular.otf") })
@@ -42,13 +40,13 @@ useFonts({ NotoSansJP: require("./assets/fonts/NotoSansJP-Regular.otf") })
 </Text>
 ```
 
-Androidの場合はフォントファイルの末尾が`_bold`、`_italic`、`_bold_italic`になっていれば自動で読み込んでくれるため、bold用のフォントファイルを配置しておけばboldに変わってくれるのですが、iOSの場合はboldになってくれません。また、Androidの場合でも`weight`を`"100"`〜`"900"`で細かく指定したくてもすることはできません。
+Androidの場合はフォントファイルの末尾が`_bold`、`_italic`、`_bold_italic`になっていれば自動で読み込んでくれるため、bold用のフォントファイルを配置しておけばboldに変わってくれるのですが、iOSの場合はboldになってくれません。また、Androidの場合でも`weight`を`"100"`〜`"900"`で細かく指定することはできません。
 
 [How to add fonts for different font weights for react-native android project? - Stack Overflow](https://stackoverflow.com/questions/38815234/how-to-add-fonts-for-different-font-weights-for-react-native-android-project/38820631#38820631)
 
-ではどのようにしたらよいかですが以下のIssueで対処法があったためこれを参考にしてweightを指定可能にしてみたいと思います。
+ではどうしたらweightに応じて太さを変えるかですが、以下のIssueで対処法があったためこれを参考にしてweightを指定可能にしてみたいと思います。
 
-[Props font-weight doesn't work on iOS by use expo-font and custom font · Issue #9149 · expo/expo](https://github.com/expo/expo/issues/9149)
+[Props font-weight doesn't work on iOS by use expo-font and custom font · Issue #9149 · expo/expo](https://github.com/expo/expo/issues/9149#issuecomment-879641067)
 
 
 ## fontWeightに応じてfontFamilyを変更する
@@ -140,9 +138,11 @@ import { Text } from "./Text"
 
 fontWeightに応じて太さが変わって表示されるようになりました。
 
-<View style={{ width: useMedia({ maxWidth: 700 }) ? "100%" : "70%", marginBottom: 40, borderWidth: 1, borderColor: "rgb(220, 220, 220)", borderRadius: 8, padding: 8 }}>
-  <Image width={330} height={300} objectFit="contain" src="/posts/2022-08-22-custom-font-weight/font-weights.jpeg" />
-</View>
+<NextImageWrapper
+  imageSize={{ width: 600, height: 500 }}
+  withBorder
+  src="/posts/2022-08-22-custom-font-weight/font-weights.jpeg"
+/>
 
 
 
