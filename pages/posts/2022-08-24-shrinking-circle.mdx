@@ -1,0 +1,131 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import useMedia from "use-media"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-08-24-shrinking-circle"
+
+export const headlines = [{ title: "実装方法" }]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+様々なアプリやサービスで見かける、収縮する小さな円（ライト)をreact-native-skiaで表現してみます。
+
+
+<View style={{ marginTop: 24 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-24-shrinking-circle/ShrinkingCircles")
+    }
+    fallback={() => <LoadingRect width={300} height={160} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+## 実装方法
+
+実装方法は簡単です。内側の円と外側の円を用意し、外側の円のサイズをアニメーションvalue値に従って動的に変更します。
+
+
+```jsx
+import {
+  Blur,
+  Canvas,
+  Circle,
+  Easing,
+  interpolate,
+  useComputedValue,
+  usePaintRef,
+  useTiming,
+} from "@shopify/react-native-skia"
+
+type Props = {
+  radius: number
+  color: string
+}
+
+export function ShrinkingCircle(props: Props) {
+  const canvasSize = { width: props.radius * 4, height: props.radius * 4 }
+  const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
+
+  const progress = useTiming(
+    { loop: true, yoyo: true },
+    { easing: Easing.inOut(Easing.ease), duration: 2200 },
+  )
+
+  return (
+    <Canvas style={canvasSize}>
+      {/* Outer Circle */}
+      <Circle
+        cx={center.x}
+        cy={center.y}
+        r={useComputedValue(() => {
+          return interpolate(
+            progress.current,
+            [0, 1],
+            [props.radius * 1.5, props.radius * 1.9],
+          )
+        }, [progress, props.radius])}
+        color={props.color}
+        opacity={0.3}
+      >
+        <Blur blur={1} />
+      </Circle>
+
+      {/* Inner Circle */}
+      <Circle
+        cx={center.x}
+        cy={center.y}
+        r={props.radius}
+        color={props.color}
+      />
+      {/* Inner Circle (ぼかし効果) */}
+      <Circle
+        cx={center.x}
+        cy={center.y}
+        r={props.radius}
+        color={props.color}
+      >
+        <Blur blur={2} />
+      </Circle>
+    </Canvas>
+  )
+}
+```
+
+内側の円に少しぼかし効果を出すため2つ円を重ねて一つにBlurを設定しています。
+
+
+`useTiming`でアニメーションを設定します。この設定をするとvalue値が0から1に繰り返し変化します。`yoyo: true`を指定すると、アニメーションが進んだ後戻ってくるアニメーションも実行してくれます(ヨーヨー効果)。
+
+```js
+const progress = useTiming(
+  { loop: true, yoyo: true },
+  { easing: Easing.inOut(Easing.ease), duration: 2200 },
+)
+```
+
+外側の円の半径をアニメーションvalueを使って動的に変更します。
+```jsx
+  <Circle
+    ...
+    r={useComputedValue(() => {
+      return interpolate(
+        progress.current,
+        [0, 1],
+        [props.radius * 1.5, props.radius * 1.9],
+      )
+    }, [progress, props.radius])}
+  >
+```
+
+可能であれば、今後より自然な表現になるよう改善していきたいと思います。

@@ -3,7 +3,12 @@ const { parse } = require("date-fns")
 
 exports.meta = {
   title: "Agletの無限に斜め横に移動するアニメーションを再現してみる",
-  tagNames: ["react-native-skia", "アニメーション", "アニメーション再現"],
+  tagNames: [
+    "react-native-skia",
+    "アニメーション",
+    "アニメーション再現",
+    "模倣してみる",
+  ],
   color1: "#A615FF",
   color2: "rgb(210, 210, 210)",
   createdAt: parse(
