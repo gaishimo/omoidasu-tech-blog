@@ -153,8 +153,16 @@ const styles = StyleSheet.create({
 
 ## skiaを利用する場合の注意点
 
-skiaをつかう場合キャンバスにwidthとheightを指定する必要があります。幅と高さが固定の場合は問題ありませんが、動的に指定したい場合は`View`の`onLayout`で幅と高さを取得する必要があります。
+skiaをつかう場合、Canvasの中で描画する必要があり、Canvasにwidthとheightを指定する必要があります。幅と高さが固定の場合は問題ありませんが、動的に指定したい場合は`View`の`onLayout`で幅と高さを取得する必要があります。
 
+
+## テキストのシャドウについて
+
+`Text`についてはReact Nativeが用意したテキストシャドウ用のスタイルで指定可能です。Androidに関しても問題なく表示されます。
+
+[Text Style Props · React Native](https://reactnative.dev/docs/text-style-props#textshadowcolor)
+
+Skiaでテキストを描画しようとするとフォントのロードに時間がかかってしまうので、通常のReact Nativeの`Text`を使うことをおすすめします。
 
 
 
