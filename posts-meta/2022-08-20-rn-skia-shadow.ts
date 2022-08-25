@@ -13,6 +13,7 @@ exports.meta = {
   ),
   author: "@gaishimo",
   description: "react-native-skiaでドロップシャドウをつける方法です。",
+  priority: 0.7,
   lastUpdatedAt: parse(
     "2022-08-24 18:10:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",

@@ -15,6 +15,7 @@ exports.meta = {
   description:
     "ExpoのEAS Buildで、Managed Workflowプロジェクトに対してアプリ内課金を実装する手順について説明します。",
   imagePath: "/posts/2021-08-28-eas-iap/expo-iap-image.png",
+  priority: 0.8,
   lastUpdatedAt: parse(
     "2022-01-21 17:00:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",

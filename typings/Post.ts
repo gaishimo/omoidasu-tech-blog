@@ -6,6 +6,7 @@ export type PostMeta = {
   author: string
   description: string
   imagePath: string | null
+  priority?: number
   createdAt: Date
   lastUpdatedAt: Date
 }

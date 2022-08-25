@@ -21,6 +21,7 @@ exports.meta = {
   description:
     "2DグラフィックライブラリをReact Nativeで扱うためのreact-native-skiaを当ブログに導入しました",
   imagePath: "/posts/2022-08-07-rn-skia-in-blog/image.png",
+  priority: 0.8,
   lastUpdatedAt: parse(
     "2022-08-08 09:15:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",

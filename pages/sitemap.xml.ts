@@ -89,7 +89,12 @@ export async function getServerSideProps({ req, res }: NextPageContext) {
                 {
                   type: "element",
                   name: "priority",
-                  elements: [{ type: "text", text: "0.5" }],
+                  elements: [
+                    {
+                      type: "text",
+                      text: post.priority ? post.priority.toString() : "0.5",
+                    },
+                  ],
                 },
               ],
             })),

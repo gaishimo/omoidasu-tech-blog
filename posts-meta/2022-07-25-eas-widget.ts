@@ -15,6 +15,7 @@ exports.meta = {
   description:
     "ExpoのManaged WorkflowでWidget(iOS / Android)を作成する方法について説明します。",
   imagePath: "/posts/2022-07-25-eas-widget/widget_image.webp",
+  priority: 0.8,
   lastUpdatedAt: parse(
     "2022-08-07 11:45:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",

@@ -20,6 +20,7 @@ exports.meta = {
   description:
     "様々なアプリやサービスで見かける、収縮する小さな円（ライト)をreact-native-skiaで表現してみます。",
   imagePath: "/posts/2022-08-24-shrinking-circle/shrinking-circles.png",
+  priority: 0.7,
   lastUpdatedAt: parse(
     "2022-08-24 11:35:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
