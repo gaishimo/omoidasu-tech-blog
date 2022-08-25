@@ -1,5 +1,5 @@
 import { format } from "date-fns"
-import { StyleSheet, Text, View } from "react-native"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
 import { Colors } from "../libs/colors"
 import { ShapeSymbol } from "./atoms/ShapeSymbol"
 import { Tag } from "./atoms/Tag"
@@ -26,7 +26,11 @@ export function PostHeader(props: Props) {
         </View>
         <Text style={styles.titleText}>{props.title}</Text>
       </View>
-      <View style={styles.tags}>
+      <ScrollView
+        horizontal
+        style={styles.tagsScroll}
+        contentContainerStyle={styles.tagsContainer}
+      >
         {props.tagNames.map((tagName, i) => (
           <View
             key={i}
@@ -37,7 +41,7 @@ export function PostHeader(props: Props) {
             <Tag name={tagName} />
           </View>
         ))}
-      </View>
+      </ScrollView>
     </View>
   )
 }
@@ -52,6 +56,11 @@ const styles = StyleSheet.create({
   header: { marginBottom: 16, flexDirection: "row", alignItems: "center" },
   symbol: { marginRight: 12 },
   titleText: { fontWeight: "bold", fontSize: 24, letterSpacing: 0.6 },
-  tags: { marginLeft: 12, flexDirection: "row", alignItems: "center" },
+  tagsScroll: { marginLeft: 12 },
+  tagsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingBottom: 16,
+  },
   tag: { marginRight: 16 },
 })

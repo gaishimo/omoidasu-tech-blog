@@ -1,5 +1,5 @@
 import { format } from "date-fns"
-import { StyleSheet, Text, View } from "react-native"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
 import { Colors } from "../libs/colors"
 import { Post } from "../typings/Post"
 import { ShapeSymbol } from "./atoms/ShapeSymbol"
@@ -27,7 +27,11 @@ export function PostItem(props: Props) {
           <Text style={styles.creationTimeText}>
             {format(new Date(props.post.createdAt), "yyyy-MM-dd")}
           </Text>
-          <View style={styles.tags}>
+          <ScrollView
+            horizontal
+            style={styles.tagsScroll}
+            contentContainerStyle={styles.tagsContainer}
+          >
             {props.post.tagNames.map((tagName, i) => (
               <View
                 key={i}
@@ -38,7 +42,7 @@ export function PostItem(props: Props) {
                 <Tag name={tagName} />
               </View>
             ))}
-          </View>
+          </ScrollView>
         </View>
         <View style={styles.desc}>
           <Text style={styles.descText}>{props.post.description}</Text>
@@ -56,13 +60,17 @@ const styles = StyleSheet.create({
   titleText: { fontWeight: "bold", fontSize: 18 },
   meta: { marginTop: 8, flexDirection: "row" },
   creationTimeText: { marginTop: 4, color: Colors.textColor3, fontSize: 13 },
-  tags: {
+  tagsScroll: {
+    flex: 1,
     marginLeft: 12,
+  },
+  tagsContainer: {
+    paddingBottom: 12,
     flexDirection: "row",
     flexWrap: "wrap",
     alignItems: "center",
   },
   tag: { marginRight: 8, fontSize: 12 },
-  desc: { marginTop: 16 },
+  desc: { marginTop: 4 },
   descText: { color: Colors.textColor2, flexWrap: "wrap", fontSize: 13 },
 })
