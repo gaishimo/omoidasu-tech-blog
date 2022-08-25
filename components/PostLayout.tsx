@@ -57,6 +57,12 @@ export function PostLayout(props: Props) {
           <View style={styles.articleBody}>
             <PostHeader {...props.meta} />
             {props.children}
+            {(isSmallScreen || isMediumScreen) && (
+              <View>
+                <RecentPostsPanel style={styles.recentPostsPanel} />
+                <TagsPanel style={styles.tagsPanel} />
+              </View>
+            )}
             <View style={styles.footer}>
               <View style={styles.footerRow}>
                 <Text style={styles.footerText}>
