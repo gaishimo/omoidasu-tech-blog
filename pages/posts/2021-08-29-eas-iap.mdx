@@ -2,6 +2,7 @@ import { parse, parseISO } from "date-fns"
 import { PostLayout } from "../../components/PostLayout"
 import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { meta } from "../../posts-meta/2021-08-29-eas-iap"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
 
 export const headlines = [
    { title: "概要", children: [{ title: "前提" }] },
@@ -306,7 +307,12 @@ Waiting for builds to complete. You can press Ctrl+C to exit.
 
 ビルドが成功したら、ビルド結果ページでインストールボタンをクリックします。QRコードが表示されるので、iPhone端末で読み取ってインストールします。
 
-<ImageWrapper width="80%" maxWidth={240} alt="DevClientをインストール" sourceUri="/posts/2021-08-28-eas-iap/install-dev-client-ios.png"  />
+
+<NextImageWrapper
+  imageSize={{ width: 260, height: 220 }}
+  alt="DevClientをインストール"
+  src="/posts/2021-08-28-eas-iap/install-dev-client-ios.png"
+/>
 
 ### DevClientの起動
 
@@ -468,15 +474,22 @@ const styles = StyleSheet.create({
 
 iOSの場合、購入時にApple IDでのサインインを求められるためAppStore Connectで作成したSandboxのテスターアカウントでログインします。ログイン後OSの購入用モーダルが表示されるため、再度Sandboxアカウントのパスワードを入力します。
 
-<ImageWrapper width="80%" maxWidth={240} alt="購入用画面" sourceUri="/posts/2021-08-28-eas-iap/purchase-ios.png"  />
-
+<NextImageWrapper
+  imageSize={{ width: 240, height: 400 }}
+  alt="iOSの購入用画面"
+  src="/posts/2021-08-28-eas-iap/purchase-ios.png"
+/>
 
 Sandbox環境の場合OSの購入用モーダルが2度表示されてしまうことがありますが、これはSandbox環境のみの現象のため本番環境では特に問題ありません。
 
 購入が無事完了すると完了のアラートが表示されます(iOSの場合)。
 
-<ImageWrapper width="80%" maxWidth={240} alt="購入完了(iOS)" sourceUri="/posts/2021-08-28-eas-iap/purchased-ios.png"  />
 
+<NextImageWrapper
+  imageSize={{ width: 240, height: 400 }}
+  alt="購入完了(iOS)"
+  src="/posts/2021-08-28-eas-iap/purchased-ios.png"
+/>
 
 ## Androidでの動作確認
 
@@ -495,7 +508,12 @@ eas build --platform android --profile release
 
 Android上でDevClientを起動し購入を行うと購入モーダルが表示されます。
 
-<ImageWrapper width="80%" maxWidth={240} alt="Androidでの購入" sourceUri="/posts/2021-08-28-eas-iap/purchase-screen-android.png"  />
+<NextImageWrapper
+  imageSize={{ width: 240, height: 400 }}
+  alt="Androidでの購入"
+  src="/posts/2021-08-28-eas-iap/purchase-screen-android.png"
+/>
+
 
 そのまま自分のクレジットカードで購入すると実際に課金されてしまうため、アプリライセンスをGmailアカウントに設定して購入することをおすすめします。ライセンスを保持しているGoogleアカウントの場合、"テストカード" と表示されるようになります。
 

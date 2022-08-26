@@ -5,6 +5,7 @@ type Props = {
   src: string
   imageSize: { width: number; height: number }
   withBorder?: boolean
+  alt?: string
   style?: StyleProp<ViewStyle>
 }
 
@@ -20,7 +21,12 @@ export function NextImageWrapper(props: Props) {
         props.style,
       ]}
     >
-      <Image {...props.imageSize} objectFit="contain" src={props.src} />
+      <Image
+        {...props.imageSize}
+        alt={props.alt}
+        objectFit="contain"
+        src={props.src}
+      />
     </View>
   )
 }
