@@ -4,7 +4,7 @@ import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { View, Text, ActivityIndicator } from "react-native"
 import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web"
 import { meta } from "../../posts-meta/2022-08-07-rn-skia-in-blog"
-
+import { WithSkia } from "../../components/WithSkia"
 
 
 export const headlines = [
@@ -145,11 +145,11 @@ webpackの設定で迷った場合は、[react-native-skiaのexampleの設定](h
 
 
 <View style={{ marginTop: 16 }}>
-  <WithSkiaWeb
-    getComponent={() =>
-      import("../../components/pages/2022-08-07-rn-skia-in-blog/SkiaStar")
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-07-rn-skia-in-blog/SkiaStar")
     }
-    fallback={<ActivityIndicator color="gray" size="small" />}
+    fallback={() => <LoadingRect width={300} height={160} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
   />
 </View>
 
@@ -193,11 +193,11 @@ webpackの設定で迷った場合は、[react-native-skiaのexampleの設定](h
 ついでにグラデーションボタンも作ってみました。
 
 <View style={{ marginBottom: 16 }}>
-  <WithSkiaWeb
-    getComponent={() =>
-      import("../../components/pages/2022-08-07-rn-skia-in-blog/LinearGradientButton")
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-07-rn-skia-in-blog/LinearGradientButton")
     }
-    fallback={<ActivityIndicator color="gray" size="small" />}
+    fallback={() => <LoadingRect width={300} height={160} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
   />
 </View>
 
