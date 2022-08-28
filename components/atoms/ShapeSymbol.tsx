@@ -13,13 +13,13 @@ export function ShapeSymbol(props: Props) {
       <Shape
         color={props.color1}
         size={props.baseSize || 30}
-        opacity={0.5}
+        opacity={0.55}
         style={styles.shape1}
       />
       <Shape
         color={props.color2}
         size={props.baseSize ? props.baseSize * 0.7 : 22}
-        opacity={0.5}
+        opacity={0.55}
         style={[
           styles.shape2,
           props.baseSize && {
