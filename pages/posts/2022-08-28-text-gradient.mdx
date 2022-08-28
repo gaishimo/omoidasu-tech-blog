@@ -1,0 +1,103 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import useMedia from "use-media"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-08-28-text-gradient"
+
+export const headlines = [
+  { title: "テキストにグラデーションをかける" },
+  { title: "アニメーション効果をつける" },
+  { title: "コード全体" },
+  { title: "参考" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+## テキストにグラデーションをかける
+
+react-native-skiaでテキストにLinearグラデーションを付けるには以下のようにします。`<Text>`のchildrenに`<LinearGradient />` を指定するだけです。
+
+
+```tsx
+<Text x={pos.x} y={pos.y} font={font} text="Gradient Text by Skia">
+  <LinearGradient
+    start={{ x: 0, y: 100 }}
+    end={{ x: window.width, y: 100 }}
+    colors={["#863FFF", "#FF84D0"]}
+    positions={positions}
+  />
+</Text>
+```
+
+<View style={{ marginTop: 24 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-28-text-gradient/StaticTextGradient.tsx")
+    }
+    fallback={() => <LoadingRect width={300} height={160} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+## アニメーション効果をつける
+
+ついでにグラデーションが横に移動していくようなアニメーションを設定してみます。
+
+`LinearGradient`には`positions`propが存在しますが、これはグラデーションの各ポイントのポジションを0から1の間で指定するものです。この値を動的に変更させます。
+
+
+
+繰り返しのアニメーションを指定したアニメーションvalueを用意し
+```js
+const progress = useTiming(
+  { loop: true, yoyo: false },
+  { easing: Easing.inOut(Easing.ease), duration: 2500 },
+)
+```
+
+`useComputedValue`でグラデーションの3つのポイントが移動していくように変化させます。
+```jsx
+const positions = useComputedValue(() => {
+  return [
+    interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0, 0.5, 1]),
+    interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0.5, 1, 1]),
+    interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1, 1]),
+  ]
+}, [progress])
+
+
+<LinearGradient
+  ...
+  colors={["#863FFF", "#FF84D0", "#863FFF"]}
+  positions={positions}
+/>
+```
+
+
+<View style={{ marginTop: 40, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-28-text-gradient/DynamicTextGradient.tsx")
+    }
+    fallback={() => <LoadingRect width={300} height={160} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+## コード全体
+
+コード全体は[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-08-28-text-gradient)で確認できます。react-native-skiaのおかげでかなり少ないコード量で実現できるのが実感できます。
+
+## 参考
+
+アニメーションをかける部分で以下のライブラリのコードを参考にしました。
+[FullstackStation/react-native-svg-animated-linear-gradient](https://github.com/FullstackStation/react-native-svg-animated-linear-gradient)
