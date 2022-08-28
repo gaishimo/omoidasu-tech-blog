@@ -751,12 +751,12 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@shopify/react-native-skia@^0.1.142":
-  version "0.1.142"
-  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.142.tgz#1d3973b3dbf3d47ec6b0edfe46dfc31034612dde"
-  integrity sha512-4X6Cu+8iBf92GX1SGN7qnEud0oRm7kB9aFRl+sTvKvBjqRKHTOL2SQuptBdtS/d4RBh8IildhVjTN6PE/nMX1A==
+"@shopify/react-native-skia@^0.1.143":
+  version "0.1.143"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.143.tgz#debb596365061d5da60a7cf994a39cb17f3c2fd4"
+  integrity sha512-evstSg1WwJ6tmMudc8VeL9I1fftmc8HfvVMpv4zVIC1e9Y0BnCyh2GxoDE5BozLKbEN5oUULoXimC7ahbrXCdg==
   dependencies:
-    canvaskit-wasm "^0.35.0"
+    canvaskit-wasm "^0.36.0"
     react-reconciler "^0.26.2"
 
 "@sindresorhus/is@^0.14.0":
@@ -1270,6 +1270,11 @@ canvaskit-wasm@^0.35.0:
   integrity sha512-y/eTJ4xoIBkKzD37aQAvBL451LIp9YiB8Vs1e8J3Qwe7WcTHsAD00E5WocPzZo+0+XaSCkJ6cS/BxBDXTSnW1g==
   dependencies:
     "@webgpu/types" "^0.1.20"
+
+canvaskit-wasm@^0.36.0:
+  version "0.36.1"
+  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.36.1.tgz#341df38ce7894a925064beaf9eeacbf7699c6633"
+  integrity sha512-6IHlBBc9zDQBTHiGuz4Rf0j/P/ulW24q/yW+QY517e7jwQoM0nJ1+L3h4wUpfC4eQrcpVPQY8ZFbqMbUCzDxTw==
 
 capture-stack-trace@^1.0.0:
   version "1.0.1"
