@@ -5,7 +5,7 @@ import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-w
 import { View, Text, ActivityIndicator } from "react-native"
 import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web"
 import { meta } from "../../posts-meta/2022-08-09-trigonometric-tool"
-
+import { WithSkia } from "../../components/WithSkia"
 
 export const headlines = [{ title: "コード" }]
 
@@ -20,11 +20,11 @@ export default props => (
 
 
 <View style={{ marginBottom: 16 }}>
-  <WithSkiaWeb
+  <WithSkia
     getComponent={() =>
       import("../../components/pages/2022-08-09-trigonometric-tool/TrigonometricTool")
     }
-    fallback={<ActivityIndicator color="gray" size="small" />}
+    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
   />
 </View>
 
