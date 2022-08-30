@@ -1,0 +1,136 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import useMedia from "use-media"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-08-30-skia-skeleton-screen"
+
+export const headlines = [{ title: "実装方法" }, { title: "実際の表示" }]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+よくUIのローディング中の表示で使われるのがSkeleton Screenです。
+
+[Facebookなどで使われているローディングの名称を知ってる？ / 調べたらたくさんありすぎた話 - omuriceman's blog](https://omuriceman.hatenablog.com/entry/skeleton-screen)
+
+
+React Nativeで実装する場合 [react-content-loader](https://github.com/danilowoz/react-content-loader) や [react-native-svg-animated-linear-gradient](https://github.com/FullstackStation/react-native-svg-animated-linear-gradient) 等のライブラリを使う方法がありますが、これらは基本的にSVGを利用しています。今回はSkia(react-native-skia)を用いて同様のものを実装してみたいと思います。
+
+
+[前回の記事](/posts/2022-08-28-text-gradient) でテキストにグラデーションを設定しグラデーションを変化させるアニメーションを実装しましたが、仕組み的には同じのため、同様の作りで実装してみたいと思います。
+
+## 実装方法
+
+グラデーションには`<LinearGradient />` を使います。
+```jsx
+<LinearGradient
+  start={{ x: 0, y: 150 }}
+  end={{ x: 300, y: 150 }}
+  colors={[basicColor, accentColor, basicColor]}
+/>
+```
+
+これをアニメーションで動的にグラデーションが移動するようにしていきます。実装の仕方は[前回の記事](/posts/2022-08-28-text-gradient#%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%8A%B9%E6%9E%9C%E3%82%92%E3%81%A4%E3%81%91%E3%82%8B) と同じですが、繰り返しアニメーションを指定した`SkiaValue`を用意し(`progress`)、この値に応じて`useComputedValue`で`<LinearGradient />`のポイント位置を動的に変化させます。
+
+
+```tsx
+const progress = useTiming(
+  { loop: true, yoyo: false },
+  { easing: Easing.inOut(Easing.ease), duration: 2500 },
+)
+
+const positions = useComputedValue(() => {
+  return [
+    interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0, 0.5, 1]),
+    interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0.5, 1, 1]),
+    interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1, 1]),
+  ]
+}, [progress])
+
+
+<LinearGradient
+  ...
+  colors={color1, color2, color1]}
+  positions={positions}
+/>
+```
+
+`<LinearGradient />`は`<Paint>`で囲み、Paintのrefを`<Group>`に指定します。こうすることで、`<Group />`配下すべてにグラデーションを適用できます。その下に`props.children`を渡し、`children`を外側のcomponentから渡せるようにすることで、Skeleton Screenの中身を自由に外から指定できるようにします。
+
+
+```jsx
+type Props = {
+  basicColor: string
+  accentColor: string
+  canvasSize: { width: number; height: number }
+  children: ReactNode
+}
+
+export function SkeletonViewContainer(props: Props) {
+  const paintRef = usePaintRef()
+  const progress = useTiming(
+    { loop: true, yoyo: false },
+    { easing: Easing.inOut(Easing.ease), duration: 2300 },
+  )
+  const positions = useComputedValue(() => {
+    return [
+      interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0, 0.5, 1]),
+      interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0.5, 1, 1]),
+      interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1, 1]),
+    ]
+  }, [progress])
+  return (
+    <Canvas style={props.canvasSize}>
+      <Paint ref={paintRef}>
+        <LinearGradient
+          start={{ x: 0, y: props.canvasSize.height % 2 }}
+          end={{ x: props.canvasSize.width, y: props.canvasSize.height % 2 }}
+          colors={[props.basicColor, props.accentColor, props.basicColor]}
+          positions={positions}
+        />
+      </Paint>
+      <Group paint={paintRef}>{props.children}</Group>
+    </Canvas>
+  )
+}
+```
+
+外側からは以下のようにコンテンツの中身をchildrenに指定してrenderさせます。
+
+```tsx
+<SkeletonViewContainer
+  basicColor="rgb(245, 245, 245)"
+  accentColor="rgb(225, 225, 225)"
+  canvasSize={canvasSize}
+>
+  <RoundedRect x={0} y={0} r={8} width={70} height={70} />
+  <RoundedRect x={80} y={17} r={8} width={250} height={13} />
+  <RoundedRect x={80} y={40} r={8} width={250} height={10} />
+  <RoundedRect x={0} y={80} r={8} width={330} height={10} />
+  <RoundedRect x={0} y={100} r={8} width={200} height={10} />
+  <RoundedRect x={0} y={120} r={8} width={330} height={10} />
+</SkeletonViewContainer>
+```
+
+
+## 実際の表示サンプル
+
+以下のようにSkeleton Screenが表示されます!
+
+<View style={{ marginTop: 40, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-30-skia-skeleton-screen/SkeletonViewExamples.tsx")
+    }
+    fallback={() => <LoadingRect width={320} height={580} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
