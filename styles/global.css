@@ -4,7 +4,7 @@
 
 body {
   color: rgb(0, 0, 0);
-  font-size: 15px;
+  font-size: 13.5px;
   line-height: 1.7rem;
   letter-spacing: 0.035rem;
   font-family: "Helvetica Neue",
@@ -17,7 +17,7 @@ body {
 
 @media screen and (max-width: 700px) {
   body {
-    font-size: 13px;
+    font-size: 12.5px;
   }
 }
 
