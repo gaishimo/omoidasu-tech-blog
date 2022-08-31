@@ -8,6 +8,7 @@ export type PostMeta = {
   imagePath: string | null
   priority?: number
   createdAt: Date
+  relatedPosts?: string[]
   lastUpdatedAt: Date
 }
 

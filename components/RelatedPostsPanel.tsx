@@ -5,17 +5,26 @@ import { ShapeSymbol } from "./atoms/ShapeSymbol"
 const posts = require("../_generated/posts.json") as Post[]
 
 type Props = {
+  id: string
   style?: StyleProp<ViewStyle>
 }
 
-export function RecentPostsPanel(props: Props) {
+export function RelatedPostsPanel(props: Props) {
+  const post = posts.find(p => p.id === props.id)
+  const relatedPosts = (post?.relatedPosts || []).map(id =>
+    posts.find(p => p.id === id),
+  )
+  console.log("post?.relatedPosts:", post)
+  if (relatedPosts.length === 0) {
+    return null
+  }
   return (
     <View style={[styles.panel, props.style]}>
       <View style={styles.header}>
-        <Text style={styles.titleText}>最近の記事</Text>
+        <Text style={styles.titleText}>関連する記事</Text>
       </View>
       <View style={styles.body}>
-        {posts.slice(0, 12).map(post => (
+        {relatedPosts.map(post => (
           <View
             key={post.id}
             accessibilityRole="link"

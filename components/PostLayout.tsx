@@ -1,12 +1,13 @@
 import { format } from "date-fns"
 import { Fragment, ReactNode } from "react"
-import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, View } from "react-native"
 import useMedia from "use-media"
 import { Colors } from "../libs/colors"
-import { PostMeta } from "../typings/Post"
+import { Post } from "../typings/Post"
 import { BaseLayout } from "./BaseLayout"
 import { PostHeader } from "./PostHeader"
 import { RecentPostsPanel } from "./RecentPostsPanel"
+import { RelatedPostsPanel } from "./RelatedPostsPanel"
 import { TagsPanel } from "./TagsPanel"
 
 type Headline = { title: string; children: Headline[] }
@@ -15,7 +16,7 @@ type Props = {
   children: ReactNode
   // description?: string
   headlines: Headline[]
-  meta: PostMeta
+  meta: Post
 }
 
 export function PostLayout(props: Props) {
@@ -57,12 +58,14 @@ export function PostLayout(props: Props) {
           <View style={styles.articleBody}>
             <PostHeader {...props.meta} />
             {props.children}
-            {(isSmallScreen || isMediumScreen) && (
-              <View>
-                <RecentPostsPanel style={styles.recentPostsPanel} />
-                <TagsPanel style={styles.tagsPanel} />
-              </View>
-            )}
+            <View style={styles.subPanels}>
+              <RelatedPostsPanel
+                id={props.meta.id}
+                style={styles.relatedPostsPanel}
+              />
+              <RecentPostsPanel style={styles.recentPostsPanel} />
+              <TagsPanel style={styles.tagsPanel} />
+            </View>
             <View style={styles.footer}>
               <View style={styles.footerRow}>
                 <Text style={styles.footerText}>
@@ -110,10 +113,6 @@ export function PostLayout(props: Props) {
                     )}
                   </View>
                 </View>
-                <ScrollView>
-                  <RecentPostsPanel style={styles.recentPostsPanel} />
-                  <TagsPanel style={styles.tagsPanel} />
-                </ScrollView>
               </View>
             </View>
           )}
@@ -148,7 +147,7 @@ const styles = StyleSheet.create({
   sidebar: { width: 280, paddingLeft: 30 },
   stick: {
     // @ts-ignore
-    // position: "sticky",
+    position: "sticky",
     top: 160,
   },
   headlinesPanel: {
@@ -169,8 +168,10 @@ const styles = StyleSheet.create({
     color: Colors.textColor1,
     fontSize: 13,
   },
+  subPanels: { marginTop: 100 },
+  relatedPostsPanel: {},
   recentPostsPanel: {
-    marginTop: 100,
+    marginTop: 40,
   },
   tagsPanel: {
     marginTop: 40,
