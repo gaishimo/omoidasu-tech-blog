@@ -23,7 +23,11 @@ export default function IndexPage(props: Props) {
     <BaseLayout>
       <View style={styles.container}>
         <View style={styles.desc}>
-          <Text style={styles.descText}>Omoidasu, Incの技術ブログです。</Text>
+          <Text style={styles.descText}>
+            {
+              "Omoidasu, Incの技術ブログです。\nReact NativeやSkiaについての記事が中心です。"
+            }
+          </Text>
         </View>
         <View style={styles.body}>
           <FlatList
@@ -48,7 +52,7 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingHorizontal: 8,
   },
-  desc: { alignItems: "center" },
+  desc: { textAlign: "center" },
   descText: { color: Colors.textColor1 },
   body: {},
   item: { marginBottom: 40 },
