@@ -14,6 +14,7 @@ export const headlines = [
   { title: "React Nativeでのスタイル指定の問題" },
   { title: "react-native-skiaを使ったシャドウ指定" },
   { title: "skiaを利用する場合の注意点" },
+  { title: "テキストのシャドウについて" },
 ]
 
 
@@ -27,7 +28,7 @@ export default props => (
 ## React Nativeでのスタイル指定の問題
 
 
-React Nativeでドロップシャドウをつけたい場合スタイルで以下のように指定できます。
+React Native標準でドロップシャドウをつけたい場合スタイルで以下のように指定できます。
 
 ```js
   shadowColor: "black",
@@ -45,14 +46,14 @@ React Nativeでドロップシャドウをつけたい場合スタイルで以�
   elevation: 3
 ```
 
-elevationで浮き上がったように見せることはできますが、シャドウのスタイル詳細を指定できず影の色や位置・ぼかし方等を指定することができません。
+これで浮き上がったように見せることはできますが、シャドウのスタイル詳細を指定できず影の色や位置・ぼかし方等を指定することができません。
 
 代替として[react-native-skia](https://github.com/Shopify/react-native-skia)を使ったシャドウの指定について説明します。
 
 
 ## react-native-skiaを使ったシャドウ指定
 
-react-native-skiaでシャドウをつける場合、`<Shadow />`を使います。
+react-native-skiaでシャドウをつける場合、`<Shadow />`を使います。対象のShapeのchildrenとして配置します。
 
 [Shadows | React Native Skia](https://shopify.github.io/react-native-skia/docs/image-filters/shadows/#drop-shadow)
 
@@ -97,7 +98,8 @@ react-native-skiaでシャドウをつける場合、`<Shadow />`を使います
   <Image src="/posts/2022-08-20-rn-skia-shadow/shadow2.png" width={300} height={200} objectFit="contain" alt="シャドウをつけたボタン2" />
 </View>
 
-このようにAndroidでも問題なくシャドウを設定できます。
+ドロップシャドウだけでなく、Innerシャドウもつけることができます。
+[Shadows | React Native Skia](https://shopify.github.io/react-native-skia/docs/image-filters/shadows)
 
 
 以下はボタン全体のコードです。
