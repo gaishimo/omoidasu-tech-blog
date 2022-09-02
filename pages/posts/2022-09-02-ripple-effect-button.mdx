@@ -1,0 +1,208 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import useMedia from "use-media"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-09-02-ripple-effect-button"
+
+export const headlines = [
+  { title: "タップ位置を取得して円を描画" },
+  { title: "波紋が拡がるアニメーションを作成" },
+  { title: "easing関数の変更" },
+  { title: "全体のコード" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+Material UIでも使われているRipple Effectのボタンをreact-native-skiaで作成してみます。
+
+以下は早速ですがこの記事の成果物です。タップ(クリック)すると波紋が拡がります。
+<View style={{ marginTop: 40, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-02-ripple-effect-button/RippleEffect05.tsx")
+    }
+    fallback={() => <LoadingRect width={320} height={140} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+## タップ位置を取得して円を描画
+
+仕組みとしてはボタン上でタップした座標を取得し、そこを中心として円を描画し拡大していけばよさそうです。
+
+Canvas内でタップした座標は`useTouchHandler`で取得できます。取得した座標をSkiaValueに保持しその座標を中心に円を描画してみます。
+
+```tsx
+const cx = useValue<number>(canvasSize.width / 2)
+const cy = useValue<number>(canvasSize.height / 2 + buttonSize.height / 3)
+
+const touchHandler = useTouchHandler({
+  onStart: ({ x, y }) => {
+    cx.current = x
+    cy.current = y
+  },
+})
+
+return (
+  <Canvas style={[canvasSize]} onTouch={touchHandler}>
+    <RoundedRect
+      {...buttonSize}
+      {...buttonPos}
+      r={buttonRadius}
+      color="lightblue"
+      style="fill"
+    />
+    <Circle
+      cx={cx || 0}
+      cy={cy || 0}
+      r={30}
+      opacity={0.2}
+      color={rippleColor}
+    />
+  </Canvas>
+)
+```
+
+
+
+すると以下のようにタップで円が表示されますが、隅をタップした時にボタンの領域をはみ出して表示されてしまいます。
+
+<View style={{ marginTop: 16, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-02-ripple-effect-button/RippleEffect01.tsx")
+    }
+    fallback={() => <LoadingRect width={320} height={140} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+ボタンの領域内にしか表示されないようにするには対象を`<Group>`で囲みclipします。
+
+[Group: Clip Rounded Rectangle | React Native Skia](https://shopify.github.io/react-native-skia/docs/group/#clip-rounded-rectangle)
+
+
+```tsx
+<Group
+  clip={rrect(
+    { ...buttonPos, ...buttonSize },
+    buttonRadius,
+    buttonRadius,
+  )}
+>
+  ...
+</Group>
+```
+
+これでボタンの外側には描画されなくなります。
+
+<View style={{ marginTop: 24, marginBottom: 24 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-02-ripple-effect-button/RippleEffect02.tsx")
+    }
+    fallback={() => <LoadingRect width={320} height={140} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+## 波紋が拡がるアニメーションを作成
+
+次は波紋の円が拡がっていくアニメーションを作成します。タップ後に半径のサイズをアニメーションで大きくしていきます。
+
+```tsx
+const rippleProgress = useValue<number>(0)
+
+const touchHandler = useTouchHandler({
+  onStart: ({ x, y }) => {
+    ...
+    runTiming(
+      rippleProgress,
+      1,
+      { duration: 1000 },
+      () => {
+        setTimeout(() => {
+          rippleProgress.current = 0
+        }, 100)
+      },
+    )
+  },
+})
+const rippleRadius = useComputedValue(() => {
+  return interpolate(rippleProgress.current, [0, 1], [0, 300])
+}, [rippleProgress])
+
+
+<Circle
+  cx={cx}
+  cy={cy}
+  r={rippleRadius}
+  opacity={0.2}
+  color={rippleColor}
+/>
+```
+
+これでタップすると波紋が拡がっていくようになりました。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-02-ripple-effect-button/RippleEffect03.tsx")
+    }
+    fallback={() => <LoadingRect width={320} height={140} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+## easing関数の変更
+
+より自然なアニメーションになるようにイージング関数を変更してみます。skiaの`runTiming`(または`useTiming`)のオプションでeasing関数を指定できます(何も指定していない場合は`linear`が使われます)。
+
+```js
+runTiming(
+  rippleProgress,
+  1,
+  { duration: 1000, easing: Easing.out(Easing.quad) }
+)
+```
+
+
+以下は`easeOutQuad`を指定した場合です。
+
+<View style={{ marginTop: 0, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-02-ripple-effect-button/RippleEffect04.tsx")
+    }
+    fallback={() => <LoadingRect width={320} height={140} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+以下は`easeInOutQuad`を指定した場合です。
+
+<View style={{ marginTop: 0, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-02-ripple-effect-button/RippleEffect05.tsx")
+    }
+    fallback={() => <LoadingRect width={320} height={140} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+Linearを指定するよりも大分自然な感じになったと思います。微妙な違いですが、easeInOutを指定した時の方が、easeOutより出だしが少し緩慢な印象です。この辺りはアニメーションの長さによっても印象が変わりそうです。
+
+Easing関数の種類については以下が参考になります。
+
+[Easing Functions Cheat Sheet](https://easings.net/)
+
+## 全体のコード
+
+[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-09-02-ripple-effect-button) で確認できます。
+
