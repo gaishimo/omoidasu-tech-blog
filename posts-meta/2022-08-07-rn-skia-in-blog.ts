@@ -8,6 +8,7 @@ exports.meta = {
     "next.js",
     "react-native",
     "skia",
+    "blog",
     "react-native-web",
   ],
   color1: "#4CC8F0",
