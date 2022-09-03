@@ -124,6 +124,9 @@ const rippleProgress = useValue<number>(0)
 const touchHandler = useTouchHandler({
   onStart: ({ x, y }) => {
     ...
+    cy.current = y
+    rippleProgress.animation?.cancel()
+    rippleProgress.current = 0
     runTiming(
       rippleProgress,
       1,
@@ -131,7 +134,7 @@ const touchHandler = useTouchHandler({
       () => {
         setTimeout(() => {
           rippleProgress.current = 0
-        }, 100)
+        }, 0)
       },
     )
   },

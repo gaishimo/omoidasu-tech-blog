@@ -36,6 +36,8 @@ export default function RippleEffect(props: Props) {
     onStart: ({ x, y }) => {
       cx.current = x
       cy.current = y
+      rippleProgress.animation?.cancel()
+      rippleProgress.current = 0
       runTiming(
         rippleProgress,
         1,
