@@ -26,7 +26,7 @@ export default props => (
 )
 
 
-先日のReact Native EU 2022で、絵文字を選択するためのライブラリ[rn-emoji-keyboard](https://github.com/TheWidlarzGroup/rn-emoji-keyboard)が紹介されていました。
+先日のReact Native EU 2022で絵文字を選択するためのライブラリ[rn-emoji-keyboard](https://github.com/TheWidlarzGroup/rn-emoji-keyboard)が紹介されていました。
 
 
 トークではコミュニケーションにおけるEmojiの重要性や、絵文字の仕組み、Unicodeやサロゲートペア、Skin tone modifier (肌の色の変更), Zero width joiner(絵文字を組み合わせる仕組み)などについて説明されています。興味のある方は実際のトークを聴くとよいと思います。
@@ -111,5 +111,5 @@ Skin tone Modifierをサポートしており、顔や体の部位の絵文字�
 
 検索が動作してなかったので修正の[Pull Request](https://github.com/TheWidlarzGroup/rn-emoji-keyboard/pull/83)を送りました。
 
-`React.memo`の第2引数のfunctionが常にtrueを返すため、propsで渡されたデータが変更されても再レンダリングされなかったようです。
+キーワードを入力しても結果が何も表示されない状態だったのですが、`React.memo`の第2引数のfunctionが常にtrueを返しており、propsで渡されたデータが変更されても再レンダリングされなかったようです。
 
