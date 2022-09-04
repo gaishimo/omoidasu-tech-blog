@@ -1,0 +1,115 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import useMedia from "use-media"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-09-04-rn-emoji-keyboard"
+
+export const headlines = [
+  { title: "rn-emoji-keyboardとは" },
+  { title: "基本的な使い方" },
+  { title: "モーダルでなく画面に埋め込む場合" },
+  { title: "Skin Tone modifier" },
+  { title: "ローカライズ" },
+  { title: "検索が動かなかったのでPull Requestした" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+先日のReact Native EU 2022で、絵文字を選択するためのライブラリ[rn-emoji-keyboard](https://github.com/TheWidlarzGroup/rn-emoji-keyboard)が紹介されていました。
+
+
+トークではコミュニケーションにおけるEmojiの重要性や、絵文字の仕組み、Unicodeやサロゲートペア、Skin tone modifier (肌の色の変更), Zero width joiner(絵文字を組み合わせる仕組み)などについて説明されています。興味のある方は実際のトークを聴くとよいと思います。
+
+[Showcase of rn-emoji-keyboard library. Enhance your communication with the language of emoji | React Native EU](https://www.react-native.eu/talks/magdalena-jaskowska-showcase-of-rn-emoji-keyboard-library-enhance-your-communication-with-the-language-of-emoji)
+
+[実際のトークセッション](https://youtu.be/uLicTDG5hSs)
+
+
+## rn-emoji-keyboardとは
+
+トークの最後で[rn-emoji-keyboard](https://github.com/TheWidlarzGroup/rn-emoji-keyboard)について紹介がありました。このライブラリは絵文字を選択するためのUIを提供します。iPhone等で絵文字を入力する時に表示されるUIと似ています。Slackの絵文字スタンプのようにコメントにリアクションする場合など、絵文字をユーザに選択させたいシチュエーションで使えそうです。
+
+
+<NextImageWrapper
+  style={{ marginTop: 40 }}
+  imageSize={{ width: 260, height: 260 }}
+  alt="rn-emoji-keyboardのUI"
+  withBorder
+  src="/posts/2022-09-04-rn-emoji-keyboard/emoji-keyboard.png"
+/>
+
+## 基本的な使い方
+
+モーダルで使う場合は以下のように呼び出します。
+
+```tsx
+import EmojiPicker from 'rn-emoji-keyboard'
+
+const [isOpen, setIsOpen] = useState(false)
+
+<EmojiPicker open={isOpen} onEmojiSelected={(emoji) => console.log(emoji)} onClose={() => setIsOpen(false)} />
+```
+
+オプションで以下が変更可能です。
+- 絵文字1つ1つのサイズ
+- カテゴリバーの位置
+- カテゴリーの順番
+- 最近使った絵文字の表示
+- 検索バーの表示
+
+その他オプションは以下のAPIドキュメントを参考にしてください。
+
+[Modal Mode | RN Emoji Keyboard](https://thewidlarzgroup.github.io/rn-emoji-keyboard/docs/api/modal)
+
+## モーダルでなく画面に埋め込む場合
+
+モーダルでなく画面にそのまま埋め込む場合は`EmojiKeyboard`コンポーネントをimportしてrenderすればOKです。
+
+```
+import { EmojiKeyboard } from 'rn-emoji-keyboard'
+```
+
+
+## Skin Tone modifier
+
+Skin tone Modifierをサポートしており、顔や体の部位の絵文字を使う場合にタップ長押しすると肌の色を選択することができます。
+
+
+<NextImageWrapper
+  style={{ marginTop: 40 }}
+  imageSize={{ width: 300, height: 300 }}
+  alt="rn-emoji-keyboardのUI"
+  withBorder
+  src="/posts/2022-09-04-rn-emoji-keyboard/skin-tone-modifier.png"
+/>
+
+## ローカライズ
+
+カテゴリ名はローカライズしたものを適用することができます。翻訳はすでにいくつか用意されてますが、日本語がまだ無かったためPull Requestを送っておきました。
+
+[feat: add ja translation by gaishimo · Pull Request #81 · TheWidlarzGroup/rn-emoji-keyboard](https://github.com/TheWidlarzGroup/rn-emoji-keyboard/pull/81)
+
+ただローカライズが用意されていなくとも、自身で用意したテキストをオプションで指定することが可能です。
+
+ただ、キーワード検索については英語でのみしか行うことができません。"cat"でなら猫関係の絵文字が検索されますが、"猫"を指定した場合は検索されません。
+
+絵文字の元データ一覧は[ここ](https://github.com/TheWidlarzGroup/rn-emoji-keyboard/blob/master/src/assets/emojis.json)でJSONファイルで管理されているんですが、このマスタデータを何らかの形で差し替える手段が用意されないと難しそうです。
+
+
+## 検索が動かなかったのでPull Requestした
+
+検索が動作してなかったので修正の[Pull Request](https://github.com/TheWidlarzGroup/rn-emoji-keyboard/pull/83)を送りました。
+
+`React.memo`の第2引数のfunctionが常にtrueを返すため、propsで渡されたデータが変更されても再レンダリングされなかったようです。
+
