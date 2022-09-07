@@ -159,7 +159,6 @@ const vector = getVector(checkMarkPoints[0], checkMarkPoints[1])
 取得したベクトルのxとyに対して現在の進捗比率をかけることにより、進捗に応じた長さにすることができます。
 ```ts
 path.rLineTo(vector.x * progress.current, vector.y * progress.current)
-  return path
 ```
 
 `lineTo`ではなく`rLineTo`を利用していますが、`rlineTo`は現在の座標からの相対指定を利用して線を引くことができます。
