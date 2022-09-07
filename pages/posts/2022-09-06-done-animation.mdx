@@ -1,0 +1,251 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-09-06-done-animation"
+
+export const headlines = [
+  { title: "周りの円を実装" },
+  { title: "チェックマークを描く" },
+  { title: "完成形" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+iOSで購入完了時等に表示される、チェックマークが描かれるアニメーションを実装してみたいと思います。以下は完成形です。
+
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-06-done-animation/AnimatedCheckMark.tsx")
+    }
+    fallback={() => <LoadingRect width={200} height={200} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+## 周りの円を実装
+
+まず周囲を回る円(CircularProgress)を実装します。
+
+円に対し一定の角度の弧を描き開始角度をアニメーションで変更していきます。
+
+Skiaで弧を描くのは以前の記事 [Skiaで円弧を描く](/posts/2022-08-17-skia-arc)でも行ったのと同様にPathを使って`addArc`します。
+
+```tsx
+const path = Skia.Path.Make()
+const arcRect = {
+  x: center.x - radius,
+  y: center.y - radius,
+  width: radius * 2,
+  height: radius * 2,
+}
+path.addArc(arcRect, progress.current * 360, 300)
+
+<Canvas>
+  <Path
+    path={path}
+    color="#0091FF"
+    style="stroke"
+    strokeWidth={6}
+    strokeCap="round"
+  />
+</Canvas>
+
+```
+
+
+<NextImageWrapper
+  imageSize={{ width: 120, height: 120 }}
+  style={{  marginTop: 0, marginBottom: 24 }}
+  alt="円弧"
+  src="/posts/2022-09-06-done-animation/static-arc.png"
+/>
+
+これを`runTiming`でアニメーションループし進捗に応じて円弧の開始角度を変更させます。
+
+```tsx
+const arcPath = useComputedValue(() => {
+  const path = Skia.Path.Make()
+  const arcRect = {
+    x: center.x - radius,
+    y: center.y - radius,
+    width: radius * 2,
+    height: radius * 2,
+  }
+  path.addArc(arcRect, progress.current * 360, 300)
+
+  return path
+}, [progress])
+
+const runAnimation = useCallback(() => {
+  runTiming(progress, { loop: true, yoyo: false }, { duration: 2000 })
+}, [progress])
+
+useEffect(() => {
+  runAnimation()
+}, [runAnimation])
+```
+
+
+<View style={{ marginTop: 0, marginBottom: 24 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-06-done-animation/CircularProgress2.tsx")
+    }
+    fallback={() => <LoadingRect width={100} height={100} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+## チェックマークを描く
+
+次にチェックマークを描きます。前提として事前に3つのポイントの座標を把握しておきます。
+
+まず静的な状態でPathで描いてみます。`lineTo`を使って各ポイントからポイントに直線を引くだけです。
+
+```tsx
+const path = Skia.Path.Make()
+path.moveTo(checkMarkPoints[0].x, checkMarkPoints[0].y)
+path.lineTo(checkMarkPoints[1].x, checkMarkPoints[1].y)
+path.lineTo(checkMarkPoints[2].x, checkMarkPoints[2].y)
+
+<Canvas>
+  <Path
+    path={path}
+    color="#0091FF"
+    style="stroke"
+    strokeWidth={6}
+    strokeCap="round"
+    strokeJoin="round"
+  />
+</Canvas>
+```
+
+<NextImageWrapper
+  imageSize={{ width: 120, height: 120 }}
+  style={{  marginBottom: 24 }}
+  alt="動かない状態のチェックマーク"
+  src="/posts/2022-09-06-done-animation/static-check-mark.png"
+/>
+
+
+
+これを順番に線を描くようなアニメーションにしてみたいと思います。アニメーション進捗に応じて線の長さを変更してあげればできそうです。
+
+今回はチェックマークの線を2つのPathに分けて1本ずつ順番にアニメーションしていきます。1つのPathで描くことも可能ですが、その場合線の長さの計算が少し複雑になるため今回はあえて分けます。(線が多い場合や線を最終的につなげる場合は1つのPathで行った方がコントロールしやすいと思います)
+
+線を引くため現在のアニメーション進捗に応じて線の終点を計算します。まず1つ目のポイントから2つ目のポイントまでどれだけ移動したかベクトルを取得します。
+
+```tsx
+function getVector(p1: { x: number; y: number }, p2: { x: number; y: number }) {
+  return {
+    x: p2.x - p1.x,
+    y: p2.y - p1.y,
+  }
+}
+
+const vector = getVector(checkMarkPoints[0], checkMarkPoints[1])
+```
+
+取得したベクトルのxとyに対して現在の進捗比率をかけることにより、進捗に応じた長さにすることができます。
+```ts
+path.rLineTo(vector.x * progress.current, vector.y * progress.current)
+  return path
+```
+
+`lineTo`ではなく`rLineTo`を利用していますが、`rlineTo`は現在の座標からの相対指定を利用して線を引くことができます。
+
+
+<NextImageWrapper
+  imageSize={{ width: 120, height: 120 }}
+  style={{ marginTop: 16, marginBottom: 24 }}
+  alt="線が途中まで描かれた状態"
+  src="/posts/2022-09-06-done-animation/line-progress.png"
+/>
+
+
+
+これをアニメーションで変化させていきます。
+
+```tsx
+const linePath = useComputedValue(() => {
+  const path = Skia.Path.Make()
+  if (progress.current === 0) {
+    return path
+  }
+  path.moveTo(checkMarkPoints[0].x, checkMarkPoints[0].y)
+  const vector = getVector(checkMarkPoints[0], checkMarkPoints[1])
+  path.rLineTo(vector.x * progress.current, vector.y * progress.current)
+  return path
+}, [progress])
+
+const runAnimation = useCallback(() => {
+  runTiming(progress, { loop: true, yoyo: false }, { duration: 2000 })
+}, [])
+
+useEffect(() => {
+  runAnimation()
+}, [runAnimation])
+```
+
+
+<View style={{ marginTop: 0, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-06-done-animation/CheckMark2.tsx")
+    }
+    fallback={() => <LoadingRect width={100} height={100} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+2本目の線も同様に実装し順番にアニメーションを実行していけば、チェックマークが描かれる部分が完成します。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-06-done-animation/CheckMark3.tsx")
+    }
+    fallback={() => <LoadingRect width={100} height={100} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+アニメーションを少し調整してみます。Easing関数を指定するのと、1本目の線と2本目の線の間にわずかにインターバルを空けています。微妙に変化が異なるのが分かると思います。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-06-done-animation/CheckMark4.tsx")
+    }
+    fallback={() => <LoadingRect width={100} height={100} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+
+## 完成形
+
+CircularProgressとチェックマークを組み合わせると完成です。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-06-done-animation/AnimatedCheckMark.tsx")
+    }
+    fallback={() => <LoadingRect width={200} height={200} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+処理待ちのときに変化するボタン等に使ったりもできそうです。
+
+
+コードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-09-06-done-animation)で確認できます。
