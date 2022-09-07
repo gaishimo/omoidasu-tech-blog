@@ -219,9 +219,26 @@ useEffect(() => {
 </View>
 
 
-アニメーションを少し調整してみます。Easing関数を指定するのと、1本目の線と2本目の線の間にわずかにインターバルを空けています。微妙に変化が異なるのが分かると思います。
+アニメーションを少し調整してみます。
+```ts
+runTiming(
+  progress1,
+  1,
+  { duration: 300, easing: Easing.out(Easing.sin) },
+  async () => {
+    await wait(100)
+    runTiming(progress2, 1, {
+      duration: 500,
+      easing: Easing.out(Easing.sin),
+    })
+  },
+)
+```
 
-<View style={{ marginTop: 24, marginBottom: 40 }}>
+
+Easing関数を指定するのと、1本目の線と2本目の線の間にわずかにインターバルを空けています。微妙に変化が異なるのが分かると思います。
+
+<View style={{ marginTop: 0, marginBottom: 40 }}>
   <WithSkia
     getComponent={
       () => import("../../components/pages/2022-09-06-done-animation/CheckMark4.tsx")
@@ -229,6 +246,7 @@ useEffect(() => {
     fallback={() => <LoadingRect width={100} height={100} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
   />
 </View>
+
 
 
 
@@ -245,7 +263,7 @@ CircularProgressとチェックマークを組み合わせると完成です。
   />
 </View>
 
-処理待ちのときに変化するボタン等に使ったりもできそうです。
+処理待ちのときに変化するボタン等に使ったりもできそうです。Hapticsフィードバックを組み合わせると更によさそうです。
 
 
 コードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-09-06-done-animation)で確認できます。
