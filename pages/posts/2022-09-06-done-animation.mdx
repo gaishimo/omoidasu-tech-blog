@@ -141,7 +141,7 @@ path.lineTo(checkMarkPoints[2].x, checkMarkPoints[2].y)
 
 これを順番に線を描くようなアニメーションにしてみたいと思います。アニメーション進捗に応じて線の長さを変更してあげればできそうです。
 
-今回はチェックマークの線を2つのPathに分けて1本ずつ順番にアニメーションしていきます。1つのPathで描くことも可能ですが、その場合線の長さの計算が少し複雑になるため今回はあえて分けます。(線が多い場合や線を最終的につなげる場合は1つのPathで行った方がコントロールしやすいと思います)
+今回はチェックマークの線を2つのPathに分けて1本ずつ順番にアニメーションしていきます。1つのPathで描くことも可能ですが、その場合進捗と線の長さの計算が少し複雑になるため今回はあえて分けます。(線が多い場合や線を最終的につなげる場合は1つのPathで行った方がコントロールしやすいと思います)
 
 線を引くため現在のアニメーション進捗に応じて線の終点を計算します。まず1つ目のポイントから2つ目のポイントまでどれだけ移動したかベクトルを取得します。
 
@@ -177,6 +177,7 @@ path.rLineTo(vector.x * progress.current, vector.y * progress.current)
 これをアニメーションで変化させていきます。
 
 ```tsx
+const progress = useValue(0)
 const linePath = useComputedValue(() => {
   const path = Skia.Path.Make()
   if (progress.current === 0) {
@@ -263,7 +264,7 @@ CircularProgressとチェックマークを組み合わせると完成です。
   />
 </View>
 
-処理待ちのときに変化するボタン等に使ったりもできそうです。Hapticsフィードバックを組み合わせると更によさそうです。
+処理待ちのときに変化するボタン等に使ったりもできそうです。同時にHapticsフィードバックを組み合わせると更によさそうです。
 
 
 コードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-09-06-done-animation)で確認できます。
