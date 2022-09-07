@@ -18,7 +18,7 @@
     "@next/mdx": "^11.1.2",
     "@shopify/react-native-skia": "^0.1.145",
     "add": "^2.0.6",
-    "canvaskit-wasm": "^0.35.0",
+    "canvaskit-wasm": "^0.36.1",
     "date-fns": "^2.23.0",
     "next": "~12.2.5",
     "node-window-polyfill": "^1.0.2",
