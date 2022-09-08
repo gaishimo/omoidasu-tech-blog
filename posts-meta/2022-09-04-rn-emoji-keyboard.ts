@@ -18,7 +18,7 @@ exports.meta = {
   imagePath: "/posts/2022-09-04-rn-emoji-keyboard/emoji-keyboard.png",
   priority: 0.7,
   lastUpdatedAt: parse(
-    "2022-09-04 16:08:00 +09:00",
+    "2022-09-08 10:31:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
