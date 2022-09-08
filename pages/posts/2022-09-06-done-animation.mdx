@@ -143,7 +143,7 @@ path.lineTo(checkMarkPoints[2].x, checkMarkPoints[2].y)
 
 今回はチェックマークの線を2つのPathに分けて1本ずつ順番にアニメーションしていきます。1つのPathで描くことも可能ですが、その場合進捗と線の長さの計算が少し複雑になるため今回はあえて分けます。(線が多い場合や線を最終的につなげる場合は1つのPathで行った方がコントロールしやすいと思います)
 
-線を引くため現在のアニメーション進捗に応じて線の終点を計算します。まず1つ目のポイントから2つ目のポイントまでの距離をベクトルを取得します。
+線を引くため現在のアニメーション進捗に応じて線の終点を計算します。まず1つ目のポイントから2つ目のポイントまでのベクトルを取得します。
 
 ```tsx
 function getVector(p1: { x: number; y: number }, p2: { x: number; y: number }) {
@@ -156,12 +156,12 @@ function getVector(p1: { x: number; y: number }, p2: { x: number; y: number }) {
 const vector = getVector(checkMarkPoints[0], checkMarkPoints[1])
 ```
 
-取得したベクトルのxとyに対して現在の進捗比率をかけることにより、進捗に応じた長さにすることができます。
+取得したベクトルのxとyに対して現在の進捗比率をかけることにより、進捗(0〜1)に応じた長さにすることができます。
 ```ts
 path.rLineTo(vector.x * progress.current, vector.y * progress.current)
 ```
 
-`lineTo`ではなく`rLineTo`を利用していますが、`rlineTo`は現在の座標からの相対指定を利用して線を引くことができます。
+`lineTo`ではなく`rLineTo`を利用していますが、`rLineTo`は現在の座標からの相対指定を利用して線を引くことができます。
 
 
 <NextImageWrapper
