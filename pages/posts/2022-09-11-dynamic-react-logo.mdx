@@ -1,0 +1,274 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-09-11-dynamic-react-logo"
+
+export const headlines = [
+  { title: "Reactロゴを描く" },
+  { title: "楕円上の移動を表現する" },
+  { title: "中心に近づいたタイミングで中心の円を拡大する" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+Reactのロゴをreact-native-skiaでアニメーションさせて遊んでみました。以下は完成品です。
+
+<View style={{ marginTop: 24, marginBottom: 120 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-11-dynamic-react-logo/DynamicReactLogo/index.tsx")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+以下で実装手順を説明していきます。
+
+
+
+
+## Reactロゴを描く
+
+Reactのロゴの描画は[react-native-skiaの紹介動画](https://youtu.be/EHxEX78alZE)でも行われていますが、円と楕円を組み合わせるだけです。
+
+
+<View style={{ marginTop: 24, marginBottom: 24 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-11-dynamic-react-logo/ReactLogo01")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+楕円を3つ用意し2つの楕円の角度をtransformで変更します。
+
+```tsx
+const ovalPaint = usePaintRef()
+
+return (
+  <Canvas style={[canvasSize]}>
+    <Circle cx={center.x} cy={center.y} r={8} color="lightblue" />
+    <Paint ref={ovalPaint} color="lightblue" style="stroke" strokeWidth={4} />
+    <Group paint={ovalPaint} strokeWidth={8}>
+      <Oval rect={ovalRect} />
+    </Group>
+    <Group
+      paint={ovalPaint}
+      origin={center}
+      transform={[{ rotate: Math.PI / 3 }]}
+    >
+      <Oval rect={ovalRect} />
+    </Group>
+    <Group
+      paint={ovalPaint}
+      strokeWidth={8}
+      origin={center}
+      transform={[{ rotate: -Math.PI / 3 }]}
+    >
+      <Oval rect={ovalRect} />
+    </Group>
+  </Canvas>
+)
+```
+
+Paintのrefを各楕円に指定することで、共通部分の属性(color, style)をまとめて設定できます。
+
+
+
+## 楕円上の移動を表現する
+
+次に楕円状を小さな円が移動するアニメーションを表現します。まず楕円でなく真円上を移動させてみます。
+
+<View style={{ marginTop: 16, marginBottom: 16 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-11-dynamic-react-logo/CircleMoving")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+`useTiming`で`theta`(θ)の値を`0`から`Math.PI * 2`(1周分)までループで値を変化させます。単位は角度ではなくラジアンを使っています。
+
+```ts
+const theta = useTiming(
+  { to: Math.PI * 2, loop: true, yoyo: false },
+  { duration: 8000 },
+)
+```
+
+
+
+進捗に対する座標位置は三角関数で取得します。x座標はcosθ、y座標はsinθで取得できます。
+
+```tsx
+const cx = useComputedValue(() => {
+  const cos = radius * Math.cos(theta.current)
+  return center.x + cos
+}, [theta])
+const cy = useComputedValue(() => {
+  const sin = radius * Math.sin(theta.current)
+  return center.y + sin
+}, [theta])
+
+<Circle
+  cx={center.x}
+  cy={center.y}
+  ...
+/>
+```
+
+これに対しY軸方向の半径を調整して値を少なくすると横長の楕円軌道になります。
+
+<View style={{ marginTop: 0, marginBottom: 8 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-11-dynamic-react-logo/OvalMoving")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+```ts
+const cx = useComputedValue(() => {
+  const cos = radius * Math.cos(theta.current)
+  return center.x + cos
+}, [theta])
+const cy = useComputedValue(() => {
+  const sin = radius * Math.sin(theta.current)
+  return center.y + sin * 0.35
+}, [theta])
+```
+
+楕円のアニメーションについてはこちらの記事が大変参考になりました。
+[07 三角関数を使って楕円軌道のアニメーションを作成する - Adobe Flash CS3 Professional ActionScript 3.0](http://www.fumiononaka.com/Drafts/ActionScript30/ActionScript30_07.html#07-03)
+
+
+次にReactロゴの3つの楕円に対してこのアニメーションを適用し、速度・回転の向きがランダムになるように調節します。ついでにそれぞれの楕円の色も変更しています。
+
+```tsx
+const theta1 = useValue(0)
+const theta2 = useValue(0)
+const theta3 = useValue(0)
+const color = useValue(colors[0])
+
+const thetas = [theta1, theta2, theta3]
+
+const startEllipticalMotion = useCallback((index: number) => {
+  const value = thetas[index]
+  const reversed = Math.random() < 0.5
+  const timingOptions = reversed
+    ? { from: Math.PI * 2, to: 0 }
+    : { from: 0, to: Math.PI * 2 }
+  runTiming(
+    value,
+    { ...timingOptions, loop: true },
+    { duration: 4000 + Math.random() * 4000 },
+  )
+}, [])
+
+const startAnimations = useCallback(async () => {
+  startEllipticalMotion(0)
+  startEllipticalMotion(1)
+  startEllipticalMotion(2)
+}, [])
+
+useEffect(() => {
+  startAnimations()
+}, [startAnimations])
+
+<Group>
+  <OvalWithMovingCircle
+    center={center}
+    color={colors[0]}
+    theta={theta1}
+  />
+</Group>
+<Group origin={center} transform={[{ rotate: Math.PI / 3 }]}>
+  <OvalWithMovingCircle
+    center={center}
+    color={colors[1]}
+    theta={theta2}
+  />
+</Group>
+<Group origin={center} transform={[{ rotate: -Math.PI / 3 }]}>
+  <OvalWithMovingCircle
+    center={center}
+    color={colors[2]}
+    theta={theta3}
+  />
+</Group>
+```
+
+
+<View style={{ marginTop: 0, marginBottom: 16 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-11-dynamic-react-logo/DynamicReactLogo02")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+速度と回転の向きがそれぞれ異なることが分かると思います。
+
+
+
+## 中心に近づいたタイミングで中心の円を拡大する
+
+最後に、各軌道上の円が中心に近づいたタイミングで中心の円を拡大させ、色を近づいた円の色を変更するエフェクトを追加します。
+
+thetaのSkiaValueに対し`useValueEffect` (useEffectのSkia版のようなもの)を指定し、thetaの値が`Math.PI / 2`(90度)もしくは`Math.PI * 1.5`(270度)に近づいたときに中心の円の値を拡大させるアニメーションを実行します。この時にカラーの値も変更します。
+
+```tsx
+const shrinkCircleWithColorChange = useCallback((value, index) => {
+  const v = Math.min(
+    Math.abs(value.current - Math.PI / 2),
+    Math.abs(value.current - Math.PI * 1.5),
+  )
+  if (v <= Math.PI / 90) {
+    color.current = colors[index]
+    runTiming(shrinking, { from: 0, to: 1 }, { duration: 150 }, () => {
+      runTiming(shrinking, { from: 1, to: 0 }, { duration: 150 })
+    })
+  }
+}, [])
+
+useValueEffect(theta1, () => {
+  shrinkCircleWithColorChange(theta1, 0)
+})
+```
+
+
+<View style={{ marginTop: 24, marginBottom: 32 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-11-dynamic-react-logo/DynamicReactLogo/index.tsx")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+各円が中心に近づいた時に拡大し色が変わるのがわかると思います。
+
+
+以上で完成です。3つの円の動きを注視して眺めていると自然と時が過ぎていく感じがして、瞑想効果があるかもしれません。
+
+
+
+完成形のソースコードは
+[こちら](https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2022-09-11-dynamic-react-logo/DynamicReactLogo)で確認できます。
+
+
