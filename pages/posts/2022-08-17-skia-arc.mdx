@@ -27,14 +27,6 @@ react-native-skiaで円弧を描く方法です。
 
 ## 円弧を描く方法
 
-<View style={{ marginTop: 32, marginBottom: 40 }}>
-  <WithSkia
-    getComponent={
-      () => import("../../components/pages/2022-08-17-skia-arc/StaticArc.tsx")
-    }
-    fallback={() => <LoadingRect width={280} height={280} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
-  />
-</View>
 
 `path.addArc()`を使います。
 
@@ -57,6 +49,16 @@ path.addArc(arcRect, -90, 60)
 
 こちらはXamarinのドキュメントですがAPIの形式は同じであるため参考になると思います。
 [円弧を描画する 3 つの方法 - Xamarin | Microsoft Docs](https://docs.microsoft.com/ja-jp/xamarin/xamarin-forms/user-interface/graphics/skiasharp/curves/arcs#the-angle-arc)
+
+
+<View style={{ marginTop: 32, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-08-17-skia-arc/StaticArc.tsx")
+    }
+    fallback={() => <LoadingRect width={280} height={280} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
 
 
 以下は全体のコードです。

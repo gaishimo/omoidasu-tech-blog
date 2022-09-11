@@ -12,9 +12,10 @@ exports.meta = {
     new Date(),
   ),
   author: "@gaishimo",
-  description: "react-native-skiaで円弧を描く方法についてです。",
+  description:
+    "react-native-skiaで円弧を描く方法についてです。path.addArcを使います。",
   lastUpdatedAt: parse(
-    "2022-08-17 09:15:00 +09:00",
+    "2022-09-12 08:40:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
