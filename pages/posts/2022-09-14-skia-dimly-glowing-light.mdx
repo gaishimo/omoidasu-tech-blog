@@ -1,0 +1,142 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-09-14-skia-dimly-glowing-light"
+
+export const headlines = [
+  { title: "円がぼんやり光る状態を表現" },
+  { title: "光のオンオフのアニメーションを設定してみる" },
+  { title: "終わりに" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+react-native-skiaでぼんやり光るライトを表現してみたいと思います。
+
+
+## 円がぼんやり光る状態を表現
+
+ぼんやり光る状態を`Blur`をつかってぼかして表現してみます。本体の円を配置しその裏にぼかしたサイズ違いの円を何枚か重ねます。外側が自然に薄くなっていくように`RadialGradient`を使って透明度を徐々に薄くしていっています。
+
+```tsx
+const blurredCircles = [
+  { radius: 40, blur: 40 },
+  { radius: 50, blur: 60 },
+  { radius: 60, blur: 80 },
+  { radius: 70, blur: 100 },
+]
+
+<Canvas ...>
+  {blurredCircles.map((c, i) => (
+    <Circle cx={center.x} cy={center.y} r={c.radius}>
+      <RadialGradient
+        c={center}
+        r={c.radius}
+        colors={[color, colorAlpha]}
+      />
+      <Blur blur={c.blur} />
+    </Circle>
+  ))}
+  <Circle cx={center.x} cy={center.y} r={30} color={color}>
+    <Blur blur={0.7} />
+  </Circle>
+</Canvas>
+```
+
+裏の円のサイズとぼかしの値、サイズはあくまで見た感覚を元に調整しています。
+
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-14-skia-dimly-glowing-light/DimlyGrowinigLight")
+    }
+    fallback={() => <LoadingRect width={300} height={500} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+## 光のオンオフのアニメーションを設定してみる
+
+これにアニメーションを設定してみます。タップするとON/OFFが切り替わります。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-14-skia-dimly-glowing-light/DimlyGrowinigLightAnimated")
+    }
+    fallback={() => <LoadingRect width={300} height={500} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+タップした際にアニメーションValue(progress)を変化させ、その値に応じて裏側の円の半径を変更していきます。合わせて本体の円の不透明度も変化させていきます。
+
+```tsx
+const progress = useValue(0)
+
+const touchHandler = useTouchHandler({
+  onStart: () => {
+    if (progress.current === 0) {
+      runTiming(progress, { to: 1 }, { duration: 350 })
+    } else {
+      runTiming(progress, { to: 0 }, { duration: 350 })
+    }
+  },
+})
+
+<Canvas
+  onTouch={touchHandler}
+  ...
+>
+  <Group color={color}>
+    {circles.map(c => (
+      <Circle
+        cx={center.x}
+        cy={center.y}
+        r={useComputedValue(() => {
+          return interpolate(progress.current, [0, 1], [0, c.radius])
+        }, [progress])}
+      >
+        <RadialGradient
+          c={center}
+          r={c.radius}
+          colors={[color, colorAlpha]}
+        />
+        <Blur blur={c.blur} />
+      </Circle>
+    ))}
+    <Circle
+      cx={center.x}
+      cy={center.y}
+      r={30}
+      color={color}
+      opacity={useComputedValue(() => {
+        return interpolate(progress.current, [0, 1], [0.4, 1])
+      }, [progress])}
+    >
+      <Blur blur={0.7} />
+    </Circle>
+  </Group>
+</Canvas>
+```
+
+## 終わりに
+
+光の範囲や円の周囲の見た目など、更に調整すればもっと自然な形にできそうです。またSkiaを使った場合他にもっとよい表現方法があるかもしれません。
+
+完成形のソースコードは
+[こちら](https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2022-09-14-skia-dimly-glowing-light)で確認できます。
+
+
