@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2021-06-04-hello-eas-build-managed",
   title: "Hello EAS Build! (Managed Workflow)",
   tagNames: ["expo", "react-native"],
   color1: "#6855F9",
