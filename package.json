@@ -27,8 +27,7 @@
     "react-native-reanimated": "~2.9.0",
     "react-native-web": "^0.17.1",
     "use-media": "^1.4.0",
-    "xml-js": "^1.6.11",
-    "yarn": "^1.22.11"
+    "xml-js": "^1.6.11"
   },
   "devDependencies": {
     "@mapbox/rehype-prism": "^0.8.0",
