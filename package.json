@@ -4,7 +4,7 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "postinstall": "patch-package && yarn generate-data-json",
+    "postinstall": "yarn setup-skia-web && patch-package && yarn generate-data-json",
     "generate-data-json": "node scripts/generatePostsAndTagsJson.js"
   },
   "dependencies": {
@@ -17,7 +17,6 @@
     "@mdx-js/react": "^1.6.22",
     "@next/mdx": "^11.1.2",
     "@shopify/react-native-skia": "^0.1.148",
-    "add": "^2.0.6",
     "canvaskit-wasm": "~0.37.0",
     "date-fns": "^2.23.0",
     "next": "~12.2.5",
