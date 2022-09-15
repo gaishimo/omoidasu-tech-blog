@@ -751,10 +751,10 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
-"@shopify/react-native-skia@^0.1.148":
-  version "0.1.148"
-  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.148.tgz#8d1afd07e14cf7c49921cbd085fe4e7080a80a08"
-  integrity sha512-GmnL8YoDZLZn9gCtnD3E9BEp8GKf1TYSaWTLR1dEh5a6swhY+kjCrOqw2pBv0u7rYuCZfTG/VWN0/cHC8dcvYA==
+"@shopify/react-native-skia@^0.1.149":
+  version "0.1.149"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-0.1.149.tgz#9c594fafb43fc5d93650e936b2212b3a1015992a"
+  integrity sha512-BHGyPYwUrrNqNVFcuo1pRYsHl0ebI7B1TBCln0oCOnEWMzNLD6Gv1OMSRPU0v3aRkpoOfEn+D+jJu6N/ke7GtQ==
   dependencies:
     canvaskit-wasm "^0.36.0"
     react-reconciler "^0.26.2"
