@@ -23,23 +23,18 @@ export default function StaticReactLogo() {
     <Canvas style={[canvasSize]}>
       <Circle cx={center.x} cy={center.y} r={16} color="lightblue" />
       <Paint ref={ovalPaint} color="lightblue" style="stroke" strokeWidth={8} />
-      <Group paint={ovalPaint} strokeWidth={8}>
-        <Oval rect={ovalRect} />
+      <Group strokeWidth={8}>
+        <Oval rect={ovalRect} paint={ovalPaint} />
+      </Group>
+      <Group origin={center} transform={[{ rotate: Math.PI / 3 }]}>
+        <Oval rect={ovalRect} paint={ovalPaint} />
       </Group>
       <Group
-        paint={ovalPaint}
-        origin={center}
-        transform={[{ rotate: Math.PI / 3 }]}
-      >
-        <Oval rect={ovalRect} />
-      </Group>
-      <Group
-        paint={ovalPaint}
         strokeWidth={8}
         origin={center}
         transform={[{ rotate: -Math.PI / 3 }]}
       >
-        <Oval rect={ovalRect} />
+        <Oval rect={ovalRect} paint={ovalPaint} />
       </Group>
     </Canvas>
   )

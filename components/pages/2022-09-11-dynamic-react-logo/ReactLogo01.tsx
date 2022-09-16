@@ -62,11 +62,10 @@ export default function ReactLogo01() {
         strokeWidth={4}
         opacity={ovalOpacity}
       />
-      <Group paint={ovalPaint}>
-        <Oval rect={ovalRect} />
+      <Group>
+        <Oval rect={ovalRect} paint={ovalPaint} />
       </Group>
       <Group
-        paint={ovalPaint}
         origin={center}
         transform={useComputedValue(
           () => [
@@ -81,10 +80,9 @@ export default function ReactLogo01() {
           [ovalRotation],
         )}
       >
-        <Oval rect={ovalRect} />
+        <Oval rect={ovalRect} paint={ovalPaint} />
       </Group>
       <Group
-        paint={ovalPaint}
         strokeWidth={8}
         origin={center}
         transform={useComputedValue(
@@ -100,7 +98,7 @@ export default function ReactLogo01() {
           [ovalRotation],
         )}
       >
-        <Oval rect={ovalRect} />
+        <Oval rect={ovalRect} paint={ovalPaint} />
       </Group>
     </Canvas>
   )
