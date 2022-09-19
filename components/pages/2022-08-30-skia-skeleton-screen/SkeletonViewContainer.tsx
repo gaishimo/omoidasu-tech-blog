@@ -1,17 +1,17 @@
 import {
   Canvas,
   Easing,
-  Group,
   interpolate,
   LinearGradient,
   Paint,
   useComputedValue,
-  usePaintRef,
   useTiming,
 } from "@shopify/react-native-skia"
-import { ReactNode } from "react"
+import { PaintNode } from "@shopify/react-native-skia/lib/typescript/src/dom/nodes/PaintNode"
+import { ReactNode, RefObject } from "react"
 
 type Props = {
+  paintRef: RefObject<PaintNode>
   basicColor: string
   accentColor: string
   canvasSize: { width: number; height: number }
@@ -19,7 +19,6 @@ type Props = {
 }
 
 export function SkeletonViewContainer(props: Props) {
-  const paintRef = usePaintRef()
   const progress = useTiming(
     { loop: true, yoyo: false },
     { easing: Easing.inOut(Easing.ease), duration: 2300 },
@@ -33,7 +32,7 @@ export function SkeletonViewContainer(props: Props) {
   }, [progress])
   return (
     <Canvas style={props.canvasSize}>
-      <Paint ref={paintRef}>
+      <Paint ref={props.paintRef}>
         <LinearGradient
           start={{ x: 0, y: props.canvasSize.height % 2 }}
           end={{ x: props.canvasSize.width, y: props.canvasSize.height % 2 }}
@@ -41,7 +40,7 @@ export function SkeletonViewContainer(props: Props) {
           positions={positions}
         />
       </Paint>
-      <Group paint={paintRef}>{props.children}</Group>
+      {props.children}
     </Canvas>
   )
 }
