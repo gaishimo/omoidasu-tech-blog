@@ -4,7 +4,7 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "postinstall": "yarn setup-skia-web && patch-package && yarn generate-data-json",
+    "postinstall": "patch-package && yarn generate-data-json",
     "generate-data-json": "node scripts/generatePostsAndTagsJson.js"
   },
   "dependencies": {
