@@ -19,7 +19,8 @@ exports.meta = {
     new Date(),
   ),
   author: "@gaishimo",
-  description: "記事に関する概要を記載",
+  description:
+    "React Native Skiaで二次ベジェ曲線を描く方法について説明します。アニメーションもしてみます。",
   imagePath: "/posts/2022-09-18-quadratic-bezier-curve/quadBezier.png",
   priority: 0.7,
   relatedPosts: [],
