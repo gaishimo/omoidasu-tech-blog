@@ -1,18 +1,28 @@
 const { parse, format } = require("date-fns")
-const { writeFileSync } = require("fs")
+const { writeFileSync, mkdirSync } = require("fs")
 const { resolve } = require("path")
 const { exit, argv } = require("process")
 
 async function createMetaFile(id) {
   const filePath = resolve("posts-meta", `${id}.ts`)
-  console.log(`create ${filePath}`)
+  console.log(`create file: ${filePath}`)
   writeFileSync(filePath, metaFileBody(id))
 }
 
 async function createMdxFile(id) {
   const filePath = resolve("pages", "posts", `${id}.mdx`)
-  console.log(`create ${filePath}`)
+  console.log(`create file: ${filePath}`)
   writeFileSync(filePath, mdxFileBody(id))
+}
+
+function createDirs(id) {
+  const dir1Path = resolve("components", "pages", `${id}`)
+  mkdirSync(dir1Path)
+  console.log("create dir:", dir1Path)
+
+  const dir2Path = resolve("public", "posts", `${id}`)
+  mkdirSync(dir2Path)
+  console.log("create dir:", dir2Path)
 }
 
 async function main(argv) {
@@ -25,6 +35,8 @@ async function main(argv) {
 
   await createMetaFile(id)
   await createMdxFile(id)
+
+  createDirs(id)
 }
 
 main(process.argv)
