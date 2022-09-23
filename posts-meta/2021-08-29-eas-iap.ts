@@ -3,7 +3,7 @@ const { parse } = require("date-fns")
 
 exports.meta = {
   title: "ExpoのManaged Workflowでアプリ内課金を実装する",
-  tagNames: ["expo", "react-native", "eas"],
+  tagNames: ["expo", "react-native", "eas", "EAS Build"],
   color1: "rgb(67,49,230)",
   color2: "rgb(200,50,50)",
   createdAt: parse(
@@ -17,7 +17,7 @@ exports.meta = {
   imagePath: "/posts/2021-08-28-eas-iap/expo-iap-image.png",
   priority: 0.8,
   lastUpdatedAt: parse(
-    "2022-08-26 10:30:00 +09:00",
+    "2022-09-23 17:30:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
