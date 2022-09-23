@@ -1,0 +1,241 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-09-21-cubic-bezier-curve"
+
+export const headlines = [
+  { title: "基本的な三次ベジェ曲線" },
+  { title: "曲線を滑らかにつなげる" },
+  { title: "曲線をアニメーションさせる" },
+  { title: "参考" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+前回の記事([react-native-skiaで二次ベジェ曲線を描く](/posts/2022-09-18-quadratic-bezier-curve))で二次ベジェ曲線について説明しましたが、今回は三次ベジェ曲線について説明したいと思います。
+
+
+## 基本的な三次ベジェ曲線
+
+react-native-skiaのPathで三次ベジェ曲線(Qubic Bezier Curve)を描くには`cubicTo`または(`rCubicTo`)を使います。
+
+```ts
+cubicTo(制御点1x, 制御点1y, 制御点2x, 制御点2y, 終点x, 終点y)
+```
+
+二次ベジェ曲線との違いは制御点が2つあるという点です。
+
+```tsx
+const start = { x: 10, y: 100 }
+const end = { x: 290, y: 200 }
+const control1 = { x: 200, y: 50 }
+const control2 = { x: 120, y: 280 }
+
+
+const path = Skia.Path.Make()
+path.moveTo(start.x, start.y)
+path.cubicTo(control1.x, control1.y, control2.x, control2.y, end.x, end.y)
+
+<Canvas>
+  <Path path={path} style="stroke" color="lightblue" strokeWidth={3} />
+</Canvas>
+```
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-21-cubic-bezier-curve/CubicBezierCurve1.tsx")
+    }
+    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+このベジェ曲線の構造を視覚化すると以下のようになります。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-21-cubic-bezier-curve/CubicBezierCurve2.tsx")
+    }
+    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+開始点と制御点(黒い点)、終点のそれぞれの中間点(黄緑の点)を結んだ線が黄緑の線になります。更に黄緑の線の中間点同士を結んだとき(オレンジの点)、その線の中間点(赤い点)が曲線の中間点になります。
+
+
+
+
+## 曲線を滑らかにつなげる
+
+
+三次ベジェ曲線を描いた後、元の2つ目の制御点と対象的な(鏡写し)位置に1つ目の制御点を指定して三次ベジェ曲線を描くと滑らかに繋がる曲線を表現できます。
+
+```tsx
+function getVector(p1: { x: number; y: number }, p2: { x: number; y: number }) {
+  return {
+    x: p2.x - p1.x,
+    y: p2.y - p1.y,
+  }
+}
+
+const start1 = { x: 10, y: 50 }
+const end1 = { x: 150, y: 140 }
+const control1 = { x: 160, y: 10 }
+const control2 = { x: 40, y: 120 }
+
+const control2ToEnd1 = getVector(control2, end1)
+
+const control3 = {
+  x: end1.x + control2ToEnd1.x,
+  y: end1.y + control2ToEnd1.y,
+}
+
+const control4 = { x: 280, y: 180 }
+const end2 = { x: 200, y: 250 }
+
+const path1 = Skia.Path.Make()
+path1.moveTo(start1.x, start1.y)
+path1.cubicTo(control1.x, control1.y, control2.x, control2.y, end1.x, end1.y)
+
+const path2 = Skia.Path.Make()
+path2.moveTo(end1.x, end1.y)
+path2.cubicTo(control3.x, control3.y, control4.x, control4.y, end2.x, end2.y)
+```
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-21-cubic-bezier-curve/CubicBezierCurve3.tsx")
+    }
+    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+制御点を終点から見て対称の位置に配置するという点では[二次ベジェ曲線の場合](/posts/2022-09-18-quadratic-bezier-curve#%E4%BA%8C%E6%AC%A1%E3%83%99%E3%82%B8%E3%82%A7%E6%9B%B2%E7%B7%9A%E3%82%92%E6%BB%91%E3%82%89%E3%81%8B%E3%81%AB%E3%81%A4%E3%81%AA%E3%81%92%E3%82%8B)と同様です。
+
+## 曲線をアニメーションさせる
+
+最後に三次ベジェ曲線をアニメーションして描きたいと思います。[二次ベジェ曲線の場合](/posts/2022-09-18-quadratic-bezier-curve#%E6%9B%B2%E7%B7%9A%E3%82%92%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%95%E3%81%9B%E3%82%8B)と同様にまず動かない状態で途中まで曲線を引いてみます。
+
+以下は40%まで曲線を引いた例です。
+<View style={{ marginTop: 8, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-21-cubic-bezier-curve/CubicBezierCurve4.tsx")
+    }
+    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+開始点と制御点1、制御点1と制御点2、制御点2と終点の間を線で結び、それぞれの進捗に応じた位置を取得します(黄緑の点)。更にその黄緑の点同士を線で結び、同様に進捗に応じた位置を取得します(オレンジの点)。更にオレンジの点の間で進捗に応じた位置を取得すると、その点が曲線の終点となります。
+
+最初の黄緑の点、オレンジの点を制御点として三次ベジェ曲線を引くと途中までの曲線を描くことができます。
+
+あとは進捗が変化するようすれば線を引くアニメーションが実装できます。
+
+<View style={{ marginTop: 8, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-09-21-cubic-bezier-curve/AnimatedCubicBezierCurve")
+    }
+    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+```tsx
+function getVector(p1: { x: number; y: number }, p2: { x: number; y: number }) {
+  return {
+    x: p2.x - p1.x,
+    y: p2.y - p1.y,
+  }
+}
+
+const start = { x: 10, y: 100 }
+const end = { x: 290, y: 200 }
+const control1 = { x: 290, y: 20 }
+const control2 = { x: 140, y: 240 }
+
+const startToControl1 = getVector(start, control1)
+const control1To2 = getVector(control1, control2)
+const control2ToEnd = getVector(control2, end)
+
+const subPath = Skia.Path.Make()
+subPath.moveTo(start.x, start.y)
+subPath.cubicTo(control1.x, control1.y, control2.x, control2.y, end.x, end.y)
+
+export default function AnimatedQubicBezierCurve4() {
+  const progress = useTiming({ loop: true }, { duration: 3500 })
+  const curvePath = useComputedValue(() => {
+    const point1 = {
+      x: start.x + startToControl1.x * progress.current,
+      y: start.y + startToControl1.y * progress.current,
+    }
+    const point2 = {
+      x: control1.x + control1To2.x * progress.current,
+      y: control1.y + control1To2.y * progress.current,
+    }
+    const point3 = {
+      x: control2.x + control2ToEnd.x * progress.current,
+      y: control2.y + control2ToEnd.y * progress.current,
+    }
+
+    const point1To2 = getVector(point1, point2)
+    const point2To3 = getVector(point2, point3)
+
+    const point4 = {
+      x: point1.x + point1To2.x * progress.current,
+      y: point1.y + point1To2.y * progress.current,
+    }
+    const point5 = {
+      x: point2.x + point2To3.x * progress.current,
+      y: point2.y + point2To3.y * progress.current,
+    }
+
+    const point4To5 = getVector(point4, point5)
+    const point6 = {
+      x: point4.x + point4To5.x * progress.current,
+      y: point4.y + point4To5.y * progress.current,
+    }
+
+    const path = Skia.Path.Make()
+    path.moveTo(start.x, start.y)
+    path.cubicTo(point1.x, point1.y, point4.x, point4.y, point6.x, point6.y)
+    return path
+  }, [progress])
+
+  return (
+    <Canvas>
+      <Path
+        path={subPath}
+        style="stroke"
+        color="rgb(240, 240, 240)"
+        strokeWidth={3}
+      />
+      <Path path={curvePath} style="stroke" color="lightblue" strokeWidth={3} />
+    </Canvas>
+  )
+}
+```
+
+
+この記事のサンプルのソースコードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2022-09-21-cubic-bezier-curve)で確認できます。
+
+
+
+## 参考
+
+- [ベジェ曲線 - 現代の JavaScript チュートリアル](https://ja.javascript.info/bezier-curve)
+- [O'Reilly Japan - SVGエッセンシャルズ 第2版](https://www.oreilly.co.jp/books/9784873117973/)の7章
