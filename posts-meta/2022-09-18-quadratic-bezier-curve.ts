@@ -23,7 +23,7 @@ exports.meta = {
     "React Native Skiaで二次ベジェ曲線を描く方法について説明します。アニメーションもしてみます。",
   imagePath: "/posts/2022-09-18-quadratic-bezier-curve/quadBezier.png",
   priority: 0.7,
-  relatedPosts: [],
+  relatedPosts: ["2022-09-21-cubic-bezier-curve"],
   lastUpdatedAt: parse(
     "2022-09-19 10:54:52 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
