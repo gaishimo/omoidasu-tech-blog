@@ -14,10 +14,11 @@ export function RelatedPostsPanel(props: Props) {
   const relatedPosts = (post?.relatedPosts || []).map(id =>
     posts.find(p => p.id === id),
   )
-  console.log("post?.relatedPosts:", post)
+
   if (relatedPosts.length === 0) {
     return null
   }
+
   return (
     <View style={[styles.panel, props.style]}>
       <View style={styles.header}>

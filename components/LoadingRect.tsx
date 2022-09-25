@@ -8,7 +8,6 @@ type Props = {
 }
 
 export function LoadingRect(props: Props) {
-  console.log("LoadingRect render()")
   return (
     <View
       style={[
