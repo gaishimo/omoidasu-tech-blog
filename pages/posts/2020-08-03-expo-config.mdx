@@ -5,94 +5,196 @@ import { meta } from "../../posts-meta/2020-08-03-expo-config"
 
 export const headlines = [
   { title: "Expoの設定ファイルについて" },
-  { title: "ファイル自体を環境別に分ける" },
-  { title: "ファイルを動的に記述する" },
-  { title: "Expoの設定ファイルについて" },
-  { title: ".envを読み込んで設定値として利用する" },
+  { title: "--configオプションを指定する方式はdeprecated" },
+  { title: "設定を動的に切り替えるには" },
+  { title: "共通(デフォルト)の設定項目" },
+  { title: "環境別の設定項目をファイルに分ける" },
+  { title: "アプリから設定値を読み込む" },
+  { title: "アプリビルド時の設定" },
 ]
 
 export default (props) => <PostLayout headlines={headlines} meta={meta}>{props.children}</PostLayout>
 
 
-※ この記事に記載されている--configオプションを使う方式はdeprecatedになりました。以下を参照してください。
-https://github.com/expo/fyi/blob/master/config-flag-migration.md
-
-
 ## Expoの設定ファイルについて
 
-Expoではアプリのメタ情報や設定値をapp.jsonに記載します。
+Expoではアプリのメタ情報や設定値を`app.json`または`app.config.json`に記載します。ただ`app.json`はstaticなJSONファイルのためそのままだと環境別(例えばdevelopment, staging, productionのように)に値を指定できません。
 
-ただapp.jsonはstaticなJSONファイルのためそのままだと環境別(例えばdevelopment, staging, productionのように)に値を指定できません。
-
-そこで、環境別に設定値を記述するにはどうしたらよいか説明します。
-
-## ファイル自体を環境別に分ける
-
-`expo start`でサーバを起動する際に`--config`オプションで設定ファイルを指定できます。
-`app.dev.json`, `app.staging.json`, `app.production.json` のように設定ファイルを環境別に用意しておき、以下のようなnpm scriptを用意して`expo start`の引数で指定すれば環境別に起動できます。
+そこで環境別に設定値を記述するにはどうしたらよいか説明します。
 
 
-```json
-"scripts": {
-  "start:dev": "expo start --config app.dev.json",
-  "start:staging": "expo start --config app.staging.json",
-  "start:production": "expo start --config app.production.json"
+## --configオプションを指定する方式はdeprecated
+
+以前のExpoでは以下のように起動時に`--config`オプションで設定ファイルを指定することができましたが、その方式についてはdeprecatedになっているため、利用しないでください。
+
+```bash
+expo start --config app.dev.json
+expo start --config app.production.json
+```
+
+[fyi/config-flag-migration.md at master · expo/fyi](https://github.com/expo/fyi/blob/master/config-flag-migration.md)
+
+
+## 設定を動的に切り替えるには
+
+設定を動的に切り替える場合、`app.config.js`または`app.config.ts`をエントリファイルとして利用します。環境別にエントリファイルを分けるのではなく、同一のエントリファイルで中身を動的にスイッチする仕組みです。
+
+
+以下のように環境変数を指定して起動し
+
+```bash
+APP_ENV=dev expo start
+```
+
+`app.config.ts`でその環境変数に応じて設定の中身を動的に切り替えます。
+
+```ts
+import { ConfigContext } from "@expo/config"
+
+export default ({ config }: ConfigContext) => {
+  const appEnvName = process.env.APP_ENV || "dev"
+
+  return {
+    ...config,
+    // 動的な記述を追加
+  }
 }
 ```
 
+## 共通(デフォルト)の設定項目
 
-## ファイルを動的に記述する
+環境によって変わらない部分(またはデフォルト値)については`app.json`(または`app.config.json`)に記載しておくとよいです。Expoの起動時、`app.json`が存在する場合はまずそれを読み込んだ上で`app.config.ts`が読み込まれるためです。
 
-[Environment variables in Expo - Expo Documentation](https://docs.expo.io/guides/environment-variables/) に記載がありますが、
-設定ファイル名をapp.config.js のように拡張子を.jsにすることでjavascriptで動的に記載することができます。
-またドキュメントには記載がないですが、ファイル名をapp.config.tsのように拡張子を.tsにすることでTypeScriptで記述することも可能です。
 
-ファイルの中身は形式は以下のように記述します。
-
-```typescript
-export default {
-  expo: {
-    name: "xxxxx",
-    slug: "xxxxx",
+```json
+// app.jsonにデフォルト設定を記載
+{
+  "expo": {
+    "name": "xxxxxx",
+    "slug": "xxxxxx",
+    "orientation": "portrait"
     ...
   }
 }
 ```
 
-## .env を読み込んで設定値として利用する
+`app.json`の中身はfunctionの引数として参照できます。
 
-固有の設定値を.envに環境変数として指定している場合、[dotenv](https://github.com/motdotla/dotenv)を使えば設定ファイル内で読み込むことができます。
+## 環境別の設定項目をファイルに分ける
 
-```typescript
-import dotenv from "dotenv"
+`app.config.ts`から更に環境別に用意した設定ファイルをインポートしたいケースがあると思います。その場合、`app.config.dev.ts`等、tsファイルで用意しておきたいところですが、`app.config.ts`からはtsファイルをimportすることはサポートされていません。
 
-dotenv.config({ path: "../../.env.dev" })
-```
+[expo/configuration.md at main · expo/expo](https://github.com/expo/expo/blob/main/docs/pages/workflow/configuration.md#dynamic-configuration-with-appconfigjs)
 
-読み込んだ値は`process.env.xxxx`でアクセスできます。
+> Importing/requiring other JavaScript files. Using import/export syntax in external files is not supported. All imported files must be transpiled to support your current version of Node.js.
 
-```typescript
-export default {
-  expo: {
-    name: process.env.APP_NAME,
-     ...
-  }
+そのためjsファイルまたはjsonファイルで用意しておく必要があります。
+
+tsファイルにしておきtranspileするという手もありますが、管理の手間が増えてしまうため辞めたほうがよいと思います。また、設定ファイルを分けずにすべての環境の設定を`app.config.ts`に記載してしまうというのも一つの手段です。
+
+以下のどちらかでファイルを用意しておき、
+
+```json
+// app.config.<env>.json
+{
+  name: "yyyyy",
+  ...
 }
 ```
 
-アプリのコードから[expo-constants](https://docs.expo.io/versions/latest/sdk/constants/)を使って設定値にアクセスさせたい場合、以下のように`extra`フィールドに指定します。
+
+```js
+// app.config.<env>.js
+module.exports = {
+  name: "yyyyy",
+  ...
+}
+```
+
+`app.config.ts`からimportして利用します。個別の設定は`app.json`とは異なりルートに`{ "expo": {}}` は記述する必要が無い点に注意してください。
 
 ```ts
+import { ConfigContext } from "@expo/config"
+import merge from "deepmerge"
+import devConfig from "./app.config.dev"
+import productionConfig from "./app.config.production"
+
+type APP_ENV_NAME = "dev" | "production"
+
+const envMapping: { [key in APP_ENV_NAME]: Record<string, any> } = {
+  dev: devConfig,
+  production: productionConfig,
+}
+
+export default ({ config }: ConfigContext) => {
+  const appEnvName = process.env.APP_ENV || "dev"
+  if (!["dev", "production"].includes(appEnvName)) {
+    throw new Error(`APP_ENV: ${appEnvName} is not supported.`)
+  }
+
+  const envConfig = envMapping[appEnvName as APP_ENV_NAME]
+  const o = merge(config, envConfig)
+  return o
+}
+```
+
+
+## アプリから設定値を読み込む
+
+アプリのコードから[expo-constants](https://docs.expo.io/versions/latest/sdk/constants/)を使って設定値にアクセスさせたい場合、以下のように`extra`フィールドに環境変数の値を設定しておきます。
+
+```ts
+{
   extra: ["APP_NAME", "API_ENDPOINT"].reduce((envs, key) => ({
     ...envs,
     [key]: process.env[key],
   }), {})
+}
 ```
 
-コードからは以下ようにアクセスできます。
+コードからは以下のようにアクセスできます。
 
 ```ts
 import Constants from 'expo-constants'
 
 console.log("API_ENDPOINT:", Constants.manifest.extra.API_ENDPOINT)
 ```
+
+Expo Updateでなく新しい形式のEAS Updateを使っている場合、 `Constants.manifest`はnullになってしまうため、`Constants.manifest2` を使います。
+
+```ts
+import Constants from 'expo-constants'
+
+console.log("API_ENDPOINT:", Constants.manifest2.extra.expoClient.extra.API_ENDPOINT)
+```
+
+
+## アプリビルド時の設定
+
+開発環境ではExpoサーバの起動時に`APP_ENV=dev expo start`のように環境変数を指定できますが、EAS Buildでアプリバンドルをビルドする場合はサーバを起動するわけではないため、別途APP_ENVを渡す設定が必要です。
+
+
+EAS Buildで環境変数を渡すには`eas.json`で各プロファイルの`"env"`フィールドに項目を追加します。最低限`APP_ENV`だけ渡してあげれば、あとは`app.config.ts`でその値に応じて設定を切り分けることができます。
+
+```json
+{
+  "build": {
+    "dev": {
+      "env": {
+        "APP_ENV": "dev"
+      }
+    },
+    "production": {
+      "env": {
+        "APP_ENV": "production"
+      }
+    }
+  }
+}
+```
+
+`eas.json`に個別の環境変数をすべて設定してしまうこともできますが、`eas.json`の環境変数は開発時のExpoサーバ起動時に読み込まれないため、結局重複した設定を更に別の箇所に記載しなくならなくなってしまうため辞めたほうがよいです。
+
+また、もしも値をGit上で管理せず秘密にしたい場合、EAS BuildのSecretsを利用するのがよいと思います。この値は開発時(Expoサーバ起動時)には参照できないため、ビルドされたアプリバンドルからのみ使う想定になります。
+
+[Environment variables and secrets - Expo Documentation](https://docs.expo.dev/build-reference/variables/#using-secrets-in-environment-variables)
