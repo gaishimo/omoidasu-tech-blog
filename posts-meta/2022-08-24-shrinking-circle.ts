@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2022-08-24-shrinking-circle",
   title: "react-native-skiaで収縮する円を表現する",
   tagNames: [
     "react-native",

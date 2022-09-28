@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2022-07-25-eas-widget",
   title: "Expo (EAS Build)でAndroid・iOSのWidgetを作成した",
   tagNames: ["react-native", "expo", "EAS Build", "widget", "extension"],
   color1: "#1977f2",

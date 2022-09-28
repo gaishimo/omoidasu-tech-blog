@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2021-08-27-expo-links",
   title: "Expo(React Native)のリンク集",
   tagNames: ["expo", "react-native"],
   color1: "rgb(50, 50, 50)",

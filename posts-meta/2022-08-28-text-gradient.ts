@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2022-08-28-text-gradient",
   title: "react-native-skiaでテキストにグラデーションをかける",
   tagNames: [
     "react-native",
@@ -21,6 +22,10 @@ exports.meta = {
     "react-native-skiaでテキストにグラデーションをかける方法です。アニメーションも試してみます。",
   imagePath: null,
   priority: 0.7,
+  relatedPosts: [
+    "2022-08-30-skia-skeleton-screen",
+    "2022-09-02-ripple-effect-button",
+  ],
   lastUpdatedAt: parse(
     "2022-08-28 11:35:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",

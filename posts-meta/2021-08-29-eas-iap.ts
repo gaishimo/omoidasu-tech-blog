@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2021-08-29-eas-iap",
   title: "ExpoのManaged Workflowでアプリ内課金を実装する",
   tagNames: ["expo", "react-native", "eas", "EAS Build"],
   color1: "rgb(67,49,230)",

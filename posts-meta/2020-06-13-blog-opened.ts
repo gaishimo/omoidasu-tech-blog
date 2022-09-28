@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2020-06-13-blog-opened",
   title: "Omoidasu Techブログを開設しました!",
   tagNames: ["blog", "next.js", "mdx"],
   color1: "#00D5FF",
@@ -14,6 +15,7 @@ exports.meta = {
   author: "@gaishimo",
   description: "ブログを新たに開設しました。",
   imagePath: "/ogImage.png",
+  relatedPosts: ["2021-09-24-blog-rn-web", "2022-08-07-rn-skia-in-blog"],
   lastUpdatedAt: parse(
     "2021-09-18 17:00:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",

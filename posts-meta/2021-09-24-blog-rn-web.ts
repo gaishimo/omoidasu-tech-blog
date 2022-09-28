@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2021-09-24-blog-rn-web",
   title: "当ブログにReact Native for Webを導入しました",
   tagNames: ["react-native", "react-native-web", "blog", "next.js"],
   color1: "#1977f2",

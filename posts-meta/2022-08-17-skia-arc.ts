@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2022-08-17-skia-arc",
   title: "Skiaで円弧を描く",
   tagNames: ["react-native-skia", "アニメーション", "円弧"],
   color1: "lightblue",

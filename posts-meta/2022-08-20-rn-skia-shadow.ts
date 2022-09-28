@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2022-08-20-rn-skia-shadow",
   title: "react-native-skiaでドロップシャドウをつける",
   tagNames: ["react-native-skia", "シャドウ", "react-native"],
   color1: "rgb(220, 220, 220)",

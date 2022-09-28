@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2022-08-09-trigonometric-tool",
   title: "三角関数計算ツール📐",
   tagNames: ["react-native-skia", "三角関数", "数学"],
   color1: "#7BEAD9",

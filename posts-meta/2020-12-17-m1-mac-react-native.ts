@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2020-12-17-m1-mac-react-native",
   title: "M1 Mac上でReact Nativeアプリを実行・検証してみる",
   tagNames: ["expo", "react-native"],
   color1: "#5ED4F4",

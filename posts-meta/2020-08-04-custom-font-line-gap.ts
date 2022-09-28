@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2020-08-04-custom-font-line-gap",
   title:
     "React Nativeでカスタムフォントの行間がやたら拡がってしまう場合の調整方法",
   tagNames: ["react-native", "font", "custom font", "styling"],

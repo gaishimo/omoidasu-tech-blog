@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2020-12-03-vercel-error",
   title:
     "Next.js Vercelデプロイ時にエラー should NOT have fewer than 1 properties",
   tagNames: ["vercel", "next.js"],

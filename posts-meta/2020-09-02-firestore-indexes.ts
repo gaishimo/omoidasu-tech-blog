@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2020-09-02-firestore-indexes",
   title: "firestoreのindexを自動で管理する",
   tagNames: ["firebase", "firestore"],
   color1: "#EE7E0C",

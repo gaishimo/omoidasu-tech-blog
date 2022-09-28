@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2022-08-07-rn-skia-in-blog",
   title: "ブログにreact-native-skiaを導入しました🎨",
   tagNames: [
     "react-native-skia",
