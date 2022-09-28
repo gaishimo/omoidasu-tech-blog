@@ -1,0 +1,104 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-09-27-eas-managed-exo-player"
+
+export const headlines = [
+  { title: "v5以下でのExoPlayerを使うための設定" },
+  { title: "Config Pluginの作成" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+## v5以下でのExoPlayerを使うための設定
+
+[react-native-video](https://github.com/react-native-video/react-native-video)のv5系でExoPlayerを使うための設定です。
+
+[ExoPlayer](https://developer.android.com/guide/topics/media/exoplayer?hl=ja)はメディアを再生するためのAndroid用のライブラリです。react-native-videoのv6ではデフォルトでExoPlayerが使われるようになりますが、v5以下ではデフォルトでMediaPlayerが使われるため、ExoPlayerを使うには設定を変更する必要があります。
+
+素のReact Nativeプロジェクト(Bare Workflow)の場合、`react-native.config.js`で以下の設定を追加するか、
+
+```js
+module.exports = {
+  ...
+  dependencies: {
+    'react-native-video': {
+      platforms: {
+        android: {
+          sourceDir: '../node_modules/react-native-video/android-exoplayer',
+        },
+      },
+    },
+  },
+};
+```
+
+もしくは`android/settings.gradle`に以下の記載を追加する必要があります。
+
+```text
+include ':react-native-video'
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '/../node_modules/react-native-video/android-exoplayer')
+```
+
+[How can I force react-native-video to use Exoplayer ? · Issue #2461 · react-native-video/react-native-video](https://github.com/react-native-video/react-native-video/issues/2461)
+
+ただ、ExpoのManaged Workflowの場合これらを編集することができない(`react-native.config.js`は配置しても意味がない、settings.gradleはそもそもandroidフォルダが無い)ため、ビルド時(Prebuild)にConfig Pluginで更新する必要があります。
+
+
+## Config Pluginの作成
+
+Config Pluginで android/settings.gradle の中身を更新するにはMod Pluginの`withSettingsGradle`を利用します。
+
+[Config Plugins - Expo Documentation](https://docs.expo.dev/guides/config-plugins/#mod-plugins)
+
+
+`configPlugins/withExoPlayer.js` のようなパスにConfigPluginファイルを作成します。
+
+```js
+const { withSettingsGradle } = require("@expo/config-plugins")
+
+/**
+ * settings.gradleにExoPlayerの設定を追加する
+ */
+function withExoPlayer(config) {
+  return withSettingsGradle(config, config => {
+    if (config.modResults.language === "groovy") {
+      config.modResults.contents += `
+include ':react-native-video'
+project(':react-native-video').projectDir = new File(rootProject.projectDir, '../../../node_modules/react-native-video/android-exoplayer')
+`
+    } else {
+      throw new Error(
+        `Cannot setup ExoPlayer because the settings.gradle is not groovy`,
+      )
+    }
+    return config
+  })
+}
+
+module.exports = withExoPlayer
+```
+
+app.jsonのpluginsの設定に追加します。
+
+```json
+{
+  "expo": {
+    ...,
+    "plugins": ["./configPlugins/withExoPlayer"]
+  }
+}
+```
+
+これでEAS Buildを行うとPrebuild時にConfigPluginが実行されsettings.gradleが更新されます。
