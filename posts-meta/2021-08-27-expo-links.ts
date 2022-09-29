@@ -14,8 +14,13 @@ exports.meta = {
   ),
   author: "@gaishimo",
   description: "Expo (React Native)関連のリンクをまとめました。",
+  relatedPosts: [
+    "2021-06-04-hello-eas-build-managed",
+    "2021-08-29-eas-iap",
+    "2022-07-25-eas-widget",
+  ],
   lastUpdatedAt: parse(
-    "2022-02-18 08:30:00 +09:00",
+    "2022-09-30 08:40:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
