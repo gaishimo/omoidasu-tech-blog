@@ -1,0 +1,213 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-10-02-custom-haptic-ios"
+
+export const headlines = [
+  { title: "Custom Hapticを使うには" },
+  {
+    title: "react-native-core-haptics-api",
+    children: [
+      { title: "インストール" },
+      { title: "基本的な使い方" },
+      { title: "eventTypeの違い" },
+      { title: "Sharpnessの違い" },
+      { title: "Intensityの違い" },
+    ]
+  },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+## Custom Hapticsを使うには
+
+React NativeでHapticを使うには[expo-haptics](https://docs.expo.dev/versions/latest/sdk/haptics/)や[react-native-haptic-feedback](https://github.com/junina-de/react-native-haptic-feedback) 等のライブラリを使う方法があります。
+
+ただこれらは[UIFeedbackGenerator](https://developer.apple.com/documentation/uikit/uifeedbackgenerator)を使っており、標準で用意されているフィードバック(`notification`, `impact`, `selection`)しか利用することができません。ゲームで使われるような独自のパターンの振動([Custom Haptics](https://developer.apple.com/design/human-interface-guidelines/patterns/playing-haptics/#custom-haptics))を発生させるにはどうしたらよいでしょうか?
+
+Custom Hapticsを使うにはiOS13以降で導入された[Core Haptics](https://developer.apple.com/documentation/corehaptics)というAPIを利用する必要があります。これをReact Nativeで使うためのライブラリとして[react-native-core-haptics-api](https://github.com/insanj/react-native-core-haptics-api) があります。これを使ってCustom Hapticsを試してみたいと思います。
+
+
+
+## react-native-core-haptics-api
+
+### インストール設定
+
+iOS 13以上でないと使えないため、Podfileで以下を指定する必要があります。
+
+```ruby
+platform :ios, '13.0'
+```
+
+
+
+### 基本的な使い方
+
+APIはSwiftのAPIとできる限り近い形式になっています。以下は2つの振動を間隔を置いて発生させる例です。
+
+
+```ts
+import { HapticEngine, HapticPatternType } from "react-native-core-haptics-api"
+
+const pattern: HapticPatternType = {
+  hapticEvents: [
+    {
+      duration: 0.3,
+      // "HapticContinuous" と "HapticTransient"が指定可能
+      eventType: { rawValue: "HapticContinuous" },
+      relativeTime: 0,
+      parameters: [
+        { parameterID: { rawValue: "HapticIntensity" }, value: 0.7 },
+        { parameterID: { rawValue: "HapticShapness" }, value: 0.4 },
+      ],
+    },
+    {
+      duration: 0.3,
+      eventType: { rawValue: "HapticContinuous" },
+      relativeTime: 0.5,
+      parameters: [
+        { parameterID: { rawValue: "HapticIntensity" }, value: 0.7 },
+        { parameterID: { rawValue: "HapticShapness" }, value: 0.4 },
+      ],
+    },
+  ],
+}
+await HapticEngine.start(undefined)
+await HapticEngine.makePlayer(pattern, undefined)
+
+const startTime = 0
+await HapticEngine.startPlayerAtTime(pattern, startTime, undefined)
+
+setTimeout(async () => {
+  await HapticEngine.stop(undefined)
+}, 3000)
+
+```
+
+一つの振動をHapticEventとして定義し、それを組み合わせてHapticPatternを作成します。`relativeTime`は開始から何秒後に発生させるかを指定します。
+
+引数で`undefined`を渡している箇所がいくつかありますが、これを省略するとエラーになってしまうので注意してください。
+
+使い終わったら`HapticEngine.stop()`で終了させます。
+
+
+### eventTypeの違い
+
+`eventType`には`HapticContinuous`と`HapticTransient`が指定可能です。振動を継続的に発生させるか、一瞬発生させるかの違いです。ただこれは実際に体感してみないと分かりづらいため、以下のパターンで違いを理解してみます。まず`HapticTransient`のイベントを継続的に発生させた後、`HapticContinues`に切り替えます。
+
+
+```ts
+const pattern: HapticPatternType = {
+  hapticEvents: [...Array(20).keys()].map(i => ({
+    duration: 0.1,
+    eventType: {
+      rawValue: i < 10 ? "HapticTransient" : "HapticContinuous",
+    },
+    relativeTime: 0.2 * i,
+    parameters: [
+      {
+        parameterID: { rawValue: "HapticIntensity" },
+        value: 0.5,
+      },
+    ],
+  })),
+}
+```
+
+実際に実行してみると、前半は一つひとつのイベントがポコッ、ポコッという感じで瞬間的に発生し、後半はブッ、ブッという感じで長めになっているのがわかります。
+
+eventTypeにはオーディオ用の`AudioContinuous`と`AudioCustom`も利用できますが今回は試しません。
+
+### Sharpnessの違い
+
+イベントのパラメータとして`HapticShapness`を設定できます。これも違いを理解するために以下のパターンを試してみます。前半はSharpnessの値を低くし、後半は高くしています。
+
+```ts
+const pattern: HapticPatternType = {
+  hapticEvents: [...Array(20).keys()].map(i => ({
+    duration: 0.1,
+    eventType: { rawValue: "HapticContinuous" },
+    relativeTime: 0.2 * i,
+    parameters: [
+      {
+        parameterID: { rawValue: "HapticSharpness" },
+        value: i < 10 ? 0.01 : 1,
+      },
+    ],
+  })),
+}
+```
+
+実際に実行すると、前半と後半で振動の仕方が異なっているのがわかります。 前半は少し鈍く(重く)、後半は鋭く(軽く)感じます。
+
+### Intensityの違い
+
+イベントのパラメータには`HapticIntensity`という値も設定できます。前半は値を低く、後半は値を高くしてみます。
+
+```ts
+const pattern: HapticPatternType = {
+  hapticEvents: [...Array(20).keys()].map(i => ({
+    duration: 0.1,
+    eventType: { rawValue: "HapticContinuous" },
+    relativeTime: 0.2 * i,
+    parameters: [
+      {
+        parameterID: { rawValue: "HapticIntensity" },
+        value: i < 10 ? 0.01 : 1,
+      },
+    ],
+  })),
+}
+```
+
+実際に実行すると振動の強さが前半と後半で異なるのが確認できます。
+
+### 独自のパターンを作ってみる
+
+独自でゲームで使うようなパターンを作成してみます。一定間隔でイベントを発生させますが、前半と後半でイベントのパラメータを変更しています。前半は長さ・間隔が長めで、後半では短くなります。Intensityも後半強くしています。
+
+```ts
+const pattern = {
+  hapticEvents: [...Array(30).keys()].map(i => ({
+    duration: i < 10 ? 0.2 : 0.15,
+    relativeTime: [...Array(i).keys()].reduce(
+      (sum, current) => sum + (current < 10 ? 0.25 : 0.18),
+      0,
+    ),
+    eventType: { rawValue: "HapticContinuous" },
+    // relativeTime: i * 0.3,
+    parameters: [
+      {
+        parameterID: { rawValue: "HapticSharpness" },
+        value: 0.1,
+      },
+      {
+        parameterID: { rawValue: "HapticIntensity" },
+        value: i < 15 ? 0.8 : 1,
+      },
+    ],
+  })),
+}
+```
+
+実際に実行してみると、前半はブー、ブー、ブー、という感じで貯めるような感じに振動し、後半になると強くなりブ、ブ、ブ、ブ、ブと一気に放つような振動になります。文章表現だと伝わりにくい部分があるので、興味あるかたは実際に試してみることをおすすめします。
+
+実際に試したサンプルコードは[こちら](https://github.com/gaishimo/RnBareSandbox/blob/custom-haptics/Page.tsx)になります。
+
+
+## 参考
+
+- [Playing haptics - Patterns - Human Interface Guidelines - Design - Apple Developer](https://developer.apple.com/design/human-interface-guidelines/patterns/playing-haptics/)
+- [Core Haptics - カスタムハプティックパターンの作成と再生 - Qiita](https://qiita.com/shu223/items/7e1578d7515cb44d3980)
+
