@@ -19,7 +19,7 @@ exports.meta = {
   priority: 0.7,
   relatedPosts: [],
   lastUpdatedAt: parse(
-    "2022-10-02 11:10:44 +09:00",
+    "2022-10-03 09:25:44 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

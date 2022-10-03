@@ -32,7 +32,7 @@ export default props => (
 
 ## Custom Hapticsを使うには
 
-React NativeでHapticを使うには[expo-haptics](https://docs.expo.dev/versions/latest/sdk/haptics/)や[react-native-haptic-feedback](https://github.com/junina-de/react-native-haptic-feedback) 等のライブラリを使う方法があります。
+React NativeでHaptic(触覚フィードバック)を使うには[expo-haptics](https://docs.expo.dev/versions/latest/sdk/haptics/)や[react-native-haptic-feedback](https://github.com/junina-de/react-native-haptic-feedback) 等のライブラリを使う方法があります。
 
 ただこれらは[UIFeedbackGenerator](https://developer.apple.com/documentation/uikit/uifeedbackgenerator)を使っており、標準で用意されているフィードバック(`notification`, `impact`, `selection`)しか利用することができません。ゲームで使われるような独自のパターンの振動([Custom Haptics](https://developer.apple.com/design/human-interface-guidelines/patterns/playing-haptics/#custom-haptics))を発生させるにはどうしたらよいでしょうか?
 
