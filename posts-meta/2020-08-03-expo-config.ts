@@ -15,10 +15,12 @@ exports.meta = {
   author: "@gaishimo",
   description:
     "Expoの設定ファイルをtypescriptで動的に書くやり方について説明します。アプリから環境変数を参照する方法についても記載します。",
-  imagePath: "/ogImage.png",
+  imagePath:
+    "/posts/2022-10-05-eas-managed-os-versions/exo-build-properties.png",
   relatedPosts: [
     "2021-08-29-eas-iap",
     "2022-07-25-eas-widget",
+    "2022-10-05-eas-managed-os-versions",
     "2021-06-04-hello-eas-build-managed",
   ],
   lastUpdatedAt: parse(

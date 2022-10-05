@@ -1,0 +1,92 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-10-05-eas-managed-os-versions"
+
+export const headlines = [
+  { title: "Bare Workflowの場合" },
+  { title: "expo-build-properties" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+ExpoのManaged WorkflowでAndroidやiOSの最低対応バージョンを変更する方法です。
+
+
+## Bare Workflowの場合
+
+素のReact Nativeプロジェクト(Bare Workflow)ではAndroidのSDKバージョンやiOSのターゲットバージョンは設定ファイルで変更できます。
+
+Androidの場合は`android/build.gradle`を編集します。
+
+```text
+buildToolsVersion = "31.0.0"
+minSdkVersion = 26
+compileSdkVersion = 30
+targetSdkVersion = 31
+```
+
+- [Android SDK バージョンのプロパティ  |  Android NDK  |  Android Developers](https://developer.android.com/ndk/guides/sdk-versions?hl=ja)
+- [compileSdk・minSdk・targetSdkの違い(Android) - Qiita](https://qiita.com/uhooi/items/0f2ad61d83b96d9166c8)
+
+
+iOSの最低バージョンを指定するには`ios/Podfile`で以下を編集します。
+
+
+```ruby
+platform :ios, '13.0'
+```
+
+- [CocoaPods Guides - Podfile Syntax Reference <span>v1.11.2</span>](https://guides.cocoapods.org/syntax/podfile.html#platform)
+
+
+ただこれらの設定はExpoのManaged Workflowの場合は編集できません(そもそも`android`、`ios`フォルダ自体が管理されていない)。これらを変更したい場合expo-build-propertiesを使います。
+
+
+## expo-build-properties
+
+[expo-build-properties](https://docs.expo.dev/versions/latest/sdk/build-properties/)はビルド時の設定値を変更するためのConfig Pluginです。
+
+EAS Buildではビルド時にビルド用の設定値を`android/gradle.properties`、`ios/Podfile.properties.json`から読み込みますが、expo-build-propertiesはその前にこれらのファイルに渡した値を書き込んでくれます。
+
+設定したい値は`app.json`で以下のように指定します。
+
+```json
+{
+  "expo": {
+    ...
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 31,
+            "minSdkVersion": 26,
+          },
+          "ios": {
+            "deploymentTarget": "13.0"
+          },
+        }
+      ],
+    ]
+  }
+}
+```
+
+設定可能な値は以下で参照可能です。
+
+[BuildProperties - Expo Documentation](https://docs.expo.dev/versions/latest/sdk/build-properties/#pluginconfigtype)
+
+Androidの場合sdkバージョンだけではなくkotlinのバージョンや`pickFirst`の記述を追加したり、iOSの場合`useFrameworks`を追加できたり、細かな設定が可能なことがわかります。
+

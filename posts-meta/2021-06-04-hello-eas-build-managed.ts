@@ -19,6 +19,7 @@ exports.meta = {
   relatedPosts: [
     "2021-08-29-eas-iap",
     "2022-07-25-eas-widget",
+    "2022-10-05-eas-managed-os-versions",
     "2022-09-27-eas-managed-exo-player",
   ],
   lastUpdatedAt: parse(
