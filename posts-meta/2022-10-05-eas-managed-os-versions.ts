@@ -5,7 +5,13 @@ exports.meta = {
   id: "2022-10-05-eas-managed-os-versions",
   title:
     "ExpoのManaged Workflowでビルド時の設定値(ターゲットOSバージョン等)を変更する",
-  tagNames: ["react-native", "expo", "EAS Build", "Managed Workflow"],
+  tagNames: [
+    "react-native",
+    "expo",
+    "EAS Build",
+    "Config Plugin",
+    "Managed Workflow",
+  ],
   color1: "#D2CAFD",
   color2: "#392AC4",
   createdAt: parse(
