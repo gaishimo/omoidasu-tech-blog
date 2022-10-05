@@ -16,7 +16,8 @@ exports.meta = {
   author: "@gaishimo",
   description:
     "ExpoのManaged Workflowにおいてexpo-build-propertiesでAndroidのminSdkVersionやiOSのターゲットバージョンを設定する方法です。",
-  imagePath: null,
+  imagePath:
+    "/posts/2022-10-05-eas-managed-os-versions/exo-build-properties.png",
   priority: 0.7,
   relatedPosts: [
     "2022-09-27-eas-managed-exo-player",
