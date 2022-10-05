@@ -24,8 +24,16 @@ exports.meta = {
     "2DグラフィックライブラリをReact Nativeで扱うためのreact-native-skiaを当ブログに導入しました",
   imagePath: "/posts/2022-08-07-rn-skia-in-blog/image.png",
   priority: 0.8,
+  relatedPosts: [
+    "2021-09-24-blog-rn-web",
+    "2022-08-28-text-gradient",
+    "2022-09-14-skia-dimly-glowing-light",
+    "2022-08-20-rn-skia-shadow",
+    "2022-08-24-shrinking-circle",
+    "2022-09-06-done-animation",
+  ],
   lastUpdatedAt: parse(
-    "2022-08-08 09:15:00 +09:00",
+    "2022-10-05 09:40:00 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
