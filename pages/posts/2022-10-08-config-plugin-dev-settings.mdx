@@ -1,0 +1,200 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-10-08-config-plugin-dev-settings"
+
+export const headlines = [
+  { title: "Config Plugin用のtsconfig.json" },
+  { title: "expo-module-scripts" },
+  { title: "フォルダ構成" },
+  { title: "jestでのテストの設定" },
+  { title: "スクリプトをpackage.jsonに追加" },
+  { title: "Config Pluginの実行を手元で検証する" },
+  { title: "実際の設定サンプル" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+Expoの[Config Plugin](https://docs.expo.dev/guides/config-plugins/)を独自で作成する場合コードはJavaScriptで記述できますが、コード量が増えてきたり複雑な処理を行うPluginを作成したい場合、型のサポートの恩恵を受けられるためTypeScriptを利用するのがおすすめです。
+
+この記事ではConfig PluginをTypeScriptで作成するための設定やテストの設定について説明します。
+
+記載の内容は以下の公式のドキュメントを元にしています。
+- [Config Plugins - Expo Documentation](https://docs.expo.dev/guides/config-plugins/#developing-a-plugin)
+- [expo/packages/expo-module-scripts at main · expo/expo](https://github.com/expo/expo/tree/main/packages/expo-module-scripts#-config-plugin)
+
+
+## Config Plugin用のtsconfig.json
+
+Config PluginはNode.js(LTS)で実行されるため、TypeScriptでコードを書いた場合Node.jsで実行可能なJavaScriptにTranspileする必要があります。
+
+React NativeアプリのソースコードもTypeScriptで記述することができますが、トランスパイルするターゲットがConfig Pluginとは異なる(ES6やJSXがサポートされている)ため、同じtsconfig.jsonを共有することはできません。そのためConfig Plugin用に別途tsconfig.jsonを用意する必要があります。
+
+## expo-module-scripts
+
+expoがユーティリティとして用意している[expo-module-scripts](https://github.com/expo/expo/tree/main/packages/expo-module-scripts)というライブラリが存在します。これはExpoのモジュールやSDKが共通で利用しているスクリプトや設定をまとめたものになります。
+
+Config Plugin用のtsconfig.jsonを用意してくれたり、Pluginのビルドを行うためのコマンドツール等を提供してくれます。利用する場合はインストールしておきます。
+
+```bash
+yarn add --dev expo-module-scripts
+```
+
+必ずしもこれを利用する必要はなく、もしも使わない場合は独自でtsconfig.jsonの記述やビルド用のスクリプトを用意する形になります。
+
+
+## フォルダ構成
+
+Config Plugin関連のファイルはすべて`plugin`フォルダに配置します。expo-module-scriptsのトランスパイル用のスクリプトがこの名前のフォルダ名であることを前提としているため、名前をそれに合わせます。別の名前にしても問題ありませんが、その場合はビルド用のスクリプトを自身で用意する必要があります。
+
+
+tsconfig.jsonは`plugin/tsconfig.json`に配置します。expo-module-scriptsが用意したtsconfigを継承しています。
+
+```json
+{
+  "extends": "expo-module-scripts/tsconfig.plugin",
+  "compilerOptions": {
+    "outDir": "build",
+    "rootDir": "src"
+  },
+  "include": ["./src"],
+  "exclude": ["**/__mocks__/*", "**/__tests__/*"]
+}
+```
+
+ソースコードは`plugin/src`に配置し、トランスパイルされたコードは`plugin/build`に吐かれます。
+
+## Config Pluginを配置
+
+実際にTypeScriptで書かれたConfig Pluginをsrc配下に配置します。
+
+`plugin/src/withExample.ts`
+
+```ts
+import { ConfigPlugin } from "@expo/config-plugins"
+
+type Props = { name: string }
+
+export const withExample: ConfigPlugin<Props> = (config, props) => {
+  console.log("withExample()")
+  config.name = props.name
+  return config
+}
+```
+
+`plugin/src/index.ts`
+
+```ts
+import { ConfigPlugin } from "@expo/config-plugins"
+import { withExample } from "./withExample"
+
+const withPlugins: ConfigPlugin = config => {
+  config = withExample(config, { name: "hello" })
+  return config
+}
+
+export default withPlugins
+```
+
+この状態で以下のコマンドを実行すると`plugin/build`配下にトランスパイルされたjsファイルが生成されます。
+```bash
+EXPO_NONINTERACTIVE=1 npx expo-module build plugin
+```
+
+`EXPO_NONINTERACTIVE=1`を指定しているのは指定しないとwatchモードになるためです。逆にwatchする場合はこれを外せばOKです。
+
+PluginをPrebuild時に実行するようにするには、app.json（またはapp.config.js)に`plugins`の設定を追加します。
+
+```json
+{
+  "expo": {
+    ...
+    "plugins": ["./plugin/build"]
+  }
+}
+```
+
+
+## jestでのテストの設定
+
+jestでテストができるようするにはまずjestをインストールし
+
+```bash
+yarn add --dev jest
+```
+
+
+`plugin/jest.config.js`を配置します。
+
+```js
+module.exports = {
+  ...require("expo-module-scripts/jest-preset-plugin"),
+  testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$",
+}
+```
+
+ここでもexpo-module-scriptsが提供するjestの設定を利用しています。`testRegex`を指定し直しているのは`sample.test.ts`のような形式で配置した場合にテスト対象と認識されないためです。このあたりは自身の利用したい形式に合わせて設定を変えればよいと思います。
+
+実際にテストファイルを配置し
+
+`plugin/src/withExample.test.ts`
+
+```ts
+import { withExample } from "./withExample"
+
+describe("withExample", () => {
+  it("sets name in config", () => {
+    const config = {}
+    const result = withExample(config as any, { name: "hello" })
+    expect(result.name).toBe("hello")
+  })
+})
+```
+
+
+以下のコマンドでテストを実行します。
+
+```bash
+npx expo-module test plugin
+```
+
+## スクリプトをpackage.jsonに追加
+
+ビルドやテスト時に利用するコマンドはpackage.jsonに以下のように設定しておくとよいです。
+
+```json
+"scripts": {
+  ...
+  "plugin:build": "EXPO_NONINTERACTIVE=1 expo-module build plugin",
+  "plugin:watch": "expo-module build plugin",
+  "plugin:test": "expo-module test plugin",
+}
+```
+
+## Config Pluginの実行を手元で検証する
+
+Config Pluginが実際に問題なく動作するかどうかをローカルで確かめるには`expo prebuild`を実行します。
+
+```bash
+expo prebuild
+```
+
+実行後、Config Pluginで設定した内容がPrebuild時に実際に反映されているかを確認します。
+
+
+## 実際の設定サンプル
+
+今回おこなった設定を反映した実際のプロジェクトサンプルを以下で確認できます。
+
+https://github.com/gaishimo/rn-expo-sandbox/tree/config-plugin-dev
