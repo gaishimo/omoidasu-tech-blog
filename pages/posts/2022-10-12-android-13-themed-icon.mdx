@@ -98,6 +98,8 @@ const REPLACE_TEXT = `    <foreground android:drawable="@mipmap/ic_launcher_fore
     <monochrome android:drawable="@mipmap/ic_launcher_foreground" />`
 ```
 
+Config PluginをTypeScriptで記述するための設定については[こちらの記事](/posts/2022-10-08-config-plugin-dev-settings)を参考にしてください。
+
 `ic_launcher.xml`、`ic_launcher_rounded.xml`を更新するための[Default mods](https://docs.expo.dev/guides/config-plugins/#default-mods)は用意されていないため、`withDangerousMod`を使います。ファイルの内容を読み込み、テキストを置換しています。
 
 今回は面倒だったのでテキスト置換していますが今後これらのファイルの内容が変わることも考えられるため、気になる方はXMLパーサで読み込んでオブジェクトを更新しそれをXMLにまた変換するというやり方をした方が安全かもしれません。
