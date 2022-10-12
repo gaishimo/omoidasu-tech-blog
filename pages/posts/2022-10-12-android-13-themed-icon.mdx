@@ -1,0 +1,119 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-10-12-android-13-themed-icon"
+
+export const headlines = [
+  { title: "前提" },
+  { title: "必要な変更内容" },
+  { title: "Config Pluginの作成" },
+  { title: "実際の表示を確認" },
+  { title: "参考" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+Android 13で[Themed Icons(テーマ別アイコン)](https://developer.android.com/about/versions/13/features?hl=ja) が導入され、壁紙やテーマに合わせてアプリアイコンの色を変更できるようになりました。これをExpoのManaged Workflowで設定する方法について説明します。
+
+
+## 前提
+
+- Expo SDK 46で試しています
+- 事前にAdaptive Iconが設定されている必要があります [App Icons - Expo Documentation](https://docs.expo.dev/guides/app-icons/)
+
+
+## 必要な変更内容
+
+Themed Iconを使うには`android/app/src/main/res/mipmap-anydpi-v26`の下の`ic_launcher.xml`、`ic_launcher_rounded.xml` ファイルを編集する必要があります。
+
+Managed Workflowを利用している場合`android`フォルダ配下は管理されていないため、ビルド前のタイミング(Prebuild時)でConfig Pluginを実行してファイルの内容を更新する必要があります。
+
+一度`expo prebuild`を実行してビルド前の状態を確認すると`ic_launcher.xml`、`ic_launcher_rounded.xml`の中身は以下のようになっていることがわかります。
+
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@color/iconBackground"/>
+    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+</adaptive-icon>
+```
+
+これらのファイルの`<adaptive-icon>`の配下に以下の記述を追加する必要があります。
+
+```xml
+<monochrome android:drawable="@drawable/ic_launcher_foreground" />
+```
+
+## Config Pluginの作成
+
+以下のようなConfig Pluginを作成します。
+
+```ts
+import { ConfigPlugin, withDangerousMod } from "@expo/config-plugins"
+import fs from "fs"
+import path from "path"
+
+
+export const withMonochromeIcon: ConfigPlugin = config => {
+  return withDangerousMod(config, [
+    "android",
+    async c => {
+      console.log("withMonochromeIcon()")
+      const mipMap26Path = path.join(
+        c.modRequest.platformProjectRoot,
+        "app",
+        "src",
+        "main",
+        "res",
+        "mipmap-anydpi-v26",
+      )
+      for (const file of ["ic_launcher.xml", "ic_launcher_round.xml"]) {
+        const filePath = path.join(mipMap26Path, file)
+        const contents = fs.readFileSync(filePath, "utf-8")
+        const replacedContents = contents.replace(SEARCH_TEXT, REPLACE_TEXT)
+        fs.writeFileSync(filePath, replacedContents)
+        console.log("update", filePath)
+      }
+      return c
+    },
+  ])
+}
+
+const SEARCH_TEXT =
+  '    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>'
+const REPLACE_TEXT = `    <foreground android:drawable="@mipmap/ic_launcher_foreground"/>
+    <monochrome android:drawable="@mipmap/ic_launcher_foreground" />`
+```
+
+`ic_launcher.xml`、`ic_launcher_rounded.xml`を更新するための[Default mods](https://docs.expo.dev/guides/config-plugins/#default-mods)は用意されていないため、`withDangerousMod`を使います。ファイルの内容を読み込み、テキストを置換しています。
+
+今回は面倒だったのでテキスト置換していますが今後これらのファイルの内容が変わることも考えられるため、気になる方はXMLパーサで読み込んでオブジェクトを更新しそれをXMLにまた変換するというやり方をした方が安全かもしれません。
+
+
+## 実際の表示を確認
+
+実際にConfig Pluginを適用してPrebuildした後アプリをビルドしてみると、端末のホーム画面でアイコンが壁紙に合わせたカラーになっていることが確認できます。
+
+<NextImageWrapper
+  imageSize={{ width: 260, height: 400 }}
+  alt="Android 13 Themed Icon"
+  src="/posts/2022-10-12-android-13-themed-icon/android-13-themed-icons.png"
+/>
+
+## 参考
+
+- [機能と API の概要  |  Android デベロッパー  |  Android Developers](https://developer.android.com/about/versions/13/features?hl=ja)
+- [FlutterアプリをAndroid 13に対応させる](https://zenn.dev/tsuruo/articles/eae9dbbad8372f)
