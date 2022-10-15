@@ -152,7 +152,17 @@ export default ({ config }: ConfigContext) => {
 }
 ```
 
-コードからは以下のようにアクセスできます。
+コードからは以下のようにアクセスできます(Expo SDKが46以降の場合)。
+
+
+```ts
+import Constants from 'expo-constants'
+
+console.log("API_ENDPOINT:", Constants.expoConfig.extra.API_ENDPOINT)
+```
+
+
+Expo SDKが45以前の場合、`Constants.manifest`を使います。
 
 ```ts
 import Constants from 'expo-constants'
@@ -160,13 +170,6 @@ import Constants from 'expo-constants'
 console.log("API_ENDPOINT:", Constants.manifest.extra.API_ENDPOINT)
 ```
 
-Expo Updateでなく新しい形式のEAS Updateを使っている場合、 `Constants.manifest`はnullになってしまうため、`Constants.manifest2` を使います。
-
-```ts
-import Constants from 'expo-constants'
-
-console.log("API_ENDPOINT:", Constants.manifest2.extra.expoClient.extra.API_ENDPOINT)
-```
 
 
 ## アプリビルド時の設定
