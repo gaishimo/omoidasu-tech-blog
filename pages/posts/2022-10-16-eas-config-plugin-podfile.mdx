@@ -1,0 +1,70 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-10-16-eas-config-plugin-podfile"
+
+export const headlines = [
+  { title: "作成方法" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+ExpoのManaged Workflowを使っている場合にPodfileの内容を書き換えたい時があります。一部の項目(`deploymentTarget`, `useFrameworks`)については[expo-build-properties](https://docs.expo.dev/versions/latest/sdk/build-properties/#pluginconfigtypeios) で書き換えることができます([ExpoのManaged Workflowでビルド時の設定値(ターゲットOSバージョン等)を変更する](https://blog.omoidasu.dev/posts/2022-10-05-eas-managed-os-versions))が、それ以外の箇所を更新する場合、Config PluginのModを使って直接書き換える必要があります。
+
+
+## 作成方法
+
+firebase関連で以下のpod指定を追加しないといけない場合を例とします。
+
+```ruby
+pod 'Firebase', :modular_headers => true
+pod 'FirebaseCore', :modular_headers => true
+pod 'FirebaseCoreInternal', :modular_headers => true
+pod 'GoogleUtilities', :modular_headers => true
+```
+
+Podfileを書き換えるためのMod pluginはデフォルトでは用意されていないため、[`withDangerousMod`](https://docs.expo.dev/guides/config-plugins/#experimental-functionality)を使います。`withDangerousMod`に渡す非同期functionの中でファイルを読み込んで中身を更新します。
+
+
+```ts
+import { ConfigPlugin, withDangerousMod } from "@expo/config-plugins"
+import fs from "fs"
+import path from "path"
+
+export const withPodfileUpdate: ConfigPlugin = config => {
+  return withDangerousMod(config, [
+    "ios",
+    async c => {
+      const podfilePath = path.join(c.modRequest.platformProjectRoot, "Podfile")
+      const contents = fs.readFileSync(podfilePath, "utf-8")
+      const replaced = contents.replace(SEARCH_TEXT, REPLACE_TEXT)
+      fs.writeFileSync(podfilePath, replaced)
+
+      return c
+    },
+  ])
+}
+
+const SEARCH_TEXT = " # Uncomment to opt-in to using Flipper"
+const REPLACE_TEXT = `
+  pod 'Firebase', :modular_headers => true
+  pod 'FirebaseCore', :modular_headers => true
+  pod 'FirebaseCoreInternal', :modular_headers => true
+  pod 'GoogleUtilities', :modular_headers => true
+
+  # Uncomment to opt-in to using Flipper`
+`
+```
+
+中身はテキスト置換で強引に更新していますが、React Native (Expo SDK)のバージョンアップ等で元のPodfileの中身が変わり更新が効かなくなる可能性があるので、使う場合はバージョンアップ時に都度動作するかどうか検証する必要があります。

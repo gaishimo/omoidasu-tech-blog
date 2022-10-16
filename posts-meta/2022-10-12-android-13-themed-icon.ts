@@ -26,6 +26,7 @@ exports.meta = {
     "/posts/2022-10-12-android-13-themed-icon/android-13-themed-icons.png",
   priority: 0.7,
   relatedPosts: [
+    "2022-10-16-eas-config-plugin-podfile",
     "2022-10-08-config-plugin-dev-settings",
     "2022-10-05-eas-managed-os-versions",
     "2022-09-27-eas-managed-exo-player",

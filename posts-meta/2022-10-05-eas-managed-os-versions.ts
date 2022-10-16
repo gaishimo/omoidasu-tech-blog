@@ -26,6 +26,7 @@ exports.meta = {
     "/posts/2022-10-05-eas-managed-os-versions/exo-build-properties.png",
   priority: 0.7,
   relatedPosts: [
+    "2022-10-16-eas-config-plugin-podfile",
     "2022-09-27-eas-managed-exo-player",
     "2022-07-25-eas-widget",
     "2021-06-04-hello-eas-build-managed",

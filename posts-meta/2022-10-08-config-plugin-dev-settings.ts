@@ -23,7 +23,11 @@ exports.meta = {
     "ExpoのConfig PluginをTypeScriptで開発するための環境設定について説明します。",
   imagePath: null,
   priority: 0.7,
-  relatedPosts: [],
+  relatedPosts: [
+    "2022-10-16-eas-config-plugin-podfile",
+    "2022-10-05-eas-managed-os-versions",
+    "2022-09-27-eas-managed-exo-player",
+  ],
   lastUpdatedAt: parse(
     "2022-10-08 17:20:20 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
