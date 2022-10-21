@@ -1,0 +1,175 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-10-19-skia-curved-line-chart"
+
+export const headlines = [
+  { title: "角張った折れ線グラフ" },
+  { title: "カーブのついた折れ線グラフ" },
+  { title: "カーブのテンションを変化させてみる" },
+  { title: "コード" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+[react-native-graph](https://github.com/margelo/react-native-graph)等で見られる、カーブのついた丸みのある折れ線グラフを実現してみたいと思います。描画はReact Native Skiaで行います。
+
+## 角張った折れ線グラフ
+
+まず通常の角張った折れ線グラフを作ってみます。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-10-19-skia-curved-line-chart/AngularLineGraph")
+    }
+    fallback={() => <LoadingRect width={300} height={200} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+これは各点から点へ直接を引くだけです。
+
+```tsx
+const hPadding = 20
+const yScale = 2
+const data = [35, 75, 45, 60, 40]
+const xPointsDistance = (canvasSize.width - hPadding * 2) / (data.length - 1)
+
+const path = Skia.Path.Make()
+
+for (let i = 0; i < data.length; i++) {
+  if (i === 0) {
+    path.moveTo(hPadding, canvasSize.height - data[0])
+  } else {
+    path.lineTo(
+      hPadding + i * xPointsDistance,
+      canvasSize.height - data[i] * yScale,
+    )
+  }
+}
+
+<Canvas>
+  <Path path={path} color="lightblue" strokeWidth={2} style="stroke" />
+</Canvas>
+```
+
+
+## カーブのついた折れ線グラフ
+
+ではカーブのついた折れ線グラフを実装してみます。今回は[d3-shape](https://github.com/d3/d3-shape)のLine Generatorを使います。自身でベジェ曲線を使って計算することもできますが難易度が上がるためそれはまたの機会にします。
+
+D3 Shapeの[Line Generator](https://www.d3indepth.com/shapes/)を使うと座標のデータからPathデータを生成することができます。ジェネレータを作成する際にはカーブを設定できるため(`line().curve()`)、これを利用します。
+
+```tsx
+import * as shape from "d3-shape"
+
+const hPadding = 8
+const yScale = 2
+
+const data = [5, 75, 25, 60, 35]
+const xPointsDistance = (canvasSize.width - hPadding * 2) / (data.length - 1)
+
+const points: [number, number][] = data.map((d, i) => [
+  hPadding + i * xPointsDistance,
+  canvasSize.height - d * yScale,
+])
+
+const lineGenerator = shape.line().curve(shape.curveCardinal.tension(0.1))
+const pathData = lineGenerator(points)
+
+<Canvas>
+  <Path path={pathData} style="stroke" color="lightblue" strokeWidth={2} />
+</Canvas>
+```
+
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-10-19-skia-curved-line-chart/CurvedLineGraph")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+`curve()` に渡す引数で[カーブの種類](https://www.d3indepth.com/examples-merged/shapes/curve-explorer/)を指定することができます。
+
+## カーブのテンションを変化させてみる
+
+カーブで`curveCardinal`を設定している際、`tension`の値を0から1まで指定できます。これはカーブの張力を指定するものです。これをアニメーションで変化させてみます。以下、タップするとテンションが0 - 1で変化します。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-10-19-skia-curved-line-chart/AnimatedCurvedLineGraph")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+```tsx
+const canvasSize = { width: 300, height: 200 }
+const hPadding = 8
+const yScale = 2
+
+const data = [5, 75, 25, 60, 35]
+const xPointsDistance = (canvasSize.width - hPadding * 2) / (data.length - 1)
+
+const points: [number, number][] = data.map((d, i) => [
+  hPadding + i * xPointsDistance,
+  canvasSize.height - d * yScale,
+])
+const lineGenerator = shape.line().curve(shape.curveCardinal.tension(0.1))
+const pathData = lineGenerator(points)
+
+export default function AnimatedCurvedLineGraph() {
+  const tension = useValue(1)
+  const pathData = useComputedValue(() => {
+    const lineGenerator = shape
+      .line()
+      .curve(shape.curveCardinal.tension(tension.current))
+    const data = lineGenerator(points)
+    return data
+  }, [tension])
+
+  const touchHandler = useTouchHandler({
+    onStart: () => {
+      if (tension.current === 0) {
+        runTiming(tension, 1, {
+          easing: Easing.inOut(Easing.ease),
+          duration: 1000,
+        })
+      }
+      if (tension.current === 1) {
+        runTiming(tension, 0, {
+          easing: Easing.inOut(Easing.ease),
+          duration: 1000,
+        })
+      }
+    },
+  })
+
+  return (
+    <Canvas style={[styles.canvas, canvasSize]} onTouch={touchHandler}>
+      <Path path={pathData} style="stroke" color="lightblue" strokeWidth={2} />
+    </Canvas>
+  )
+}
+```
+
+## コード
+
+今回のすべてのコードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-10-19-skia-curved-line-chart)から確認できます。
