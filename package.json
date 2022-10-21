@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@mapbox/rehype-prism": "^0.8.0",
+    "@types/d3-shape": "^3.1.0",
     "@types/next": "^9.0.0",
     "@types/node": "^16.9.2",
     "@types/react": "^18.0.0",
