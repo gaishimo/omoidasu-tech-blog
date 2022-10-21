@@ -24,7 +24,11 @@ exports.meta = {
     "React Native Skiaでカーブのついた折れ線グラフを実現したいと思います。d3-shapeを使います。",
   imagePath: "/posts/2022-10-19-skia-curved-line-chart/curved-line-graph.png",
   priority: 0.7,
-  relatedPosts: [],
+  relatedPosts: [
+    "2022-09-18-quadratic-bezier-curve",
+    "2022-09-21-cubic-bezier-curve",
+    "2022-08-10-parabola-move",
+  ],
   lastUpdatedAt: parse(
     "2022-10-21 09:40:25 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
