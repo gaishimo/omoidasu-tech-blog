@@ -36,6 +36,7 @@ const withMDX = require("@next/mdx")({
 const withTM = require("next-transpile-modules")([
   "react-native-reanimated",
   "@shopify/react-native-skia",
+  "@miblanchard/react-native-slider",
 ])
 
 module.exports = withPlugins([withTM, withMDX], {

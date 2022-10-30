@@ -1,0 +1,204 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+import { CoinRotateAnimation } from "../../components/pages/2022-10-30-coin-rotate-animation/CoinRotateAnimation"
+import { CoinRotate1 } from "../../components/pages/2022-10-30-coin-rotate-animation/CoinRotate1"
+import { CoinRotate2 } from "../../components/pages/2022-10-30-coin-rotate-animation/CoinRotate2"
+
+
+import { meta } from "../../posts-meta/2022-10-30-coin-rotate-animation"
+
+export const headlines = [
+  { title: "表裏画像を用意" },
+  { title: "画像を回転させてみる" },
+  { title: "回転によって表裏の表示を切り替える" },
+  { title: "完成形" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+React Nativeでコインの裏表を回転(3D)させるアニメーションを実装します。react-native-reanimatedを利用します。
+
+<View style={{ marginTop: 8, marginBottom: 8 }}>
+  <CoinRotateAnimation />
+</View>
+
+## 表裏画像を用意
+
+まず表裏の画像をそれぞれ用意します。画像でなくともコンポーネントで表現してもOKです。
+
+<View style={{ marginTop: 16, marginBottom: 24, flexDirection: "row" }}>
+  <NextImageWrapper
+    imageSize={{ width: 100, height: 100 }}
+    style={{  }}
+    alt=""
+    src="/posts/2022-10-30-coin-rotate-animation/coinHead.png"
+  />
+  <NextImageWrapper
+    imageSize={{ width: 100, height: 100 }}
+    style={{ marginLeft: 24 }}
+    alt=""
+    src="/posts/2022-10-30-coin-rotate-animation/coinTail.png"
+  />
+</View>
+
+
+## 画像を回転させてみる
+
+
+まずこの画像の一つを回転させてみます。React Nativeではスタイルの`transform`で`rotateY`を指定することで、縦軸を中心とした3D回転を行うことができます。
+
+reanimatedのSharedValueを用意し`rotateY`の値を進捗に応じて動的に変更します。
+
+```tsx
+const progress = useSharedValue(0)
+const animatedStyle = useAnimatedStyle(
+  () => ({
+    transform: [{ rotateY: `${progress.value}deg` }],
+  }),
+  [progress],
+)
+
+useEffect(() => {
+  progress.value = withRepeat(withTiming(360, { duration: 3000 }), -1, false)
+}, [])
+
+<Animated.Image
+  source={...}
+  style={[styles.image, animatedStyle]}
+/>
+```
+
+<View style={{ marginTop: 0, marginBottom: 16 }}>
+  <CoinRotate1 />
+</View>
+
+## 回転によって表裏の表示を切り替える
+
+表裏が自然に回転しているように見せるには回転角度に応じて表裏の表示非表示を切り替える必要があります。0から90度までは表面、90度から270度までは裏面、270度から360度までは表面を表示する必要があります。
+
+以下のスライダーで角度を変更してみるとわかりやすいです。
+
+<View style={{ marginTop: 32, marginBottom: 48 }}>
+  <CoinRotate2 />
+</View>
+
+角度によって表示非表示を切り替えるには`opacity`を利用します。特定の角度のときは1で表示し、それ以外のときは0で非表示にします。また、裏面は表面に対して角度を-180度する必要があります。
+
+```tsx
+const image1AnimatedStyle = useAnimatedStyle(
+  () => ({
+    opacity: progress.value <= 90 || progress.value >= 270 ? 1 : 0,
+    transform: [{ rotateY: `${progress.value}deg` }],
+  }),
+  [progress],
+)
+
+const image2AnimatedStyle = useAnimatedStyle(
+  () => ({
+    opacity: progress.value > 90 && progress.value < 270 ? 1 : 0,
+    transform: [{ rotateY: `${progress.value - 180}deg` }],
+  }),
+  [progress],
+)
+```
+
+## 完成形
+
+あとは180度回転した後ディレイを入れるようにし、リピートさせれば完成です。
+
+<View style={{ marginTop: 8, marginBottom: 8 }}>
+  <CoinRotateAnimation />
+</View>
+
+全体のコードは以下です。
+
+```tsx
+import { useEffect } from "react"
+import { StyleSheet, View } from "react-native"
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from "react-native-reanimated"
+
+export function CoinRotateAnimation() {
+  const progress = useSharedValue(0)
+
+  const image1AnimatedStyle = useAnimatedStyle(
+    () => ({
+      opacity: progress.value <= 90 || progress.value >= 270 ? 1 : 0,
+      transform: [{ rotateY: `${progress.value}deg` }],
+    }),
+    [progress],
+  )
+
+  const image2AnimatedStyle = useAnimatedStyle(
+    () => ({
+      opacity: progress.value > 90 && progress.value < 270 ? 1 : 0,
+      transform: [{ rotateY: `${progress.value - 180}deg` }],
+    }),
+    [progress],
+  )
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withSequence(
+        withDelay(400, withTiming(180, { duration: 700 })),
+        withDelay(400, withTiming(360, { duration: 700 })),
+      ),
+      -1,
+      true,
+    )
+  }, [])
+
+  return (
+    <View style={styles.container}>
+      <Animated.Image
+        source={{
+          uri: "/posts/2022-10-30-coin-rotate-animation.mdx/coinHead.png",
+        }}
+        resizeMode="contain"
+        style={[styles.image, image1AnimatedStyle]}
+      />
+      <Animated.Image
+        source={{
+          uri: "/posts/2022-10-30-coin-rotate-animation.mdx/coinTail.png",
+        }}
+        resizeMode="contain"
+        style={[styles.image, image2AnimatedStyle]}
+      />
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    width: 160,
+    height: 160,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  image: {
+    position: "absolute",
+    width: 120,
+    height: 120,
+  },
+})
+```
+
+
+今回のすべてのコードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-10-30-coin-rotate-animation)から確認できます。
