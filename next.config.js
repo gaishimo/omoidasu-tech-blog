@@ -42,6 +42,9 @@ const withTM = require("next-transpile-modules")([
 module.exports = withPlugins([withTM, withMDX], {
   experimental: { nftTracing: true },
   pageExtensions: ["ts", "tsx", "mdx"],
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   webpack: config => {
     const originEntry = config.entry
     config.entry = async () => {
