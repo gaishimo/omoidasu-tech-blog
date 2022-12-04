@@ -1,0 +1,142 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2022-12-04-circle-gradient"
+
+export const headlines = [
+  { title: "Skiaでの実装" },
+  { title: "複数の円にまとめてグラデーションをかける" },
+  { title: "円以外の対象にもグラデーションをかけてみる"},
+  { title: "コード"},
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+最近、様々なサイトやロゴで枠線にグラデーションがかかっている円を見かけることがあります。
+
+Photoshopだとグラデーションオーバレイを使えば簡単に実現できますが、これをReact Native Skiaで実装してみたいと思います。
+
+
+## Skiaでの実装
+
+`<Circle />`を描画しその子要素に[SweepGradient](https://shopify.github.io/react-native-skia/docs/shaders/gradients#sweep-gradient)要素を追加します。こうすることで円の描画部分のみ(今回だと枠線のみ)を対象にグラデーションをかけることができます。
+
+```tsx
+const canvasSize = { width: 300, height: 300 }
+const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
+
+<Canvas style={[canvasSize]}>
+  <Circle
+    cx={center.x}
+    cy={center.y}
+    r={100}
+    strokeWidth={20}
+    style="stroke"
+  >
+    <SweepGradient
+      c={center}
+      colors={["cyan", "magenta", "yellow", "cyan"]}
+    />
+  </Circle>
+</Canvas>
+```
+
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-12-04-circle-gradient/CircleGradient.tsx")
+    }
+    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+## 複数の円にまとめてグラデーションをかける
+
+複数の対象に対してもグラデーションをかけることが可能です。`<Group />`でまとめその子要素に`<SweepGradient />`を追加します。こうすることで対象グループに対してまとめてグラデーションをかけることができます。Groupの外側に配置した要素にはグラデーションはかかりません。
+
+```tsx
+<Group>
+  <Circle
+    cx={center.x}
+    cy={center.y}
+    r={100}
+    strokeWidth={20}
+    style="stroke"
+  />
+  <Circle
+    cx={center.x}
+    cy={center.y}
+    r={60}
+    strokeWidth={20}
+    style="stroke"
+  />
+  <SweepGradient
+    c={center}
+    colors={["cyan", "magenta", "yellow", "cyan"]}
+  />
+</Group>
+```
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-12-04-circle-gradient/CircleGradient2.tsx")
+    }
+    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+## 円以外の対象にもグラデーションをかけてみる
+
+最後に、円の中にテキストを配置し一緒にグラデーションをかけてみたいと思います。先の例と同様にテキストと円を`<Group>`で囲み、`<SweepGradient>`を設定すればOKです。
+
+```tsx
+<Group>
+  <Circle
+    cx={center.x}
+    cy={center.y}
+    r={100}
+    strokeWidth={20}
+    style="stroke"
+  />
+  <Text font={font} x={center.x - 56} y={center.y + 12} text="Skia" />
+  <SweepGradient
+    c={center}
+    colors={["cyan", "magenta", "yellow", "cyan"]}
+  />
+</Group>
+```
+
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2022-12-04-circle-gradient/CircleGradient3.tsx")
+    }
+    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+## コード
+
+今回のすべてのコードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-12-04-circle-gradient)から確認できます。
+
+
+
+
+
