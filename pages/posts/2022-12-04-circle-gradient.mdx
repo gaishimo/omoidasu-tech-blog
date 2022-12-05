@@ -23,7 +23,7 @@ export default props => (
   </PostLayout>
 )
 
-最近、様々なサイトやロゴで枠線にグラデーションがかかっている円を見かけることがあります。
+最近、様々なサイトやバナー・ロゴ等で枠線にグラデーションがかかっている円を見かけることがあります。
 
 Photoshopだとグラデーションオーバレイを使えば簡単に実現できますが、これをReact Native Skiaで実装してみたいと思います。
 
@@ -52,16 +52,11 @@ const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 </Canvas>
 ```
 
-
-<View style={{ marginTop: 24, marginBottom: 40 }}>
-  <WithSkia
-    getComponent={
-      () => import("../../components/pages/2022-12-04-circle-gradient/CircleGradient.tsx")
-    }
-    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
-  />
-</View>
-
+<NextImageWrapper
+  imageSize={{ width: 300, height: 300 }}
+  alt="円の枠線にグラデーション"
+  src="/posts/2022-12-04-circle-gradient/circle1.png"
+/>
 
 ## 複数の円にまとめてグラデーションをかける
 
@@ -90,14 +85,11 @@ const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 </Group>
 ```
 
-<View style={{ marginTop: 24, marginBottom: 40 }}>
-  <WithSkia
-    getComponent={
-      () => import("../../components/pages/2022-12-04-circle-gradient/CircleGradient2.tsx")
-    }
-    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
-  />
-</View>
+<NextImageWrapper
+  imageSize={{ width: 300, height: 300 }}
+  alt="複数の円にグラデーション"
+  src="/posts/2022-12-04-circle-gradient/circle2.png"
+/>
 
 
 ## 円以外の対象にもグラデーションをかけてみる
@@ -121,15 +113,12 @@ const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 </Group>
 ```
 
+<NextImageWrapper
+  imageSize={{ width: 400, height: 400 }}
+  alt="複数の円にグラデーション"
+  src="/posts/2022-12-04-circle-gradient/circle-gradient.png"
+/>
 
-<View style={{ marginTop: 24, marginBottom: 40 }}>
-  <WithSkia
-    getComponent={
-      () => import("../../components/pages/2022-12-04-circle-gradient/CircleGradient3.tsx")
-    }
-    fallback={() => <LoadingRect width={300} height={300} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
-  />
-</View>
 
 
 ## コード
