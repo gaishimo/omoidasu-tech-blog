@@ -45,14 +45,7 @@ export default function TrigonometricTool() {
     <View style={{ width: toolWidth }}>
       <Canvas style={[styles.canvas]}>
         {/* X, Y軸 */}
-        {/* <Paint
-          ref={xyLineRef}
-          color="rgb(150, 150, 150)"
-          style="stroke"
-          strokeWidth={0.5}
-        >
-          <DashPathEffect intervals={[3, 3]} />
-        </Paint> */}
+
         <Path
           {...xyLineProps}
           path={`M 0 ${center.y} L ${toolWidth} ${center.y}`}
@@ -75,14 +68,6 @@ export default function TrigonometricTool() {
         />
 
         {/* sinとcosの補助線 */}
-        {/* <Paint
-          ref={supportLineRef}
-          color="lightblue"
-          style="stroke"
-          strokeWidth={1.5}
-        >
-          <DashPathEffect intervals={[3, 3]} />
-        </Paint> */}
         <Path
           {...supportLineProps}
           path={`M ${lineEndPos.x} ${lineEndPos.y} ${lineEndPos.x} ${center.y}`}
