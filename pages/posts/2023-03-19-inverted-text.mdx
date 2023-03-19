@@ -12,7 +12,7 @@ import { meta } from "../../posts-meta/2023-03-19-inverted-text"
 
 export const headlines = [
   { title: "テキストを背景色に合わせて反転させる" },
-  { title: "全体のコード" },
+  { title: "アニメーションさせてみる" },
 ]
 
 export default props => (
@@ -27,9 +27,7 @@ export default props => (
 
 
 
-React Native Skiaで、以下のようにテキストを背景色に合わせて部分的に反転させる方法です。
-
-
+React Native Skiaで以下のように、テキストを背景色に合わせて部分的に反転させる方法です。
 
 <View style={{ marginTop: 24, marginBottom: 40 }}>
   <WithSkia
@@ -58,57 +56,20 @@ React Native Skiaで、以下のようにテキストを背景色に合わせて
 
 マスクをして同じことが実現できると思うのですが、よいやり方がパッと思いつかなかったので、今回は上と下をそれぞれクリップする方法を採用しました。
 
-## 全体のコード
+全体のコードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2023-03-19-inverted-text/InvertedTextExample.tsx)です。
 
-```tsx
-import {
-  Canvas,
-  Group,
-  Rect,
-  rect,
-  Text,
-  useFont,
-} from "@shopify/react-native-skia"
-import { StyleSheet } from "react-native"
+## アニメーションさせてみる
 
-const canvasSize = { width: 200, height: 240 }
-const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
-const fontSize = 120
+ついでに、領域部分をアニメーションして変化させてみました。
 
-export default function InvertedTextExample() {
-  const font = useFont(require("../../../assets/fonts/Roboto400.ttf"), fontSize)
-  const upperRect = rect(0, 0, canvasSize.width, canvasSize.height / 2)
-  const lowerRect = rect(
-    0,
-    upperRect.height,
-    canvasSize.width,
-    canvasSize.height - upperRect.height,
-  )
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2023-03-19-inverted-text/InvertedTextExample2")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
 
-  const textProps = {
-    x: canvasSize.width / 2 - fontSize / 2 - 8,
-    y: canvasSize.height / 2 + fontSize / 2 - 16,
-    text: "80",
-    font,
-  }
 
-  if (font == null) return null
-
-  return (
-    <Canvas style={[styles.canvas, canvasSize]}>
-      <Rect rect={upperRect} color="black" style="fill" />
-      <Rect rect={lowerRect} color="white" style="fill" />
-      <Group clip={upperRect}>
-        <Text {...textProps} color="white" />
-      </Group>
-      <Group clip={lowerRect}>
-        <Text {...textProps} color="black" />
-      </Group>
-    </Canvas>
-  )
-}
-
-const styles = StyleSheet.create({
-  canvas: { borderWidth: 1, borderRadius: 2 },
-})
-```
+全体のコードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2023-03-19-inverted-text/InvertedTextExample2.tsx)です。
