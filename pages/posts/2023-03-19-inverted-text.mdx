@@ -1,0 +1,114 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2023-03-19-inverted-text"
+
+export const headlines = [
+  { title: "テキストを背景色に合わせて反転させる" },
+  { title: "全体のコード" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+
+## テキストを背景色に合わせて反転させる
+
+
+
+React Native Skiaで、以下のようにテキストを背景色に合わせて部分的に反転させる方法です。
+
+
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2023-03-19-inverted-text/InvertedTextExample")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+黒と白の文字をそれぞれ用意し、黒の領域で白の文字をクリップ、白の領域で黒の文字をクリップします。
+
+```tsx
+<Rect rect={upperRect} color="black" style="fill" />
+<Rect rect={lowerRect} color="white" style="fill" />
+<Group clip={upperRect}>
+  <Text {...textProps} color="white" />
+</Group>
+<Group clip={lowerRect}>
+  <Text {...textProps} color="black" />
+</Group>
+```
+
+こうすることで、テキストが背景色に合わせて反転しているように見せることができます。
+
+マスクをして同じことが実現できると思うのですが、よいやり方がパッと思いつかなかったので、今回は上と下をそれぞれクリップする方法を採用しました。
+
+## 全体のコード
+
+```tsx
+import {
+  Canvas,
+  Group,
+  Rect,
+  rect,
+  Text,
+  useFont,
+} from "@shopify/react-native-skia"
+import { StyleSheet } from "react-native"
+
+const canvasSize = { width: 200, height: 240 }
+const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
+const fontSize = 120
+
+export default function InvertedTextExample() {
+  const font = useFont(require("../../../assets/fonts/Roboto400.ttf"), fontSize)
+  const upperRect = rect(0, 0, canvasSize.width, canvasSize.height / 2)
+  const lowerRect = rect(
+    0,
+    upperRect.height,
+    canvasSize.width,
+    canvasSize.height - upperRect.height,
+  )
+
+  const textProps = {
+    x: canvasSize.width / 2 - fontSize / 2 - 8,
+    y: canvasSize.height / 2 + fontSize / 2 - 16,
+    text: "80",
+    font,
+  }
+
+  if (font == null) return null
+
+  return (
+    <Canvas style={[styles.canvas, canvasSize]}>
+      <Rect rect={upperRect} color="black" style="fill" />
+      <Rect rect={lowerRect} color="white" style="fill" />
+      <Group clip={upperRect}>
+        <Text {...textProps} color="white" />
+      </Group>
+      <Group clip={lowerRect}>
+        <Text {...textProps} color="black" />
+      </Group>
+    </Canvas>
+  )
+}
+
+const styles = StyleSheet.create({
+  canvas: { borderWidth: 1, borderRadius: 2 },
+})
+```
