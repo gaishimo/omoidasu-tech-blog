@@ -1,0 +1,260 @@
+
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2023-12-06-expo-modules"
+
+export const headlines = [
+  { title: "Expo Modulesとは何か" },
+  {
+    title: "Expo Modulesの特徴",
+    children: [
+      { title: "SwiftとKotlinで記述ができる" },
+      { title: "新アーキテクチャへの対応" },
+      { title: "ネイティブメソッドの引数検証" },
+      { title: "同期Functionと非同期Function" },
+      { title: "ネイティブからJSへのイベント通知" },
+      { title: "View Callbacks" },
+      { title: "Managed Workflowで利用可能" },
+    ]
+  },
+  { title: "まとめ" },
+  { title: "参考資料" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+この記事は[React Native Advent Calender](https://qiita.com/advent-calendar/2023/react-native)の6日目の記事になります。
+
+## Expo Modulesとは何か?
+
+当記事ではExpo Modulesとは何なのかについて説明します。
+
+基本的には[Expoのドキュメント](https://docs.expo.dev/modules/overview/)を見れば詳細は分かるのですが、この記事ではそれ以前にExpo Modulesがどのようなものなのか、使うとどのようなメリットがあるのか、大まかなイメージ・概要を掴んでもらいたいと思います。
+
+Expo ModulesはExpoが提供するNative Moduleを作成するための仕組みです。一見、expo-device, expo-haptics, expo-localizationのようなexpoが提供しているライブラリ群のことを指すのかと一見思ってしまいそうですが、そうではありません(それらのライブラリもExpo Modulesの仕組みで作られていたりするのであながち間違いではないのですが)。
+
+
+React NativeのプロジェクトにおいてiOSやAndroidのネイティブAPIを利用する機能を使いたい時、基本的にはサードパーティのライブラリを探すことになると思いますが、要件を満たせないときは自身でNative Moduleを作成する必要があります。ただNative Moduleを作成しようとなると色々とハードルが高く、メンテナンスや運用も大変です。Expoは今まで様々なNativeライブラリを開発・運用してきているので、それらの知見を元に作成のハードルを下げるための仕組みをExpo Modulesで提供してくれています。
+
+以下でExpo Modulesの特徴を見ていきたいと思います。
+
+
+## Expo Modulesの特徴
+
+### SwiftとKotlinで記述ができる
+
+Expo ModulesはSwiftやKotlinで記述することができます。
+
+Expoプロジェクト上で`npx create-expo-module@latest --local`でModuleを作成すると最小限動作するテンプレートを作成してくれます。
+
+```txt
+|--my-module
+|  |--android
+|  |  |--build.gradle
+|  |  |--src
+|  |  |  |--main
+|  |  |  |  |--AndroidManifest.xml
+|  |  |  |  |--java
+|  |  |  |  |  |--expo
+|  |  |  |  |  |  |--modules
+|  |  |  |  |  |  |  |--mymodule
+|  |  |  |  |  |  |  |  |--MyModule.kt
+|  |  |  |  |  |  |  |  |--MyModuleView.kt
+|  |--expo-module.config.json
+|  |--index.ts
+|  |--ios
+|  |  |--MyModule.podspec
+|  |  |--MyModule.swift
+|  |  |--MyModuleView.swift
+|  |--src
+|  |  |--MyModule.ts
+|  |  |--MyModule.types.ts
+|  |  |--MyModule.web.ts
+|  |  |--MyModuleView.tsx
+|  |  |--MyModuleView.web.tsx
+```
+
+基本的にコードは*.kt, *.swiftで記述し、JavaやObjective-Cを記述する必要はありません。
+
+MyModule.kt、MyModule.swiftがNative Moduleのサンプルで、MyModuleView.kt、MyModuleView.swiftがNative Viewのサンプルになっています。
+
+よりイメージを掴みたい場合、公式のTutorialを進めるよいと思います。 [Tutorial: Creating a native module - Expo Documentation](https://docs.expo.dev/modules/native-module-tutorial/)
+
+
+### 新アーキテクチャへの対応
+
+Expo ModulesはReact Nativeの新アーキテクチャに対応しているため、特に意識しなくとも新アーキテクチャを用いたNative Moduleを構築することができます。
+
+JSIによって構築されており、素のJSIを直接利用する場合はC++を記述する必要がありますが、Expo Moduleを使えばC++無しで利用することができます。
+
+Expo ModulesはTurbo Modulesそれ自体を利用しているわけではなく、それと同様の方法で独自にJSIによって構築されているようです。
+
+https://twitter.com/JI/status/1629242602590715904
+> Correction: Expo modules use JSI, the JS–native interface underlying Turbomodules but not codegen-based Turbomodules themselves
+
+
+またNative Viewのライブラリを作成する場合、通常は新旧両アーキテクチャで動作するように考慮する必要がありますが、Expo Moduleは互換レイヤーを用意してくれているため、それを意識しなくとも構築可能です。
+
+新アーキテクチャのJSIやTurbo Modules、CodeGenがどのようなものかについては以下の記事が参考になります。
+[React Nativeの Re-architecture について。 #react-native - Qiita](https://qiita.com/Naturalclar/items/30a07ff86acc7a1ea03c)
+
+
+
+### ネイティブメソッドの引数検証
+
+React Nativeの旧APIを使ってネイティブモジュールを作成した場合、問題になりやすいのはJavaScript側からネイティブメソッドに渡される引数の形式です。
+
+これについてはExpoブログの以下の記事で記載があります。https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492
+
+> One of the big pain points that we’ve encountered over the years is validation of arguments passed from JavaScript to native methods. This is especially painful when it comes to NSDictionary or ReadableMap, where the type of values is unknown and each property needs to be validated separately.
+
+例えば旧APIの場合、Objective-C(iOS)のネイティブメソッドで以下のようなDictionary形式の引数を受け取ることができます。
+
+```c
+@interface CustomModule : NSObject <RCTBridgeModule>
+@end
+
+@implementation CustomModule
+
+RCT_EXPORT_MODULE();
+
+RCT_EXPORT_METHOD(exampleMethod:(NSDictionary *)params)
+{
+    NSString *value1 = params[@"key1"];
+    NSString *value2 = params[@"key2"];
+}
+
+@end
+```
+
+この場合、paramsの中身が様々なキー・値形式を取り得るため、検証処理を行わないと予期せぬ値が渡ってきた時にエラーとなってしまいます。
+
+私も以前expo-in-app-purchasesの不具合に遭遇したことがありPull Requestを送ったことがあるのですが、これもネイティブメソッドの引数に関するものでした。
+https://github.com/expo/expo/pull/18272
+
+Expo ModuleのAPIでは自身で引数の検証を行う必要はなく、以下のように型を指定することができるため、ネイティブメソッドが引数の型を完全に把握できます。
+
+```swift
+struct Params: Record {
+  @Field var key1: String = "hello"
+  @Field var key2: Int = 0
+}
+
+// functionの定義箇所
+Function("exampleMethod") { params: Params in
+  print(params.key1)
+  print(params.key2)
+}
+```
+
+### 同期Functionと非同期Function
+
+Expo Modulesでは同期Functionと非同期Functionを定義することが可能です。
+
+Swift(iOS)の場合:
+
+```swift
+Function("hello") {
+  // ...
+}
+
+AsyncFunction("helloAsync") {
+  // ...
+}
+```
+
+Kotlin(Android)の場合:
+```kt
+Function("hello") {
+    // ...
+    return "hello"
+}
+
+AsyncFunction("helloAsync") {
+    // ...
+    return "hello"
+}
+```
+
+JS側からは以下のように呼び出します。AsyncFunctionの場合はPromiseが返ります。
+
+```js
+const result1 = MyModule.hello()
+
+const result2 = await MyModule.helloAsync()
+```
+
+
+
+Function(同期)の場合はJSスレッドと同じスレッドでネイティブコードが実行され、結果が返ってくるまでJSスレッドはブロックされます。
+
+AsyncFunction(非同期)の場合はJSスレッドとは別のスレッドでネイティブコードが実行され、JSスレッドはブロックされません。
+
+以下のような場合に非同期functionの使用が推奨されます。
+- 通信やファイルの読み書きなど、I/O処理を行う場合
+- UI関連の処理などをMain UIスレッドで実行させたい場合
+- 広範囲・長期間にわたる処理で、JSスレッドをブロックする処理
+
+https://docs.expo.dev/modules/module-api/#function
+https://docs.expo.dev/modules/module-api/#asyncfunction
+
+
+### ネイティブからJSへのイベント通知
+
+sendEventを使ってネイティブ側の情報をJS側にイベントとして送信することができます。
+
+公式Docのサンプルコード: https://docs.expo.dev/modules/module-api/#sending-events
+
+
+### View Callbacks
+
+ViewをタップしたときのようなViewに紐づくイベントを送信したいときView callbacksという仕組みを利用します。前述したsendEventはその目的で利用することはできません。
+
+公式Docのサンプルコード: https://docs.expo.dev/modules/module-api/#view-callbacks
+
+
+### Managed Workflowで利用可能
+
+Expo ModulesはEAS BuildのManaged Workflowを利用している場合でもそのまま利用することができます。
+
+既存のプロジェクトが存在する状態で`npx create-expo-module@latest --local`を実行すると、modulesフォルダにExpo Modulesが配置されます。このままEAS BuildでDevClientビルドを実行するとそのModuleが含まれた状態でビルドが作成されるため、そのModuleを含んだDevClientアプリで開発を行うことが可能です。
+
+ただmodulesフォルダに配置された場合、そのモジュールは独立していないので、Moduleのコードを変更した場合すぐにExampleアプリで実行して動作確認ができません。
+
+ExampleとなるReact Nativeプロジェクトを含めた状態でModuleを作成したい場合は、別のリポジトリに別パッケージとして作成するか、もしくはMonorepoにして、同一リポジトリ内の別パッケージとして作成する必要があります。別リポジトリとして独立した形で作成する場合は、既存プロジェクトが存在しないディレクトリで`npx create-expo-module@latest`を実行(`--local`無し)すればよいです。
+
+この辺りをどうするかは、Moduleの変更頻度がどれくらいありそうかによって決めると良さそうです。例えばModuleの変更頻度がほとんど無さそうな場合はmodulesフォルダに配置する形にし、もしも頻繁に変更しそうであるが、そのプロジェクトでしか使わないような場合はMonorepoで別パッケージにする、他のプロジェクトでも利用する場合は別リポジトリにする、といったようにするのが良いと思います。
+
+また、Expo ModulesはManaged Workflowでないと使えないわけではないので、Bare Workflowでも問題なく利用できます。
+
+
+## まとめ
+
+Expo Modulesについて見ていきましたが、Expoの知見が詰まった結晶という感じがします。Native Moduleの作成が必要になった時に一つの大きな選択肢となりそうです。
+
+より詳細は公式ドキュメントを参照ください。
+https://docs.expo.dev/modules/overview/
+
+また、以下で実際にexpoが作成したExpo Modulesの一覧を確認することが可能ですので、より実践的なサンプルコードを確認したい時参考になると思います。
+https://docs.expo.dev/modules/module-api/#examples
+
+
+## 参考資料
+
+- [Expo Modules API: Overview - Expo Documentation](https://docs.expo.dev/modules/overview/)
+- [Expo Modules API: Get started - Expo Documentation](https://docs.expo.dev/modules/get-started/)
+- [Module API Reference - Expo Documentation](https://docs.expo.dev/modules/module-api/)
+- [A peek into the upcoming “sweet” Expo module API | by Tomasz Sapeta | Exposition](https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492)
+- [React Nativeの Re-architecture について。 #react-native - Qiita](https://qiita.com/Naturalclar/items/30a07ff86acc7a1ea03c)
+- [Expo Modules APIを使ってFeliCaの読み取りを実装する](https://tech.fusic.co.jp/posts/2023-08-03-expo-modules-api-felica-reader/)
