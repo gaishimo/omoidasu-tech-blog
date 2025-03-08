@@ -46,7 +46,7 @@
     "next-transpile-modules": "^9.0.0",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "patch-package": "^6.4.7",
-    "prettier": "^2.4.0",
+    "prettier": "^3.5.3",
     "remark-autolink-headings": "^6.1.0",
     "remark-slug": "^6.1.0",
     "ts-node": "^10.9.1",
