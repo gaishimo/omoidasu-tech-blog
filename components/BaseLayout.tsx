@@ -71,14 +71,7 @@ export function BaseLayout(props: Props) {
           onLoad="this.media = 'all'"
         /> */}
 
-        <link href={PRISM_CSS_URL} rel="preload" as="style" />
-        <link
-          rel="stylesheet"
-          href={PRISM_CSS_URL}
-          media="print"
-          // @ts-ignore
-          onLoad="this.media = 'all'"
-        />
+        <link href={PRISM_CSS_URL} rel="stylesheet" as="style" />
       </Head>
 
       {/* <div css={styles.background}>
