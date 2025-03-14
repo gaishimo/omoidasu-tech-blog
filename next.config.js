@@ -31,13 +31,12 @@ const withMDX = require("@next/mdx")({
   },
 })
 
-const withTM = require("next-transpile-modules")([
-  "react-native-reanimated",
-  "@shopify/react-native-skia",
-  "@miblanchard/react-native-slider",
-])
-
 const nextConfig = {
+  transpilePackages: [
+    "react-native-reanimated",
+    "@shopify/react-native-skia",
+    "@miblanchard/react-native-slider",
+  ],
   pageExtensions: ["ts", "tsx", "mdx"],
   typescript: {
     ignoreBuildErrors: true,
@@ -102,4 +101,4 @@ const nextConfig = {
   },
 }
 
-module.exports = withTM(withMDX(nextConfig))
+module.exports = withMDX(nextConfig)
