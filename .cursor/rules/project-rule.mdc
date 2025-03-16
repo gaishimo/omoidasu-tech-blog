@@ -1,7 +1,8 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 
 - If code comments are to be included, they must be in English.
+- o not add imports for codes in the pre code in the mdx file for the article.
