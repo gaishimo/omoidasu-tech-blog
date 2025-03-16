@@ -23,7 +23,7 @@ exports.meta = {
   imagePath: "/posts/2022-08-24-shrinking-circle/shrinking-circles.png",
   priority: 0.7,
   lastUpdatedAt: parse(
-    "2022-08-24 11:35:00 +09:00",
+    "2025-03-16 14:48:05 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

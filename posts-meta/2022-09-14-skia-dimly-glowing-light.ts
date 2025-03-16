@@ -25,7 +25,7 @@ exports.meta = {
     "2022-08-20-rn-skia-shadow",
   ],
   lastUpdatedAt: parse(
-    "2022-09-14 11:05:00 +09:00",
+    "2025-03-16 14:48:05 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

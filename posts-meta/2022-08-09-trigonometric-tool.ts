@@ -16,7 +16,7 @@ exports.meta = {
   description:
     "三角関数の計算をおこなうためのツールをSkiaで作成してみました。角度と半径を元にsin, cosの計算を行います。",
   lastUpdatedAt: parse(
-    "2022-08-23 10:07:00 +09:00",
+    "2025-03-14 16:29:24 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

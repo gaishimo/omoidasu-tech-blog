@@ -18,7 +18,7 @@ exports.meta = {
     "Vercelでデプロイした時にshould NOT have fewer than 1 propertiesと謎のエラーが出た場合の対処法です。",
   imagePath: null,
   lastUpdatedAt: parse(
-    "2020-12-03 15:40:00 +09:00",
+    "2022-08-16 15:16:06 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

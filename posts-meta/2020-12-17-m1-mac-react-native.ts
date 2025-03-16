@@ -16,7 +16,7 @@ exports.meta = {
   description: "React NativeのアプリをM1 Mac上で検証する手順についてです。",
   imagePath: "/posts/2020-12-17-m1-mac-react-native/article-image.png",
   lastUpdatedAt: parse(
-    "2021-09-18 17:00:00 +09:00",
+    "2022-08-16 15:16:06 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

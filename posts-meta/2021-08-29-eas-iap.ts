@@ -18,7 +18,7 @@ exports.meta = {
   imagePath: "/posts/2021-08-28-eas-iap/expo-iap-image.png",
   priority: 0.8,
   lastUpdatedAt: parse(
-    "2022-09-23 17:30:00 +09:00",
+    "2022-09-25 14:20:08 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
