@@ -6,7 +6,7 @@
     "start": "next start",
     "postinstall": "patch-package && yarn generate-data-json",
     "generate-data-json": "node scripts/generatePostsAndTagsJson.js",
-    "update-last-updated": "node scripts/sync-last-updated-at.js",
+    "update-last-updated": "node scripts/syncLastUpdatedAt.js",
     "prebuild": "yarn generate-data-json && yarn update-last-updated"
   },
   "dependencies": {
