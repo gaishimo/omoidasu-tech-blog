@@ -20,8 +20,8 @@ export async function getStaticProps() {
 export async function getStaticPaths() {
   const tags = await getTags()
   return {
-    paths: Object.keys(tags).map(tag => `/tags/${tag}`),
-    fallback: true,
+    paths: Object.keys(tags).map(tag => `/tags/${tag.toLowerCase()}`),
+    fallback: false,
   }
 }
 
@@ -36,7 +36,9 @@ export default function TagPage(props: Props) {
   const filteredPosts = useMemo(
     () =>
       (props.posts || []).filter(post =>
-        post.tagNames.includes(tag.toString()),
+        post.tagNames
+          .map(t => t.toLowerCase())
+          .includes(tag.toString().toLowerCase()),
       ),
     [],
   )
