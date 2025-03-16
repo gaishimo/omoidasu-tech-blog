@@ -1,12 +1,12 @@
+import { Canvas, Path, Skia } from "@shopify/react-native-skia"
 import {
-  Canvas,
   Easing,
-  Path,
-  runTiming,
-  Skia,
-  useComputedValue,
-  useValue,
-} from "@shopify/react-native-skia"
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  withRepeat,
+  runOnJS,
+} from "react-native-reanimated"
 import { useCallback, useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { wait } from "../../../utils/wait"
@@ -30,12 +30,12 @@ function getVector(p1: { x: number; y: number }, p2: { x: number; y: number }) {
 
 export default function AnimatedCheckMark() {
   const [animating, setAnimating] = useState(false)
-  const circleProgress = useValue(0)
-  const done = useValue(false)
-  const checkMark1Progress = useValue(0)
-  const checkMark2Progress = useValue(0)
+  const circleProgress = useSharedValue(0)
+  const done = useSharedValue(false)
+  const checkMark1Progress = useSharedValue(0)
+  const checkMark2Progress = useSharedValue(0)
 
-  const activeArcPath = useComputedValue(() => {
+  const activeArcPath = useDerivedValue(() => {
     const path = Skia.Path.Make()
     const arcRect = {
       x: center.x - radius,
@@ -43,82 +43,105 @@ export default function AnimatedCheckMark() {
       width: radius * 2,
       height: radius * 2,
     }
-    if (done.current) {
+    if (done.value) {
       path.addArc(arcRect, 0, 360)
     } else {
-      path.addArc(arcRect, circleProgress.current * 360, 300)
+      path.addArc(arcRect, circleProgress.value * 360, 300)
     }
 
     return path
-  }, [circleProgress, done])
+  }, [])
 
-  const checkMarkPath1 = useComputedValue(() => {
+  const checkMarkPath1 = useDerivedValue(() => {
     const path = Skia.Path.Make()
-    if (checkMark1Progress.current === 0) {
+    if (checkMark1Progress.value === 0) {
       return path
     }
     path.moveTo(checkMarkPoints[0].x, checkMarkPoints[0].y)
 
     const vector = getVector(checkMarkPoints[0], checkMarkPoints[1])
     const vectorToCurrent = {
-      x: vector.x * checkMark1Progress.current,
-      y: vector.y * checkMark1Progress.current,
+      x: vector.x * checkMark1Progress.value,
+      y: vector.y * checkMark1Progress.value,
     }
     path.rLineTo(vectorToCurrent.x, vectorToCurrent.y)
     return path
-  }, [checkMark1Progress])
+  }, [])
 
-  const checkMarkPath2 = useComputedValue(() => {
+  const checkMarkPath2 = useDerivedValue(() => {
     const path = Skia.Path.Make()
-    if (checkMark2Progress.current === 0) {
+    if (checkMark2Progress.value === 0) {
       return path
     }
     path.moveTo(checkMarkPoints[1].x, checkMarkPoints[1].y)
     const vector = getVector(checkMarkPoints[1], checkMarkPoints[2])
     const vectorToCurrent = {
-      x: vector.x * checkMark2Progress.current,
-      y: vector.y * checkMark2Progress.current,
+      x: vector.x * checkMark2Progress.value,
+      y: vector.y * checkMark2Progress.value,
     }
     path.rLineTo(vectorToCurrent.x, vectorToCurrent.y)
     return path
-  }, [checkMark2Progress])
+  }, [])
 
   const runAnimation = useCallback(async () => {
     setAnimating(true)
-    runTiming(circleProgress, { loop: true, yoyo: false }, { duration: 1000 })
+
+    // アニメーションを開始
+    circleProgress.value = withRepeat(
+      withTiming(1, { duration: 1000 }),
+      -1,
+      false,
+    )
+
     await wait(3000)
-    done.current = true
-    circleProgress.animation.cancel()
+
+    // アニメーションを停止し、完了状態に
+    done.value = true
+    circleProgress.value = 0
+
     await wait(500)
-    runTiming(
-      checkMark1Progress,
+
+    // チェックマークの最初の部分をアニメーション
+    checkMark1Progress.value = withTiming(
       1,
       { duration: 300, easing: Easing.out(Easing.sin) },
-      async () => {
-        await wait(100)
-        runTiming(
-          checkMark2Progress,
-          1,
-          {
-            duration: 400,
-            easing: Easing.out(Easing.sin),
-          },
-          async () => {
-            await wait(1500)
-            circleProgress.current = 0
-            checkMark1Progress.current = 0
-            checkMark2Progress.current = 0
-            done.current = false
-            setAnimating(false)
-          },
-        )
+      finished => {
+        if (finished) {
+          runOnJS(animateCheckMark2)()
+        }
       },
     )
-  }, [checkMark1Progress, checkMark2Progress])
+
+    const animateCheckMark2 = async () => {
+      await wait(100)
+
+      // チェックマークの2番目の部分をアニメーション
+      checkMark2Progress.value = withTiming(
+        1,
+        { duration: 400, easing: Easing.out(Easing.sin) },
+        finished => {
+          if (finished) {
+            runOnJS(resetAnimation)()
+          }
+        },
+      )
+    }
+
+    const resetAnimation = async () => {
+      await wait(1500)
+
+      // すべてをリセット
+      circleProgress.value = 0
+      checkMark1Progress.value = 0
+      checkMark2Progress.value = 0
+      done.value = false
+      setAnimating(false)
+    }
+  }, [])
 
   return (
     <View style={[styles.container, canvasSize]}>
-      <Canvas style={[canvasSize]}>
+      <Canvas style={canvasSize}>
         <Path
           path={activeArcPath}
           color="#0091FF"

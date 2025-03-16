@@ -38,7 +38,7 @@ export default function CheckMark1() {
 
   return (
     <View style={[styles.container, canvasSize]}>
-      <Canvas style={[canvasSize]}>
+      <Canvas style={canvasSize}>
         <Path
           path={totalLinePath}
           color="rgb(230, 230, 230)"

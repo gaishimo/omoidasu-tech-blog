@@ -17,7 +17,7 @@ exports.meta = {
   imagePath: "/ogImage.png",
   relatedPosts: ["2021-09-24-blog-rn-web", "2022-08-07-rn-skia-in-blog"],
   lastUpdatedAt: parse(
-    "2021-09-18 17:00:00 +09:00",
+    "2022-08-16 15:16:06 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

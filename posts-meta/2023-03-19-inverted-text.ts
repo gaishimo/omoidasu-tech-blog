@@ -19,7 +19,7 @@ exports.meta = {
   priority: 0.7,
   relatedPosts: ["2022-08-28-text-gradient", "2022-08-22-custom-font-weight"],
   lastUpdatedAt: parse(
-    "2023-03-19 12:50:00 +09:00",
+    "2023-03-19 13:07:18 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

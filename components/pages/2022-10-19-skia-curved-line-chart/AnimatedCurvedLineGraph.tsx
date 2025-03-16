@@ -1,14 +1,13 @@
+import { Canvas, Path } from "@shopify/react-native-skia"
 import {
-  Canvas,
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
   Easing,
-  Path,
-  runTiming,
-  useComputedValue,
-  useTouchHandler,
-  useValue,
-} from "@shopify/react-native-skia"
+} from "react-native-reanimated"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
 import * as shape from "d3-shape"
-import { StyleSheet } from "react-native"
+import { StyleSheet, View } from "react-native"
 
 const canvasSize = { width: 300, height: 200 }
 const hPadding = 8
@@ -25,36 +24,42 @@ const lineGenerator = shape.line().curve(shape.curveCardinal.tension(0.1))
 const pathData = lineGenerator(points)
 
 export default function AnimatedCurvedLineGraph() {
-  const tension = useValue(1)
-  const pathData = useComputedValue(() => {
+  const tension = useSharedValue(1)
+  const pathData = useDerivedValue(() => {
     const lineGenerator = shape
       .line()
-      .curve(shape.curveCardinal.tension(tension.current))
+      .curve(shape.curveCardinal.tension(tension.value))
     const data = lineGenerator(points)
     return data
-  }, [tension])
+  }, [])
 
-  const touchHandler = useTouchHandler({
-    onStart: () => {
-      if (tension.current === 0) {
-        runTiming(tension, 1, {
-          easing: Easing.inOut(Easing.ease),
-          duration: 1000,
-        })
-      }
-      if (tension.current === 1) {
-        runTiming(tension, 0, {
-          easing: Easing.inOut(Easing.ease),
-          duration: 1000,
-        })
-      }
-    },
+  const gesture = Gesture.Tap().onStart(() => {
+    if (tension.value === 0) {
+      tension.value = withTiming(1, {
+        easing: Easing.inOut(Easing.ease),
+        duration: 1000,
+      })
+    } else if (tension.value === 1) {
+      tension.value = withTiming(0, {
+        easing: Easing.inOut(Easing.ease),
+        duration: 1000,
+      })
+    }
   })
 
   return (
-    <Canvas style={[styles.canvas, canvasSize]} onTouch={touchHandler}>
-      <Path path={pathData} style="stroke" color="lightblue" strokeWidth={2} />
-    </Canvas>
+    <GestureDetector gesture={gesture}>
+      <View>
+        <Canvas style={{ ...styles.canvas, ...canvasSize }}>
+          <Path
+            path={pathData}
+            style="stroke"
+            color="lightblue"
+            strokeWidth={2}
+          />
+        </Canvas>
+      </View>
+    </GestureDetector>
   )
 }
 

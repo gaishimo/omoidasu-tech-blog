@@ -1,4 +1,4 @@
-import { Easing } from "@shopify/react-native-skia"
+import { Easing } from "react-native-reanimated"
 import RippleEffect from "./RippleEffect"
 
 /**

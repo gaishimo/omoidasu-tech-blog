@@ -27,7 +27,7 @@ exports.meta = {
     "2022-09-02-ripple-effect-button",
   ],
   lastUpdatedAt: parse(
-    "2022-08-28 11:35:00 +09:00",
+    "2025-03-16 14:48:05 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

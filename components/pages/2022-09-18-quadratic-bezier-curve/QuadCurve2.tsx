@@ -41,7 +41,7 @@ subPath2.lineTo(end.x, end.y)
 
 export default function QuadCurve2() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path
         path={subPath1}
         style="stroke"

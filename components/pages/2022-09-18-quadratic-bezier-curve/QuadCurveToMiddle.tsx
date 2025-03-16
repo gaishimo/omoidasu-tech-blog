@@ -44,7 +44,7 @@ subPath2.lineTo(point2.x, point2.y)
 
 export default function QuadCurveToMiddle() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path
         path={subPath1}
         style="stroke"

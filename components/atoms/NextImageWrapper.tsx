@@ -24,7 +24,7 @@ export function NextImageWrapper(props: Props) {
       <Image
         {...props.imageSize}
         alt={props.alt}
-        objectFit="contain"
+        style={{ objectFit: "contain" }}
         src={props.src}
       />
     </View>

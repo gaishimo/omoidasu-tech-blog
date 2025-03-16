@@ -1,5 +1,6 @@
-import { SkFont, SkiaValue } from "@shopify/react-native-skia"
+import { SkFont } from "@shopify/react-native-skia"
 import { useMemo } from "react"
+import { SharedValue } from "react-native-reanimated"
 import { Constants } from "./Constants"
 import { MessageGroup } from "./MessageGroup"
 
@@ -8,7 +9,7 @@ type Props = {
   baseY: number
   font: SkFont
   numOfLogo: number
-  progress: SkiaValue<number>
+  progress: SharedValue<number>
 }
 
 export function Row(props: Props) {

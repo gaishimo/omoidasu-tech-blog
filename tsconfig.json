@@ -6,6 +6,7 @@
       "dom.iterable",
       "esnext"
     ],
+    "types": ["react-native-web"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,

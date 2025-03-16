@@ -1,10 +1,5 @@
-import {
-  Group,
-  SkFont,
-  SkiaValue,
-  useComputedValue,
-  Vector,
-} from "@shopify/react-native-skia"
+import { Group, SkFont, Vector } from "@shopify/react-native-skia"
+import { SharedValue, useDerivedValue } from "react-native-reanimated"
 import { range } from "../../../../utils/arrayUtils"
 import { Constants } from "./Constants"
 import { Message } from "./Message"
@@ -14,7 +9,7 @@ type Props = {
   basePosition: Vector
   font: SkFont
   numOfLogo: number
-  progress: SkiaValue<number>
+  progress: SharedValue<number>
 }
 
 export function MessageGroup(props: Props) {
@@ -22,14 +17,14 @@ export function MessageGroup(props: Props) {
 
   const groupWidth = Constants.messageGroupWidth * props.numOfLogo
 
-  const transform = useComputedValue(() => {
-    const distance = props.progress.current * groupWidth
+  const transform = useDerivedValue(() => {
+    const distance = props.progress.value * groupWidth
     return [
       {
         translateX: distance * (props.direction === "left" ? -1 : 1),
       },
     ]
-  }, [props.progress, props.direction])
+  })
 
   return (
     <Group transform={transform}>

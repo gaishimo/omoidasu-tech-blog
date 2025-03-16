@@ -23,7 +23,7 @@ exports.meta = {
     "2022-09-27-eas-managed-exo-player",
   ],
   lastUpdatedAt: parse(
-    "2022-10-16 17:09:25 +09:00",
+    "2022-10-16 17:31:26 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

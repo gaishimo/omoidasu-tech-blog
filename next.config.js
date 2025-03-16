@@ -1,5 +1,3 @@
-const withPlugins = require("next-compose-plugins")
-// const withTM = require("next-transpile-modules")(["remark-slug"])
 const rehypePrism = require("@mapbox/rehype-prism")
 const remarkSlug = require("remark-slug")
 const remarkAutolinkHeadings = require("remark-autolink-headings")
@@ -33,14 +31,12 @@ const withMDX = require("@next/mdx")({
   },
 })
 
-const withTM = require("next-transpile-modules")([
-  "react-native-reanimated",
-  "@shopify/react-native-skia",
-  "@miblanchard/react-native-slider",
-])
-
-module.exports = withPlugins([withTM, withMDX], {
-  experimental: { nftTracing: true },
+const nextConfig = {
+  transpilePackages: [
+    "react-native-reanimated",
+    "@shopify/react-native-skia",
+    "@miblanchard/react-native-slider",
+  ],
   pageExtensions: ["ts", "tsx", "mdx"],
   typescript: {
     ignoreBuildErrors: true,
@@ -103,4 +99,6 @@ module.exports = withPlugins([withTM, withMDX], {
     ]
     return config
   },
-})
+}
+
+module.exports = withMDX(nextConfig)

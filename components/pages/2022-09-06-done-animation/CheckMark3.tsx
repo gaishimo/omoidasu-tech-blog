@@ -1,11 +1,10 @@
+import { Canvas, Path, Skia } from "@shopify/react-native-skia"
 import {
-  Canvas,
-  Path,
-  runTiming,
-  Skia,
-  useComputedValue,
-  useValue,
-} from "@shopify/react-native-skia"
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated"
 import { useCallback, useEffect } from "react"
 import { StyleSheet, View } from "react-native"
 
@@ -27,46 +26,53 @@ function getVector(p1: { x: number; y: number }, p2: { x: number; y: number }) {
 }
 
 export default function CheckMark2() {
-  const progress1 = useValue(0)
-  const progress2 = useValue(0)
+  const progress1 = useSharedValue(0)
+  const progress2 = useSharedValue(0)
 
-  const line1Path = useComputedValue(() => {
+  const line1Path = useDerivedValue(() => {
     const path = Skia.Path.Make()
-    if (progress1.current === 0) {
+    if (progress1.value === 0) {
       return path
     }
     path.moveTo(checkMarkPoints[0].x, checkMarkPoints[0].y)
     const vector = getVector(checkMarkPoints[0], checkMarkPoints[1])
-    path.rLineTo(vector.x * progress1.current, vector.y * progress1.current)
+    path.rLineTo(vector.x * progress1.value, vector.y * progress1.value)
     return path
-  }, [progress1])
+  }, [])
 
-  const line2Path = useComputedValue(() => {
+  const line2Path = useDerivedValue(() => {
     const path = Skia.Path.Make()
-    if (progress2.current === 0) {
+    if (progress2.value === 0) {
       return path
     }
     path.moveTo(checkMarkPoints[1].x, checkMarkPoints[1].y)
     const vector = getVector(checkMarkPoints[1], checkMarkPoints[2])
-    path.rLineTo(vector.x * progress2.current, vector.y * progress2.current)
+    path.rLineTo(vector.x * progress2.value, vector.y * progress2.value)
     return path
-  }, [progress2])
-
-  const runAnimation = useCallback(() => {
-    progress1.current = 0
-    progress2.current = 0
-    runTiming(progress1, 1, { duration: 500 }, () => {
-      runTiming(progress2, 1, { duration: 700 })
-    })
   }, [])
 
+  const animateLine2 = useCallback(() => {
+    progress2.value = withTiming(1, { duration: 700 })
+  }, [])
+
+  const runAnimation = useCallback(() => {
+    progress1.value = 0
+    progress2.value = 0
+    progress1.value = withTiming(1, { duration: 500 }, finished => {
+      if (finished) {
+        runOnJS(animateLine2)()
+      }
+    })
+  }, [animateLine2])
+
   useEffect(() => {
-    setInterval(() => runAnimation(), 4000)
+    const interval = setInterval(() => runAnimation(), 4000)
+    return () => clearInterval(interval)
   }, [runAnimation])
 
   return (
     <View style={[styles.container, canvasSize]}>
-      <Canvas style={[canvasSize]}>
+      <Canvas style={canvasSize}>
         <Path
           path={line1Path}
           color="#0091FF"

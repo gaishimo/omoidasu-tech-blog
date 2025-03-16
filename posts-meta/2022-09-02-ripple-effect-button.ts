@@ -24,7 +24,7 @@ exports.meta = {
   priority: 0.7,
   relatedPosts: ["2022-08-28-text-gradient"],
   lastUpdatedAt: parse(
-    "2022-09-02 12:10:00 +09:00",
+    "2025-03-16 14:48:05 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

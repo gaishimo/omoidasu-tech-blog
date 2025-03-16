@@ -10,7 +10,7 @@ const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 
 export default function CircleGradient2() {
   return (
-    <Canvas style={[canvasSize]}>
+    <Canvas style={canvasSize}>
       <Group>
         <Circle
           cx={center.x}

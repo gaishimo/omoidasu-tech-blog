@@ -16,7 +16,7 @@ exports.meta = {
     "AndroidのExpo Clientアプリを、CLI(expo client:install:android)ではなく、APKを直接インストールする方法です。",
   imagePath: null,
   lastUpdatedAt: parse(
-    "2021-09-18 17:00:00 +09:00",
+    "2022-08-16 15:16:06 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

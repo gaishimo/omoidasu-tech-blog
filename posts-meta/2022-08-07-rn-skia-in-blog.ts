@@ -33,7 +33,7 @@ exports.meta = {
     "2022-09-06-done-animation",
   ],
   lastUpdatedAt: parse(
-    "2022-10-05 09:40:00 +09:00",
+    "2025-03-16 14:48:05 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

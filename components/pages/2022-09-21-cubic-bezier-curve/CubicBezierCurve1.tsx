@@ -14,7 +14,7 @@ path.cubicTo(control1.x, control1.y, control2.x, control2.y, end.x, end.y)
 
 export default function QubicBezierCurve1() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path path={path} style="stroke" color="lightblue" strokeWidth={3} />
     </Canvas>
   )

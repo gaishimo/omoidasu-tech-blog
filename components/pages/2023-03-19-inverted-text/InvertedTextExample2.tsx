@@ -4,10 +4,15 @@ import {
   Rect,
   rect,
   Text,
-  useComputedValue,
   useFont,
-  useTiming,
 } from "@shopify/react-native-skia"
+import {
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  withRepeat,
+} from "react-native-reanimated"
+import { useEffect } from "react"
 import { StyleSheet } from "react-native"
 
 const canvasSize = { width: 200, height: 240 }
@@ -15,23 +20,27 @@ const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 const fontSize = 120
 
 export default function InvertedTextExample2() {
-  const progress = useTiming({ loop: true }, { duration: 3000 })
+  const progress = useSharedValue(0)
+
+  useEffect(() => {
+    progress.value = withRepeat(withTiming(1, { duration: 3000 }), -1, true)
+  }, [])
 
   const font = useFont(require("../../../assets/fonts/Roboto400.ttf"), fontSize)
 
-  const upperRect = useComputedValue(
-    () => rect(0, 0, canvasSize.width, canvasSize.height * progress.current),
-    [progress],
+  const upperRect = useDerivedValue(
+    () => rect(0, 0, canvasSize.width, canvasSize.height * progress.value),
+    [],
   )
-  const lowerRect = useComputedValue(
+  const lowerRect = useDerivedValue(
     () =>
       rect(
         0,
-        canvasSize.height * progress.current,
+        canvasSize.height * progress.value,
         canvasSize.width,
-        canvasSize.height - canvasSize.height * progress.current,
+        canvasSize.height - canvasSize.height * progress.value,
       ),
-    [progress],
+    [],
   )
 
   const textProps = {
@@ -44,7 +53,7 @@ export default function InvertedTextExample2() {
   if (font == null) return null
 
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Rect rect={upperRect} color="black" style="fill" />
       <Rect rect={lowerRect} color="white" style="fill" />
       <Group clip={upperRect}>

@@ -5,7 +5,7 @@ const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 
 export default function CircleGradient() {
   return (
-    <Canvas style={[canvasSize]}>
+    <Canvas style={canvasSize}>
       <Circle
         cx={center.x}
         cy={center.y}

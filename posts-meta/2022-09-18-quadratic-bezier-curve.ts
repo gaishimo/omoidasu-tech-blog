@@ -25,7 +25,7 @@ exports.meta = {
   priority: 0.7,
   relatedPosts: ["2022-09-21-cubic-bezier-curve"],
   lastUpdatedAt: parse(
-    "2022-09-19 10:54:52 +09:00",
+    "2025-03-16 14:48:05 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

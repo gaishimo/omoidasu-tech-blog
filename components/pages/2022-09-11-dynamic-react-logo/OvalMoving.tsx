@@ -1,10 +1,12 @@
+import { Canvas, Circle, Oval } from "@shopify/react-native-skia"
 import {
-  Canvas,
-  Circle,
-  Oval,
-  useComputedValue,
-  useTiming,
-} from "@shopify/react-native-skia"
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  withRepeat,
+  Easing,
+} from "react-native-reanimated"
+import { useEffect } from "react"
 
 const canvasSize = { width: 120, height: 120 }
 const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
@@ -19,22 +21,28 @@ const ovalRect = {
 }
 
 export default function OvalMoving() {
-  const theta = useTiming(
-    { to: Math.PI * 2, loop: true, yoyo: false },
-    { duration: 8000 },
-  )
+  const theta = useSharedValue(0)
 
-  const cx = useComputedValue(() => {
-    const cos = radius * Math.cos(theta.current)
+  useEffect(() => {
+    theta.value = withRepeat(
+      withTiming(Math.PI * 2, { duration: 4000, easing: Easing.linear }),
+      -1,
+      false,
+    )
+  }, [])
+
+  const cx = useDerivedValue(() => {
+    const cos = radius * Math.cos(theta.value)
     return center.x + cos
-  }, [theta])
-  const cy = useComputedValue(() => {
-    const sin = radius * Math.sin(theta.current)
+  }, [])
+
+  const cy = useDerivedValue(() => {
+    const sin = radius * Math.sin(theta.value)
     return center.y + sin * 0.35
-  }, [theta])
+  }, [])
 
   return (
-    <Canvas style={[canvasSize]}>
+    <Canvas style={canvasSize}>
       <Oval rect={ovalRect} color="lightblue" style="stroke" strokeWidth={3} />
       <Circle cx={cx} cy={cy} r={6} color="lightblue" />
     </Canvas>

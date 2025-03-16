@@ -163,7 +163,7 @@ export default function AnimatedCurvedLineGraph() {
   })
 
   return (
-    <Canvas style={[styles.canvas, canvasSize]} onTouch={touchHandler}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }} onTouch={touchHandler}>
       <Path path={pathData} style="stroke" color="lightblue" strokeWidth={2} />
     </Canvas>
   )

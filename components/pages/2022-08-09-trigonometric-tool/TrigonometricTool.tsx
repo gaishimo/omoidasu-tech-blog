@@ -43,7 +43,7 @@ export default function TrigonometricTool() {
 
   return (
     <View style={{ width: toolWidth }}>
-      <Canvas style={[styles.canvas]}>
+      <Canvas style={styles.canvas}>
         {/* X, Y軸 */}
 
         <Path

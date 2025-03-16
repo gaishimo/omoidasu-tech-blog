@@ -1,11 +1,10 @@
+import { Canvas, Path, Skia } from "@shopify/react-native-skia"
 import {
-  Canvas,
-  Path,
-  runTiming,
-  Skia,
-  useComputedValue,
-  useValue,
-} from "@shopify/react-native-skia"
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  withRepeat,
+} from "react-native-reanimated"
 import { useCallback, useEffect } from "react"
 import { StyleSheet, View } from "react-native"
 
@@ -14,8 +13,8 @@ const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 const radius = 30
 
 export default function CircleProgress2() {
-  const progress = useValue(0)
-  const activeArcPath = useComputedValue(() => {
+  const progress = useSharedValue(0)
+  const activeArcPath = useDerivedValue(() => {
     const path = Skia.Path.Make()
     const arcRect = {
       x: center.x - radius,
@@ -23,14 +22,14 @@ export default function CircleProgress2() {
       width: radius * 2,
       height: radius * 2,
     }
-    path.addArc(arcRect, progress.current * 360, 300)
+    path.addArc(arcRect, progress.value * 360, 300)
 
     return path
-  }, [progress])
+  }, [])
 
   const runAnimation = useCallback(() => {
-    runTiming(progress, { loop: true, yoyo: false }, { duration: 2000 })
-  }, [progress])
+    progress.value = withRepeat(withTiming(1, { duration: 2000 }), -1, false)
+  }, [])
 
   useEffect(() => {
     runAnimation()
@@ -38,7 +37,7 @@ export default function CircleProgress2() {
 
   return (
     <View style={[styles.container, canvasSize]}>
-      <Canvas style={[canvasSize]}>
+      <Canvas style={canvasSize}>
         <Path
           path={activeArcPath}
           color="#0091FF"

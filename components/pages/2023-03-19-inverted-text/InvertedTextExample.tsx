@@ -32,7 +32,7 @@ export default function InvertedTextExample() {
   if (font == null) return null
 
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Rect rect={upperRect} color="black" style="fill" />
       <Rect rect={lowerRect} color="white" style="fill" />
       <Group clip={upperRect}>

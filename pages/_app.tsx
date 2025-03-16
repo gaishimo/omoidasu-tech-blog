@@ -1,12 +1,9 @@
 import Head from "next/head"
 import "raf/polyfill"
 import "../styles/global.css"
+import type { AppProps } from "next/app"
 
-// if (typeof window === "undefined") {
-//   global.window = {}
-// }
-
-function MyApp({ Component, pageProps }) {
+function MyApp({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>

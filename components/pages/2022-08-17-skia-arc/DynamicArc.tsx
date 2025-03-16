@@ -1,14 +1,11 @@
-import {
-  Canvas,
-  Circle,
-  Path,
-  runTiming,
-  Skia,
-  useComputedValue,
-  useValue,
-} from "@shopify/react-native-skia"
+import { Canvas, Circle, Path, Skia } from "@shopify/react-native-skia"
 import { useCallback, useState } from "react"
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import {
+  useDerivedValue,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated"
 
 const canvasSize = { width: 280, height: 280 }
 const radius = 80
@@ -16,9 +13,9 @@ const centerPos = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 
 export default function DynamicArc() {
   const [animating, setAnimating] = useState(false)
-  const progress = useValue(0)
+  const progress = useSharedValue(0)
 
-  const path = useComputedValue(() => {
+  const path = useDerivedValue(() => {
     const path = Skia.Path.Make()
     path.moveTo(centerPos.x, centerPos.y)
 
@@ -29,7 +26,7 @@ export default function DynamicArc() {
       height: radius * 2,
     }
     const startDegree = -90
-    path.addArc(arcRect, startDegree, progress.current)
+    path.addArc(arcRect, startDegree, progress.value)
     path.lineTo(centerPos.x, centerPos.y).close()
     return path
   }, [progress])
@@ -37,9 +34,9 @@ export default function DynamicArc() {
   const start = useCallback(() => {
     if (animating) return
     setAnimating(true)
-    runTiming(progress, 360, { duration: 6000 }, () => {
+    progress.value = withTiming(360, { duration: 6000 }, () => {
       setTimeout(() => {
-        progress.current = 0
+        progress.value = 0
         setAnimating(false)
       }, 500)
     })
@@ -47,7 +44,7 @@ export default function DynamicArc() {
 
   return (
     <View style={[styles.container, canvasSize]}>
-      <Canvas style={[styles.canvas, { ...canvasSize }]}>
+      <Canvas style={{ ...styles.canvas, ...canvasSize }}>
         <Circle
           cx={centerPos.x}
           cy={centerPos.y}

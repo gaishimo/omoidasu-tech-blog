@@ -49,7 +49,7 @@ const arcRect = {
   width: radius * 2,
   height: radius * 2,
 }
-path.addArc(arcRect, progress.current * 360, 300)
+path.addArc(arcRect, progress.value * 360, 300)
 
 <Canvas>
   <Path
@@ -71,10 +71,10 @@ path.addArc(arcRect, progress.current * 360, 300)
   src="/posts/2022-09-06-done-animation/static-arc.png"
 />
 
-これを`runTiming`でアニメーションループし進捗に応じて円弧の開始角度を変更させます。
+これを`withTiming`と`withRepeat`を使ってアニメーションループし進捗に応じて円弧の開始角度を変更させます。
 
 ```tsx
-const arcPath = useComputedValue(() => {
+const arcPath = useDerivedValue(() => {
   const path = Skia.Path.Make()
   const arcRect = {
     x: center.x - radius,
@@ -82,14 +82,14 @@ const arcPath = useComputedValue(() => {
     width: radius * 2,
     height: radius * 2,
   }
-  path.addArc(arcRect, progress.current * 360, 300)
+  path.addArc(arcRect, progress.value * 360, 300)
 
   return path
-}, [progress])
+}, [])
 
 const runAnimation = useCallback(() => {
-  runTiming(progress, { loop: true, yoyo: false }, { duration: 2000 })
-}, [progress])
+  progress.value = withRepeat(withTiming(1, { duration: 2000 }), -1, false)
+}, [])
 
 useEffect(() => {
   runAnimation()
@@ -158,7 +158,7 @@ const vector = getVector(checkMarkPoints[0], checkMarkPoints[1])
 
 取得したベクトルのxとyに対して現在の進捗比率をかけることにより、進捗(0〜1)に応じた長さにすることができます。
 ```ts
-path.rLineTo(vector.x * progress.current, vector.y * progress.current)
+path.rLineTo(vector.x * progress.value, vector.y * progress.value)
 ```
 
 `lineTo`ではなく`rLineTo`を利用していますが、`rLineTo`は現在の座標からの相対指定を利用して線を引くことができます。
@@ -176,20 +176,20 @@ path.rLineTo(vector.x * progress.current, vector.y * progress.current)
 これをアニメーションで変化させていきます。
 
 ```tsx
-const progress = useValue(0)
-const linePath = useComputedValue(() => {
+const progress = useSharedValue(0)
+const linePath = useDerivedValue(() => {
   const path = Skia.Path.Make()
-  if (progress.current === 0) {
+  if (progress.value === 0) {
     return path
   }
   path.moveTo(checkMarkPoints[0].x, checkMarkPoints[0].y)
   const vector = getVector(checkMarkPoints[0], checkMarkPoints[1])
-  path.rLineTo(vector.x * progress.current, vector.y * progress.current)
+  path.rLineTo(vector.x * progress.value, vector.y * progress.value)
   return path
-}, [progress])
+}, [])
 
 const runAnimation = useCallback(() => {
-  runTiming(progress, { loop: true, yoyo: false }, { duration: 2000 })
+  progress.value = withRepeat(withTiming(1, { duration: 2000 }), -1, false)
 }, [])
 
 useEffect(() => {
@@ -221,19 +221,24 @@ useEffect(() => {
 
 アニメーションを少し調整してみます。
 ```ts
-runTiming(
-  progress1,
+progress1.value = withTiming(
   1,
   { duration: 300, easing: Easing.out(Easing.sin) },
-  async () => {
-    await wait(100)
-    runTiming(progress2, 1, {
-      duration: 500,
-      easing: Easing.out(Easing.sin),
-    })
+  finished => {
+    if (finished) {
+      runOnJS(async () => {
+        await wait(100)
+        progress2.value = withTiming(1, {
+          duration: 500,
+          easing: Easing.out(Easing.sin),
+        })
+      })()
+    }
   },
 )
 ```
+
+`runOnJS`を使用することで、UIスレッドでコールバック関数を実行できます。これはReact Native Reanimatedのワークレットの制約によるものです。
 
 
 Easing関数を指定するのと、1本目の線と2本目の線の間にわずかにインターバルを空けています。微妙に変化が異なるのが分かると思います。

@@ -1,4 +1,3 @@
-
 import { parse, parseISO } from "date-fns"
 import Image from "next/image"
 import { ScrollView, StyleSheet, Text, View } from "react-native"
@@ -7,6 +6,7 @@ import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { WithSkia } from "../../components/WithSkia"
 import { LoadingRect } from "../../components/LoadingRect"
 import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
 
 import { meta } from "../../posts-meta/2022-09-14-skia-dimly-glowing-light"
 
@@ -39,17 +39,17 @@ const blurredCircles = [
 
 <Canvas ...>
   {blurredCircles.map((c, i) => (
-    <Circle cx={center.x} cy={center.y} r={c.radius}>
+    <Circle key={i} cx={center.x} cy={center.y} r={c.radius}>
       <RadialGradient
         c={center}
         r={c.radius}
         colors={[color, colorAlpha]}
       />
-      <Blur blur={c.blur} />
+      <Blur blur={c.blur} mode="decal" />
     </Circle>
   ))}
   <Circle cx={center.x} cy={center.y} r={30} color={color}>
-    <Blur blur={0.7} />
+    <Blur blur={0.7} mode="decal" />
   </Circle>
 </Canvas>
 ```
@@ -84,52 +84,53 @@ const blurredCircles = [
 タップした際にアニメーションValue(progress)を変化させ、その値に応じて裏側の円の半径を変更していきます。合わせて本体の円の不透明度も変化させていきます。
 
 ```tsx
-const progress = useValue(0)
+const progress = useSharedValue(0)
 
-const touchHandler = useTouchHandler({
-  onStart: () => {
-    if (progress.current === 0) {
-      runTiming(progress, { to: 1 }, { duration: 350 })
+const gesture = Gesture.Tap()
+  .onStart(() => {
+    if (progress.value === 0) {
+      progress.value = withTiming(1, { duration: 350 })
     } else {
-      runTiming(progress, { to: 0 }, { duration: 350 })
+      progress.value = withTiming(0, { duration: 350 })
     }
-  },
-})
+  })
 
-<Canvas
-  onTouch={touchHandler}
-  ...
->
-  <Group color={color}>
-    {circles.map(c => (
+<GestureDetector gesture={gesture}>
+  <Canvas
+    ...
+  >
+    <Group color={color}>
+      {circles.map((c, i) => (
+        <Circle
+          key={i}
+          cx={center.x}
+          cy={center.y}
+          r={useDerivedValue(() => {
+            return progress.value * c.radius
+          }, [])}
+        >
+          <RadialGradient
+            c={center}
+            r={c.radius}
+            colors={[color, colorAlpha]}
+          />
+          <Blur blur={c.blur} mode="decal" />
+        </Circle>
+      ))}
       <Circle
         cx={center.x}
         cy={center.y}
-        r={useComputedValue(() => {
-          return interpolate(progress.current, [0, 1], [0, c.radius])
-        }, [progress])}
+        r={30}
+        color={color}
+        opacity={useDerivedValue(() => {
+          return 0.4 + (progress.value * 0.6)
+        }, [])}
       >
-        <RadialGradient
-          c={center}
-          r={c.radius}
-          colors={[color, colorAlpha]}
-        />
-        <Blur blur={c.blur} />
+        <Blur blur={0.7} mode="decal" />
       </Circle>
-    ))}
-    <Circle
-      cx={center.x}
-      cy={center.y}
-      r={30}
-      color={color}
-      opacity={useComputedValue(() => {
-        return interpolate(progress.current, [0, 1], [0.4, 1])
-      }, [progress])}
-    >
-      <Blur blur={0.7} />
-    </Circle>
-  </Group>
-</Canvas>
+    </Group>
+  </Canvas>
+</GestureDetector>
 ```
 
 ## 終わりに

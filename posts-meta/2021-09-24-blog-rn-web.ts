@@ -16,7 +16,7 @@ exports.meta = {
   description: "当ブログ(Next.js)にReact Native for Webを導入しました。",
   imagePath: "/posts/2021-09-23-blog-rn-web/pressableExample.gif",
   lastUpdatedAt: parse(
-    "2022-01-21 17:00:00 +09:00",
+    "2022-08-16 15:16:06 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

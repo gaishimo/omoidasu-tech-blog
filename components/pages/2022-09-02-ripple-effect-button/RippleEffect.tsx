@@ -2,14 +2,19 @@ import {
   Canvas,
   Circle,
   Group,
-  interpolate,
   RoundedRect,
   rrect,
-  runTiming,
-  useComputedValue,
-  useTouchHandler,
-  useValue,
 } from "@shopify/react-native-skia"
+import {
+  interpolate,
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  runOnJS,
+  Easing,
+} from "react-native-reanimated"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
+import { useEffect } from "react"
 
 const canvasSize = { width: 320, height: 140 }
 const buttonSize = { width: 300, height: 100 }
@@ -28,57 +33,64 @@ type Props = {
  * 波紋が拡がるアニメーション
  */
 export default function RippleEffect(props: Props) {
-  const cx = useValue<number>(canvasSize.width / 2)
-  const cy = useValue<number>(canvasSize.height / 2 + buttonSize.height / 3)
-  const rippleProgress = useValue<number>(0)
+  const cx = useSharedValue<number>(canvasSize.width / 2)
+  const cy = useSharedValue<number>(
+    canvasSize.height / 2 + buttonSize.height / 3,
+  )
+  const rippleProgress = useSharedValue<number>(0)
 
-  const touchHandler = useTouchHandler({
-    onStart: ({ x, y }) => {
-      cx.current = x
-      cy.current = y
-      rippleProgress.animation?.cancel()
-      rippleProgress.current = 0
-      runTiming(
-        rippleProgress,
-        1,
-        { duration: 1000, easing: props.easing },
-        () => {
-          setTimeout(() => {
-            rippleProgress.current = 0
-          }, 100)
-        },
-      )
-    },
+  const startRipple = () => {
+    rippleProgress.value = 0
+    rippleProgress.value = withTiming(
+      1,
+      {
+        duration: 1000,
+        easing: props.easing || Easing.inOut(Easing.ease),
+      },
+      () => {
+        runOnJS(setTimeout)(() => {
+          rippleProgress.value = 0
+        }, 100)
+      },
+    )
+  }
+
+  const panGesture = Gesture.Pan().onBegin(({ x, y }) => {
+    cx.value = x
+    cy.value = y
+    runOnJS(startRipple)()
   })
 
-  const rippleRadius = useComputedValue(() => {
-    return interpolate(rippleProgress.current, [0, 1], [0, 300])
-  }, [rippleProgress])
+  const rippleRadius = useDerivedValue(() => {
+    return interpolate(rippleProgress.value, [0, 1], [0, 300])
+  }, [])
 
   return (
-    <Canvas style={[canvasSize]} onTouch={touchHandler}>
-      <Group
-        clip={rrect(
-          { ...buttonPos, ...buttonSize },
-          buttonRadius,
-          buttonRadius,
-        )}
-      >
-        <RoundedRect
-          {...buttonSize}
-          {...buttonPos}
-          r={buttonRadius}
-          color="lightblue"
-          style="fill"
-        />
-        <Circle
-          cx={cx}
-          cy={cy}
-          r={rippleRadius}
-          opacity={0.2}
-          color={rippleColor}
-        />
-      </Group>
-    </Canvas>
+    <GestureDetector gesture={panGesture}>
+      <Canvas style={canvasSize}>
+        <Group
+          clip={rrect(
+            { ...buttonPos, ...buttonSize },
+            buttonRadius,
+            buttonRadius,
+          )}
+        >
+          <RoundedRect
+            {...buttonSize}
+            {...buttonPos}
+            r={buttonRadius}
+            color="lightblue"
+            style="fill"
+          />
+          <Circle
+            cx={cx}
+            cy={cy}
+            r={rippleRadius}
+            opacity={0.2}
+            color={rippleColor}
+          />
+        </Group>
+      </Canvas>
+    </GestureDetector>
   )
 }
