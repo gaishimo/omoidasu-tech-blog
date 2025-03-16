@@ -20,7 +20,7 @@
     "@miblanchard/react-native-slider": "^2.1.0",
     "@next/mdx": "^15.2.0",
     "@react-native-community/slider": "~4.2.4",
-    "@shopify/react-native-skia": "^1.11.18",
+    "@shopify/react-native-skia": "1.7.6",
     "canvaskit-wasm": "~0.37.0",
     "d3-shape": "^3.1.0",
     "date-fns": "^2.23.0",

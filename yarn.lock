@@ -1603,10 +1603,10 @@
     invariant "^2.2.4"
     nullthrows "^1.1.1"
 
-"@shopify/react-native-skia@^1.11.18":
-  version "1.11.18"
-  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-1.11.18.tgz#f14e6c86d972cd6ac683e6828a835bce6bb8d74c"
-  integrity sha512-l5pbgn86+GcR6qg7Cj4J5fO4Qk7ofv+2vaPajOkRmnaJA0BxbqNtw301mzTqmwtZoIzZmXJW5KSy3B00+QYc9g==
+"@shopify/react-native-skia@1.7.6":
+  version "1.7.6"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-1.7.6.tgz#c184648fe831006f44c4a51071edcf84d482011c"
+  integrity sha512-BLnz7RzGENyMJtDebj6fkdUq4oc30B+MyJWRS3GEB2nC/almBn056sqHqsKvqPcKNH6Gj5z/panOFLUVmO7uGA==
   dependencies:
     canvaskit-wasm "0.39.1"
     react-reconciler "0.27.0"
