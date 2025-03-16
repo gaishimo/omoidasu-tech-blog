@@ -2,9 +2,17 @@ import { parse, parseISO } from "date-fns"
 import { PostLayout } from "../../components/PostLayout"
 import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
-import { View, Text, ActivityIndicator } from "react-native"
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native"
 import { WithSkia } from "../../components/WithSkia"
 import { LoadingRect } from "../../components/LoadingRect"
+import { Canvas, Group, Circle } from "@shopify/react-native-skia"
+import {
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  interpolate,
+} from "react-native-reanimated"
+import { useEffect, useMemo } from "react"
 import { meta } from "../../posts-meta/2022-08-10-parabola-move"
 
 export const headlines = [{ title: "放物線の動きサンプル" }, { title: "実装方法" }]
@@ -54,12 +62,12 @@ Skiaで物体が放物線の動きを描いて移動していくサンプルで�
 動的に変化する値として`pos`というvalueを用意しておき、
 
 ```js
-const pos = useValue(0)
+const pos = useSharedValue(0)
 ```
 
 移動させるタイミングで`pos`の値を0から`Math.PI`(180°)に変化させます。
 ```js
-runTiming(pos, Math.PI, { duration: 3000 })
+pos.value = withTiming(Math.PI, { duration: 3000 })
 ```
 
 
@@ -67,26 +75,26 @@ Canvasで動かしたいシェイプを囲んだ`<Group>`に対し`translateX`�
 
 ```jsx
   return (
-    <Canvas style={{ flex: 1 }}>
+    <Canvas style={styles.canvas}>
       <Group
-        transform={useComputedValue(() => {
+        transform={useDerivedValue(() => {
           return [
             {
               translateX: interpolate(
-                pos.current,
+                pos.value,
                 [0, Math.PI],
                 [0, canvasSize.width - ballRadius * 2],
               ),
             },
             {
               translateY: interpolate(
-                pos.current,
+                pos.value,
                 range(0, 100).map(i => (Math.PI / 100) * i),
                 curveYPath,
               ),
             },
           ]
-        }, [pos])}
+        }, [])}
       >
         <Circle
           r={ballRadius}
@@ -99,6 +107,12 @@ Canvasで動かしたいシェイプを囲んだ`<Group>`に対し`translateX`�
     </Canvas>
   )
 ```
+
+const styles = StyleSheet.create({
+  canvas: {
+    flex: 1,
+  },
+})
 
 全体のコードは以下で確認できます。
 

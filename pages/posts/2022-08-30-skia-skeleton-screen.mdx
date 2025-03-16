@@ -39,7 +39,7 @@ React Nativeで実装する場合 [react-content-loader](https://github.com/dani
 />
 ```
 
-これをアニメーションで動的にグラデーションが移動するようにしていきます。実装の仕方は[前回の記事](/posts/2022-08-28-text-gradient#%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%8A%B9%E6%9E%9C%E3%82%92%E3%81%A4%E3%81%91%E3%82%8B) と同じですが、繰り返しアニメーションを指定した`sharedValue`を用意し(`progress`)、この値に応じて`useComputedValue`で`<LinearGradient />`のポイント位置を動的に変化させます。
+これをアニメーションで動的にグラデーションが移動するようにしていきます。実装の仕方は[前回の記事](/posts/2022-08-28-text-gradient#%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%8A%B9%E6%9E%9C%E3%82%92%E3%81%A4%E3%81%91%E3%82%8B) と同じですが、繰り返しアニメーションを指定した`sharedValue`を用意し(`progress`)、この値に応じて`useDerivedValue`で`<LinearGradient />`のポイント位置を動的に変化させます。
 
 
 ```tsx
@@ -66,7 +66,7 @@ const positions = useDerivedValue(() => {
 ```
 
 
-```jsx
+```tsx
 type Props = {
   basicColor: string
   accentColor: string
