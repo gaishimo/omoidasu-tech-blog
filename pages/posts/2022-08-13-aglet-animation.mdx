@@ -4,9 +4,17 @@ import { getAllPosts } from "../../libs/posts"
 import { PostLayout } from "../../components/PostLayout"
 import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
-import { View, Text, ActivityIndicator } from "react-native"
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native"
 import { WithSkia } from "../../components/WithSkia"
 import { LoadingRect } from "../../components/LoadingRect"
+import { Group } from "@shopify/react-native-skia"
+import {
+  useSharedValue,
+  useDerivedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated"
+import { useEffect } from "react"
 import { meta } from "../../posts-meta/2022-08-13-aglet-animation"
 
 export const headlines = [
@@ -75,27 +83,33 @@ Math.floor((windowSize.width * 1.3) / Constants.messageGroupWidth) + 1
 react-native-skiaの場合、以下でアニメーションをループさせることができます。
 
 ```js
-const progress = useTiming(
-  { loop: true, yoyo: false },
-  { duration: 5000 }),
+const progress = useSharedValue(0)
+
+useEffect(() => {
+  progress.value = withRepeat(
+    withTiming(1, { duration: 5000 }),
+    -1,
+    false
+  )
+}, [])
 ```
 
 progressの値は0.0から1.0まで変化するのを繰り返します。
 
-オプションの`yoyo`はfalseにします。trueにすると一度進みきったところから戻るアニメーションが発生してしまうためです。なぜ`yoyo`というのかわかりませんが、これは日本語のヨーヨーを指しているのかもしれません(一度進んだら戻ってくる)。
+オプションの`repeat`の第二引数をfalseにします。trueにすると一度進みきったところから戻るアニメーションが発生してしまうためです。
 
 
 この`progress`の値を元にしてグループに対して横移動をかけます。値が0のときは移動せず、値が1のときは画面幅の分、横に移動します。左に移動する場合はマイナスします。
 
 ```jsx
-  const transform = useComputedValue(() => {
-    const distance = props.progress.current * groupWidth
+  const transform = useDerivedValue(() => {
+    const distance = progress.value * groupWidth
     return [
       {
         translateX: distance * (props.direction === "left" ? -1 : 1),
       },
     ]
-  }, [props.progress, props.direction])
+  }, [])
 
   return (
     <Group transform={transform}>
@@ -109,7 +123,10 @@ progressの値は0.0から1.0まで変化するのを繰り返します。
 角度を斜めにするには、全体をグループで覆ってtransformをかければOKです。
 
 ```jsx
-<Group transform={[{ rotate: Math.PI / 12 }]} origin={{ x: 0, y: 0 }}>
+<Group
+  transform={[{ rotate: Math.PI / 12 }]}
+  origin={{ x: 0, y: 0 }}
+>
   ...
 </Group>
 ```

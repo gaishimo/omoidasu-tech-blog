@@ -9,7 +9,7 @@ exports.meta = {
     "expo",
     "Config Plugin",
     "EAS Build",
-    "typeScript",
+    "typescript",
   ],
   color1: "#D2CAFD",
   color2: "#4630EB",

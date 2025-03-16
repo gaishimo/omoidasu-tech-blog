@@ -12,7 +12,7 @@ function getAllPostIds() {
     const entries = fs.readdirSync(PAGES_DIR)
     return entries.filter(entry => {
       const stat = fs.statSync(path.join(PAGES_DIR, entry))
-      return stat.isDirectory()
+      return !stat.isDirectory()
     })
   } catch (error) {
     console.error("Error reading posts directory:", error)

@@ -1,12 +1,18 @@
-
 import { parse, parseISO } from "date-fns"
 import dynamic from 'next/dynamic'
 import { PostLayout } from "../../components/PostLayout"
 import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
-import { View, Text, ActivityIndicator } from "react-native"
+import { View, Text, ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native"
 import { WithSkia } from "../../components/WithSkia"
 import { LoadingRect } from "../../components/LoadingRect"
+import { Canvas, Circle, Path, Skia } from "@shopify/react-native-skia"
+import {
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+} from "react-native-reanimated"
+import { useCallback, useState } from "react"
 import { meta } from "../../posts-meta/2022-08-17-skia-arc"
 
 
@@ -109,19 +115,19 @@ path.addArc(arcRect, -90, 60)
 まずアニメーションの進捗用のSkiaValueを用意します。この値を進捗に応じて0〜360まで変化させます。
 
 ```ts
-const progress = useValue(0)
+const progress = useSharedValue(0)
 ```
 
-開始するときは`runTiming`で360まで変化させます。
+開始するときは`withTiming`で360まで変化させます。
 
 ```ts
-runTiming(progress, 360, { duration: 6000 })
+progress.value = withTiming(360, { duration: 6000 })
 ```
 
-`progress`の変化に応じて画面を変更するには、`useComputedValue`を使います。`addArc`の3つ目の引数に`progress.current`を指定しています。
+`progress`の変化に応じて画面を変更するには、`useDerivedValue`を使います。`addArc`の3つ目の引数に`progress.value`を指定しています。
 
 ```ts
-const path = useComputedValue(() => {
+const path = useDerivedValue(() => {
   const path = Skia.Path.Make()
 
   // ...
@@ -133,22 +139,22 @@ const path = useComputedValue(() => {
     height: radius * 2,
   }
   const startDegree = -90
-  path.addArc(arcRect, startDegree, progress.current)
+  path.addArc(arcRect, startDegree, progress.value)
 
   // ...
 
   return path
-}, [progress])
+}, [])
 ```
 
 全体のコードは以下です。
 
-```js
+```tsx
 export default function DynamicArc() {
   const [animating, setAnimating] = useState(false)
-  const progress = useValue(0)
+  const progress = useSharedValue(0)
 
-  const path = useComputedValue(() => {
+  const path = useDerivedValue(() => {
     const path = Skia.Path.Make()
     path.moveTo(centerPos.x, centerPos.y)
 
@@ -159,17 +165,17 @@ export default function DynamicArc() {
       height: radius * 2,
     }
     const startDegree = -90
-    path.addArc(arcRect, startDegree, progress.current)
+    path.addArc(arcRect, startDegree, progress.value)
     path.lineTo(centerPos.x, centerPos.y).close()
     return path
-  }, [progress])
+  }, [])
 
   const start = useCallback(() => {
     if (animating) return
     setAnimating(true)
-    runTiming(progress, 360, { duration: 6000 }, () => {
+    progress.value = withTiming(360, { duration: 6000 }, () => {
       setTimeout(() => {
-        progress.current = 0
+        progress.value = 0
         setAnimating(false)
       }, 500)
     })
@@ -199,6 +205,23 @@ export default function DynamicArc() {
     </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    position: "relative",
+  },
+  canvas: {
+    flex: 1,
+  },
+  overlay: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  startText: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+})
 ```
 
 コード全体は[Github](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2022-08-17-skia-arc)から確認可能です。
