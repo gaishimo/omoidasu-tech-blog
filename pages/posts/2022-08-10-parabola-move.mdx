@@ -5,14 +5,6 @@ import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-w
 import { View, Text, ActivityIndicator, StyleSheet } from "react-native"
 import { WithSkia } from "../../components/WithSkia"
 import { LoadingRect } from "../../components/LoadingRect"
-import { Canvas, Group, Circle } from "@shopify/react-native-skia"
-import {
-  useSharedValue,
-  useDerivedValue,
-  withTiming,
-  interpolate,
-} from "react-native-reanimated"
-import { useEffect, useMemo } from "react"
 import { meta } from "../../posts-meta/2022-08-10-parabola-move"
 
 export const headlines = [{ title: "放物線の動きサンプル" }, { title: "実装方法" }]
