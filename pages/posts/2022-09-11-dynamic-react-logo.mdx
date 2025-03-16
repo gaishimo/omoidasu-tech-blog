@@ -55,33 +55,30 @@ Reactのロゴの描画は[react-native-skiaの紹介動画](https://youtu.be/EH
 楕円を3つ用意し2つの楕円の角度をtransformで変更します。
 
 ```tsx
-const ovalPaint = usePaintRef()
-
 return (
-  <Canvas style={[canvasSize]}>
+  <Canvas style={canvasSize}>
     <Circle cx={center.x} cy={center.y} r={8} color="lightblue" />
-    <Paint ref={ovalPaint} color="lightblue" style="stroke" strokeWidth={4} />
     <Group strokeWidth={8}>
-      <Oval rect={ovalRect} paint={ovalPaint} />
+      <Oval rect={ovalRect} color="lightblue" style="stroke" strokeWidth={8} />
     </Group>
     <Group
       origin={center}
       transform={[{ rotate: Math.PI / 3 }]}
     >
-      <Oval rect={ovalRect} paint={ovalPaint} />
+      <Oval rect={ovalRect} color="lightblue" style="stroke" strokeWidth={8} />
     </Group>
     <Group
       strokeWidth={8}
       origin={center}
       transform={[{ rotate: -Math.PI / 3 }]}
     >
-      <Oval rect={ovalRect} paint={ovalPaint} />
+      <Oval rect={ovalRect} color="lightblue" style="stroke" strokeWidth={8} />
     </Group>
   </Canvas>
 )
 ```
 
-Paintのrefを各楕円に指定することで、共通部分の属性(color, style)をまとめて設定できます。
+各楕円に直接スタイルを指定します。
 
 
 
@@ -98,13 +95,18 @@ Paintのrefを各楕円に指定することで、共通部分の属性(color, s
   />
 </View>
 
-`useTiming`で`theta`(θ)の値を`0`から`Math.PI * 2`(1周分)までループで値を変化させます。単位は角度ではなくラジアンを使っています。
+`useSharedValue`と`withTiming`、`withRepeat`を使って`theta`(θ)の値を`0`から`Math.PI * 2`(1周分)までループで値を変化させます。単位は角度ではなくラジアンを使っています。
 
 ```ts
-const theta = useTiming(
-  { to: Math.PI * 2, loop: true, yoyo: false },
-  { duration: 8000 },
-)
+const theta = useSharedValue(0)
+
+useEffect(() => {
+  theta.value = withRepeat(
+    withTiming(Math.PI * 2, { duration: 8000 }),
+    -1,
+    false
+  )
+}, [])
 ```
 
 
@@ -112,14 +114,14 @@ const theta = useTiming(
 進捗に対する座標位置は三角関数で取得します。x座標はcosθ、y座標はsinθで取得できます。
 
 ```tsx
-const cx = useComputedValue(() => {
-  const cos = radius * Math.cos(theta.current)
+const cx = useDerivedValue(() => {
+  const cos = radius * Math.cos(theta.value)
   return center.x + cos
-}, [theta])
-const cy = useComputedValue(() => {
-  const sin = radius * Math.sin(theta.current)
+}, [])
+const cy = useDerivedValue(() => {
+  const sin = radius * Math.sin(theta.value)
   return center.y + sin
-}, [theta])
+}, [])
 
 <Circle
   cx={center.x}
@@ -140,14 +142,14 @@ const cy = useComputedValue(() => {
 </View>
 
 ```ts
-const cx = useComputedValue(() => {
-  const cos = radius * Math.cos(theta.current)
+const cx = useDerivedValue(() => {
+  const cos = radius * Math.cos(theta.value)
   return center.x + cos
-}, [theta])
-const cy = useComputedValue(() => {
-  const sin = radius * Math.sin(theta.current)
+}, [])
+const cy = useDerivedValue(() => {
+  const sin = radius * Math.sin(theta.value)
   return center.y + sin * 0.35
-}, [theta])
+}, [])
 ```
 
 楕円のアニメーションについてはこちらの記事が大変参考になりました。
@@ -157,24 +159,33 @@ const cy = useComputedValue(() => {
 次にReactロゴの3つの楕円に対してこのアニメーションを適用し、速度・回転の向きがランダムになるように調節します。ついでにそれぞれの楕円の色も変更しています。
 
 ```tsx
-const theta1 = useValue(0)
-const theta2 = useValue(0)
-const theta3 = useValue(0)
-const color = useValue(colors[0])
+const theta1 = useSharedValue(0)
+const theta2 = useSharedValue(0)
+const theta3 = useSharedValue(0)
+const color = useSharedValue(colors[0])
 
 const thetas = [theta1, theta2, theta3]
 
 const startEllipticalMotion = useCallback((index: number) => {
   const value = thetas[index]
   const reversed = Math.random() < 0.5
-  const timingOptions = reversed
-    ? { from: Math.PI * 2, to: 0 }
-    : { from: 0, to: Math.PI * 2 }
-  runTiming(
-    value,
-    { ...timingOptions, loop: true },
-    { duration: 4000 + Math.random() * 4000 },
-  )
+  const duration = 4000 + Math.random() * 4000
+
+  if (reversed) {
+    value.value = Math.PI * 2
+    value.value = withRepeat(
+      withTiming(0, { duration }),
+      -1,
+      false
+    )
+  } else {
+    value.value = 0
+    value.value = withRepeat(
+      withTiming(Math.PI * 2, { duration }),
+      -1,
+      false
+    )
+  }
 }, [])
 
 const startAnimations = useCallback(async () => {
@@ -228,25 +239,31 @@ useEffect(() => {
 
 最後に、各軌道上の円が中心に近づいたタイミングで中心の円を拡大させ、色を近づいた円の色を変更するエフェクトを追加します。
 
-thetaのSkiaValueに対し`useValueEffect` (useEffectのSkia版のようなもの)を指定し、thetaの値が`Math.PI / 2`(90度)もしくは`Math.PI * 1.5`(270度)に近づいたときに中心の円の値を拡大させるアニメーションを実行します。この時にカラーの値も変更します。
+thetaの値に対し`useAnimatedReaction` (react-native-reanimatedの機能)を指定し、thetaの値が`Math.PI / 2`(90度)もしくは`Math.PI * 1.5`(270度)に近づいたときに中心の円の値を拡大させるアニメーションを実行します。この時にカラーの値も変更します。
 
 ```tsx
-const shrinkCircleWithColorChange = useCallback((value, index) => {
+const shrinkCircleWithColorChange = useCallback((value: number, index: number) => {
   const v = Math.min(
-    Math.abs(value.current - Math.PI / 2),
-    Math.abs(value.current - Math.PI * 1.5),
+    Math.abs(value - Math.PI / 2),
+    Math.abs(value - Math.PI * 1.5),
   )
   if (v <= Math.PI / 90) {
-    color.current = colors[index]
-    runTiming(shrinking, { from: 0, to: 1 }, { duration: 150 }, () => {
-      runTiming(shrinking, { from: 1, to: 0 }, { duration: 150 })
+    color.value = colors[index]
+    shrinking.value = 0
+    shrinking.value = withTiming(1, { duration: 150 }, finished => {
+      if (finished) {
+        shrinking.value = withTiming(0, { duration: 150 })
+      }
     })
   }
 }, [])
 
-useValueEffect(theta1, () => {
-  shrinkCircleWithColorChange(theta1, 0)
-})
+useAnimatedReaction(
+  () => theta1.value,
+  (currentValue) => {
+    shrinkCircleWithColorChange(currentValue, 0)
+  }
+)
 ```
 
 

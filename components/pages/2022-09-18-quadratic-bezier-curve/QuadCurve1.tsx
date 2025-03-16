@@ -9,7 +9,7 @@ path.quadTo(150, 50, 280, 210)
 
 export default function QuadCurve1() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path path={path} style="stroke" color="lightblue" strokeWidth={3} />
     </Canvas>
   )

@@ -1,10 +1,6 @@
-import {
-  Canvas,
-  Circle,
-  RoundedRect,
-  useTouchHandler,
-  useValue,
-} from "@shopify/react-native-skia"
+import { Canvas, Circle, RoundedRect } from "@shopify/react-native-skia"
+import { useSharedValue, runOnJS } from "react-native-reanimated"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
 
 const canvasSize = { width: 320, height: 140 }
 const buttonSize = { width: 300, height: 100 }
@@ -16,32 +12,28 @@ const buttonRadius = 50
 const rippleColor = "rgb(100, 200, 255)"
 
 export default function RippleEffect01() {
-  const cx = useValue<number>(canvasSize.width / 2)
-  const cy = useValue<number>(canvasSize.height / 2 + buttonSize.height / 3)
+  const cx = useSharedValue<number>(canvasSize.width / 2)
+  const cy = useSharedValue<number>(
+    canvasSize.height / 2 + buttonSize.height / 3,
+  )
 
-  const touchHandler = useTouchHandler({
-    onStart: ({ x, y }) => {
-      cx.current = x
-      cy.current = y
-    },
+  const panGesture = Gesture.Pan().onBegin(({ x, y }) => {
+    cx.value = x
+    cy.value = y
   })
 
   return (
-    <Canvas style={[canvasSize]} onTouch={touchHandler}>
-      <RoundedRect
-        {...buttonSize}
-        {...buttonPos}
-        r={buttonRadius}
-        color="lightblue"
-        style="fill"
-      />
-      <Circle
-        cx={cx || 0}
-        cy={cy || 0}
-        r={30}
-        opacity={0.2}
-        color={rippleColor}
-      />
-    </Canvas>
+    <GestureDetector gesture={panGesture}>
+      <Canvas style={canvasSize}>
+        <RoundedRect
+          {...buttonSize}
+          {...buttonPos}
+          r={buttonRadius}
+          color="lightblue"
+          style="fill"
+        />
+        <Circle cx={cx} cy={cy} r={30} opacity={0.2} color={rippleColor} />
+      </Canvas>
+    </GestureDetector>
   )
 }

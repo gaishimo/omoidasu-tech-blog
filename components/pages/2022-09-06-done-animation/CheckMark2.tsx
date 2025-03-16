@@ -1,11 +1,10 @@
+import { Canvas, Path, Skia } from "@shopify/react-native-skia"
 import {
-  Canvas,
-  Path,
-  runTiming,
-  Skia,
-  useComputedValue,
-  useValue,
-} from "@shopify/react-native-skia"
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  withRepeat,
+} from "react-native-reanimated"
 import { useCallback, useEffect, useMemo } from "react"
 import { StyleSheet, View } from "react-native"
 
@@ -27,7 +26,7 @@ function getVector(p1: { x: number; y: number }, p2: { x: number; y: number }) {
 }
 
 export default function CheckMark2() {
-  const progress = useValue(0)
+  const progress = useSharedValue(0)
   const totalLinePath = useMemo(() => {
     const path = Skia.Path.Make()
     path.moveTo(checkMarkPoints[0].x, checkMarkPoints[0].y)
@@ -35,19 +34,19 @@ export default function CheckMark2() {
     return path
   }, [])
 
-  const activeLinePath = useComputedValue(() => {
+  const activeLinePath = useDerivedValue(() => {
     const path = Skia.Path.Make()
-    if (progress.current === 0) {
+    if (progress.value === 0) {
       return path
     }
     path.moveTo(checkMarkPoints[0].x, checkMarkPoints[0].y)
     const vector = getVector(checkMarkPoints[0], checkMarkPoints[1])
-    path.rLineTo(vector.x * progress.current, vector.y * progress.current)
+    path.rLineTo(vector.x * progress.value, vector.y * progress.value)
     return path
-  }, [progress])
+  }, [])
 
   const runAnimation = useCallback(() => {
-    runTiming(progress, { loop: true, yoyo: false }, { duration: 2000 })
+    progress.value = withRepeat(withTiming(1, { duration: 2000 }), -1, false)
   }, [])
 
   useEffect(() => {
@@ -56,7 +55,7 @@ export default function CheckMark2() {
 
   return (
     <View style={[styles.container, canvasSize]}>
-      <Canvas style={[canvasSize]}>
+      <Canvas style={canvasSize}>
         <Path
           path={totalLinePath}
           color="rgb(230, 230, 230)"

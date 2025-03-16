@@ -71,7 +71,7 @@ subPath3.lineTo(middle5.x, middle5.y)
 
 export default function QubicBezierCurve2() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path path={path} style="stroke" color="lightblue" strokeWidth={3} />
       <Path
         path={subPath}

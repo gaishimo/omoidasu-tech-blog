@@ -20,7 +20,7 @@ export default function StaticArc() {
   path.lineTo(centerPos.x, centerPos.y).close()
 
   return (
-    <Canvas style={[styles.canvas, { ...canvasSize }]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Circle
         cx={centerPos.x}
         cy={centerPos.y}

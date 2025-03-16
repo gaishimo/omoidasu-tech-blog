@@ -1,9 +1,5 @@
-import {
-  Circle,
-  Oval,
-  SkiaMutableValue,
-  useComputedValue,
-} from "@shopify/react-native-skia"
+import { Circle, Oval } from "@shopify/react-native-skia"
+import { SharedValue, useDerivedValue } from "react-native-reanimated"
 
 const radius = 100
 const ovalRatio = 0.35
@@ -11,7 +7,7 @@ const ovalRatio = 0.35
 type Props = {
   center: { x: number; y: number }
   color: string
-  theta: SkiaMutableValue<number>
+  theta: SharedValue<number>
 }
 
 export function OvalWithMovingCircle(props: Props) {
@@ -23,14 +19,15 @@ export function OvalWithMovingCircle(props: Props) {
     height: radius * ovalRatio * 2,
   }
 
-  const cx = useComputedValue(() => {
-    const cos = radius * Math.cos(theta.current)
+  const cx = useDerivedValue(() => {
+    const cos = radius * Math.cos(theta.value)
     return center.x + cos
-  }, [theta])
-  const cy = useComputedValue(() => {
-    const sin = radius * Math.sin(theta.current)
+  }, [])
+
+  const cy = useDerivedValue(() => {
+    const sin = radius * Math.sin(theta.value)
     return center.y + sin * ovalRatio
-  }, [theta])
+  }, [])
 
   return (
     <>

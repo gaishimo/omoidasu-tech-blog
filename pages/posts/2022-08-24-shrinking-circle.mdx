@@ -37,30 +37,29 @@ export default props => (
 
 
 ```jsx
-import {
-  Blur,
-  Canvas,
-  Circle,
-  Easing,
-  interpolate,
-  useComputedValue,
-  usePaintRef,
-  useTiming,
-} from "@shopify/react-native-skia"
-
-type Props = {
-  radius: number
-  color: string
-}
-
-export function ShrinkingCircle(props: Props) {
   const canvasSize = { width: props.radius * 4, height: props.radius * 4 }
   const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 
-  const progress = useTiming(
-    { loop: true, yoyo: true },
-    { easing: Easing.inOut(Easing.ease), duration: 2200 },
-  )
+  const progress = useSharedValue(0)
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, {
+        easing: Easing.inOut(Easing.ease),
+        duration: 2200,
+      }),
+      -1,
+      true,
+    )
+  }, [])
+
+  const outerRadius = useDerivedValue(() => {
+    return interpolate(
+      progress.value,
+      [0, 1],
+      [props.radius * 1.5, props.radius * 1.9],
+    )
+  }, [props.radius])
 
   return (
     <Canvas style={canvasSize}>
@@ -68,13 +67,7 @@ export function ShrinkingCircle(props: Props) {
       <Circle
         cx={center.x}
         cy={center.y}
-        r={useComputedValue(() => {
-          return interpolate(
-            progress.current,
-            [0, 1],
-            [props.radius * 1.5, props.radius * 1.9],
-          )
-        }, [progress, props.radius])}
+        r={outerRadius}
         color={props.color}
         opacity={0.3}
       >
@@ -89,43 +82,40 @@ export function ShrinkingCircle(props: Props) {
         color={props.color}
       />
       {/* Inner Circle (ぼかし効果) */}
-      <Circle
-        cx={center.x}
-        cy={center.y}
-        r={props.radius}
-        color={props.color}
-      >
+      <Circle cx={center.x} cy={center.y} r={props.radius} color={props.color}>
         <Blur blur={2} />
       </Circle>
     </Canvas>
   )
-}
 ```
 
 内側の円に少しぼかし効果を出すため2つ円を重ねて一つにBlurを設定しています。
 
 
-`useTiming`でアニメーションを設定します。この設定をするとvalue値が0から1に繰り返し変化します。`yoyo: true`を指定すると、アニメーションが進んだ後戻ってくるアニメーションも実行してくれます(ヨーヨー効果)。
+`withRepeat`と`withTiming`でアニメーションを設定します。この設定をするとvalue値が0から1に繰り返し変化します。
 
 ```js
-const progress = useTiming(
-  { loop: true, yoyo: true },
-  { easing: Easing.inOut(Easing.ease), duration: 2200 },
+progress.value = withRepeat(
+  withTiming(1, {
+    easing: Easing.inOut(Easing.ease),
+    duration: 2200,
+  }),
+  -1,
+  true,
 )
 ```
 
 外側の円の半径をアニメーションvalueを使って動的に変更します。
 ```jsx
-  <Circle
-    ...
-    r={useComputedValue(() => {
-      return interpolate(
-        progress.current,
-        [0, 1],
-        [props.radius * 1.5, props.radius * 1.9],
-      )
-    }, [progress, props.radius])}
-  >
+<Circle
+  cx={center.x}
+  cy={center.y}
+  r={outerRadius}
+  color={props.color}
+  opacity={0.3}
+>
+  <Blur blur={1} />
+</Circle>
 ```
 
 可能であれば、今後より自然な表現になるよう改善していきたいと思います。

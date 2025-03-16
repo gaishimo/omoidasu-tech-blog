@@ -22,7 +22,7 @@ console.log("pathData:", pathData)
 
 export default function CurvedLineGraph() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path path={pathData} style="stroke" color="lightblue" strokeWidth={2} />
     </Canvas>
   )

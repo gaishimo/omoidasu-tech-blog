@@ -19,6 +19,8 @@ export default props => (
   </PostLayout>
 )
 
+*2025/03/15: この記事は、以前のNext.js v12、@shopify/react-native-skia v0.1時点での設定方法です。古いため、最新バージョンでの設定方法は各ライブラリの公式ドキュメント等を参考にしてください。Skiaのサンプルコードは最新(v1.11)に合わせたコードに修正しています。
+
 
 [react-native-skia](https://github.com/Shopify/react-native-skia)がExpo GoとWebでサポートされたそうです。
 
@@ -155,36 +157,46 @@ webpackの設定で迷った場合は、[react-native-skiaのexampleの設定](h
 
 
 ```jsx
-  const onTouch = useTouchHandler({
-    onStart: () => {
-      runTiming(value, 10, {
-        duration: 600,
-      })
-    },
-    onEnd: () => {
-      runTiming(value, 0, {
-        duration: 1000,
-      })
-    },
-  })
+  const progress = useSharedValue(0)
+
+  const gesture = Gesture.LongPress()
+    .onStart(() => {
+      progress.value = withTiming(10, { duration: 600 })
+    })
+    .onEnd(() => {
+      progress.value = withTiming(0, { duration: 1000 })
+    })
+
   return (
-    <Canvas onTouch={onTouch}>
-      <Group>
-        <Path
-          strokeCap={"round"}
-          strokeWidth={10}
-          style="fill"
-          path="M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
-        >
-          <Blur blur={value} />
-          <LinearGradient
-            start={vec(0, 0)}
-            end={vec(280, 280)}
-            colors={["#30cfd0", "#330867"]}
-          />
-        </Path>
-      </Group>
-    </Canvas>
+    <View>
+      <GestureDetector gesture={gesture}>
+        <Canvas style={{ height: 300 }}>
+          <Group>
+            <Path
+              strokeCap={"round"}
+              strokeWidth={10}
+              style="fill"
+              path="M 128 0 L 168 80 L 256 93 L 192 155 L 207 244 L 128 202 L 49 244 L 64 155 L 0 93 L 88 80 L 128 0 Z"
+            >
+              <Blur blur={progress} />
+              <LinearGradient
+                start={vec(0, 0)}
+                end={vec(280, 280)}
+                colors={["#30cfd0", "#330867"]}
+              />
+            </Path>
+          </Group>
+        </Canvas>
+      </GestureDetector>
+
+      {props.showGuideText && (
+        <View style={{ top: -32 }}>
+          <Text style={{ fontSize: 12, opacity: 0.5 }}>
+            react-native-skiaのサンプル。長押しするとぼかし効果が入ります。
+          </Text>
+        </View>
+      )}
+    </View>
   )
 ```
 
@@ -212,9 +224,7 @@ webpackの設定で迷った場合は、[react-native-skiaのexampleの設定](h
       height: 48,
     }}
   >
-    <Canvas
-      style={[StyleSheet.absoluteFill, { width: "100%", height: "100%" }]}
-    >
+    <Canvas style={StyleSheet.absoluteFill}>
       <RoundedRect x={0} y={0} width={256} height={48} r={8}>
         <LinearGradient
           start={vec(0, 10)}
@@ -242,7 +252,7 @@ webpackの設定で迷った場合は、[react-native-skiaのexampleの設定](h
           letterSpacing: 2,
         }}
       >
-        Title
+        SIGN IN
       </Text>
     </View>
   </View>
@@ -257,3 +267,10 @@ webpackの設定で迷った場合は、[react-native-skiaのexampleの設定](h
 react-native-skiaが提供されたことによりUI表現に関するこれらのネックが大幅に解消されそうです。今後はReact NativeのUIの作り方も変わってくるのではないかと思います。表現や効果、アニメーション等がより充実したアプリ等が作れるようになったのはとてもありがたいです。
 
 また、Reactで宣言的UIを使って描画を行えるという点も大変魅力的な点だと思います。
+
+
+## コード
+
+この記事のサンプルのソースコードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2022-08-07-rn-skia-in-blog)で確認できます。
+
+

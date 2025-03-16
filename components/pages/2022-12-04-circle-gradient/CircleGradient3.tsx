@@ -17,7 +17,7 @@ export default function CircleGradient3() {
   )
   if (font == null) return null
   return (
-    <Canvas style={[canvasSize]}>
+    <Canvas style={canvasSize}>
       <Group>
         <Circle
           cx={center.x}

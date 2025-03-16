@@ -1,10 +1,11 @@
+import { Canvas, Path, Skia } from "@shopify/react-native-skia"
 import {
-  Canvas,
-  Path,
-  Skia,
-  useComputedValue,
-  useTiming,
-} from "@shopify/react-native-skia"
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  withRepeat,
+} from "react-native-reanimated"
+import { useEffect } from "react"
 import { StyleSheet } from "react-native"
 
 const canvasSize = { width: 300, height: 300 }
@@ -25,31 +26,36 @@ function getVector(p1: { x: number; y: number }, p2: { x: number; y: number }) {
 }
 
 export default function AnimatedQuadCurve() {
-  const progress = useTiming({ loop: true }, { duration: 4000 })
-  const curvePath = useComputedValue(() => {
+  const progress = useSharedValue(0)
+
+  useEffect(() => {
+    progress.value = withRepeat(withTiming(1, { duration: 4000 }), -1, false)
+  }, [])
+
+  const curvePath = useDerivedValue(() => {
     const vector1 = getVector(start, control)
     const vector2 = getVector(control, end)
     const point1 = {
-      x: start.x + vector1.x * progress.current,
-      y: start.y + vector1.y * progress.current,
+      x: start.x + vector1.x * progress.value,
+      y: start.y + vector1.y * progress.value,
     }
     const point2 = {
-      x: control.x + vector2.x * progress.current,
-      y: control.y + vector2.y * progress.current,
+      x: control.x + vector2.x * progress.value,
+      y: control.y + vector2.y * progress.value,
     }
     const vector3 = getVector(point1, point2)
     const point3 = {
-      x: point1.x + vector3.x * progress.current,
-      y: point1.y + vector3.y * progress.current,
+      x: point1.x + vector3.x * progress.value,
+      y: point1.y + vector3.y * progress.value,
     }
     const path = Skia.Path.Make()
     path.moveTo(start.x, start.y)
     path.quadTo(point1.x, point1.y, point3.x, point3.y)
     return path
-  }, [progress])
+  }, [])
 
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path
         path={subPath}
         style="stroke"

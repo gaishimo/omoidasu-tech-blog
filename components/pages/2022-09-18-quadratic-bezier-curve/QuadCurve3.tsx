@@ -20,7 +20,7 @@ path.quadTo(control2.x, control2.y, 290, 40)
 
 export default function QuadCurve3() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path path={path} style="stroke" color="lightblue" strokeWidth={3} />
     </Canvas>
   )

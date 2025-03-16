@@ -26,7 +26,7 @@ for (let i = 0; i < data.length; i++) {
 
 export default function AngularLineGraph() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path path={path} color="lightblue" strokeWidth={2} style="stroke" />
     </Canvas>
   )

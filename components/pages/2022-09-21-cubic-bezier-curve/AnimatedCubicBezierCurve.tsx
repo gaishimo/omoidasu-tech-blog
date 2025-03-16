@@ -1,10 +1,11 @@
+import { Canvas, Path, Skia } from "@shopify/react-native-skia"
 import {
-  Canvas,
-  Path,
-  Skia,
-  useComputedValue,
-  useTiming,
-} from "@shopify/react-native-skia"
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  withRepeat,
+} from "react-native-reanimated"
+import { useEffect } from "react"
 import { StyleSheet } from "react-native"
 
 const canvasSize = { width: 300, height: 300 }
@@ -31,47 +32,52 @@ subPath.moveTo(start.x, start.y)
 subPath.cubicTo(control1.x, control1.y, control2.x, control2.y, end.x, end.y)
 
 export default function AnimatedQubicBezierCurve4() {
-  const progress = useTiming({ loop: true }, { duration: 3500 })
-  const curvePath = useComputedValue(() => {
+  const progress = useSharedValue(0)
+
+  useEffect(() => {
+    progress.value = withRepeat(withTiming(1, { duration: 3500 }), -1, true)
+  }, [])
+
+  const curvePath = useDerivedValue(() => {
     const point1 = {
-      x: start.x + startToControl1.x * progress.current,
-      y: start.y + startToControl1.y * progress.current,
+      x: start.x + startToControl1.x * progress.value,
+      y: start.y + startToControl1.y * progress.value,
     }
     const point2 = {
-      x: control1.x + control1To2.x * progress.current,
-      y: control1.y + control1To2.y * progress.current,
+      x: control1.x + control1To2.x * progress.value,
+      y: control1.y + control1To2.y * progress.value,
     }
     const point3 = {
-      x: control2.x + control2ToEnd.x * progress.current,
-      y: control2.y + control2ToEnd.y * progress.current,
+      x: control2.x + control2ToEnd.x * progress.value,
+      y: control2.y + control2ToEnd.y * progress.value,
     }
 
     const point1To2 = getVector(point1, point2)
     const point2To3 = getVector(point2, point3)
 
     const point4 = {
-      x: point1.x + point1To2.x * progress.current,
-      y: point1.y + point1To2.y * progress.current,
+      x: point1.x + point1To2.x * progress.value,
+      y: point1.y + point1To2.y * progress.value,
     }
     const point5 = {
-      x: point2.x + point2To3.x * progress.current,
-      y: point2.y + point2To3.y * progress.current,
+      x: point2.x + point2To3.x * progress.value,
+      y: point2.y + point2To3.y * progress.value,
     }
 
     const point4To5 = getVector(point4, point5)
     const point6 = {
-      x: point4.x + point4To5.x * progress.current,
-      y: point4.y + point4To5.y * progress.current,
+      x: point4.x + point4To5.x * progress.value,
+      y: point4.y + point4To5.y * progress.value,
     }
 
     const path = Skia.Path.Make()
     path.moveTo(start.x, start.y)
     path.cubicTo(point1.x, point1.y, point4.x, point4.y, point6.x, point6.y)
     return path
-  }, [progress])
+  }, [])
 
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path
         path={subPath}
         style="stroke"

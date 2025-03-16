@@ -1,10 +1,10 @@
+import { Canvas, Circle, Group } from "@shopify/react-native-skia"
 import {
-  Canvas,
-  Circle,
-  Group,
-  runTiming,
-  useValue,
-} from "@shopify/react-native-skia"
+  useSharedValue,
+  withTiming,
+  withRepeat,
+  Easing,
+} from "react-native-reanimated"
 import { useCallback, useEffect } from "react"
 import { StyleSheet, View } from "react-native"
 import { OvalWithMovingCircle } from "./OvalWithMovingCircle"
@@ -14,18 +14,18 @@ const center = { x: canvasSize.width / 2, y: canvasSize.height / 2 }
 const colors = ["#ADD8E6", "#B1D6FC", "#AABAF2"]
 
 export default function DynamicReactLogo() {
-  const theta1 = useValue(0)
-  const theta2 = useValue(0)
-  const theta3 = useValue(0)
+  const theta1 = useSharedValue(0)
+  const theta2 = useSharedValue(0)
+  const theta3 = useSharedValue(0)
 
   const thetas = [theta1, theta2, theta3]
 
   const startAnimations = useCallback(async () => {
     for (const theta of thetas) {
-      runTiming(
-        theta,
-        { from: 0, to: Math.PI * 2, loop: true },
-        { duration: 8000 },
+      theta.value = withRepeat(
+        withTiming(Math.PI * 2, { duration: 8000, easing: Easing.linear }),
+        -1,
+        false,
       )
     }
   }, [])
@@ -36,7 +36,7 @@ export default function DynamicReactLogo() {
 
   return (
     <View style={[styles.container, canvasSize]}>
-      <Canvas style={[canvasSize]}>
+      <Canvas style={canvasSize}>
         <Group>
           <Circle cx={center.x} cy={center.y} r={12} color={colors[0]}></Circle>
         </Group>

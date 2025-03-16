@@ -1,14 +1,19 @@
 import {
   Canvas,
-  Easing,
-  interpolate,
   LinearGradient,
   Text,
-  useComputedValue,
   useFont,
-  useTiming,
 } from "@shopify/react-native-skia"
+import {
+  Easing,
+  interpolate,
+  useSharedValue,
+  useDerivedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated"
 import { StyleSheet } from "react-native"
+import { useEffect } from "react"
 
 const canvasSize = { width: 320, height: 160 }
 const textPos = { x: 20, y: 90 }
@@ -18,18 +23,27 @@ export default function DynamicTextGradient() {
     require("../../../assets/fonts/SF-Mono-Semibold.otf"),
     20.5,
   )
-  const progress = useTiming(
-    { loop: true, yoyo: false },
-    { easing: Easing.inOut(Easing.ease), duration: 2500 },
-  )
 
-  const positions = useComputedValue(() => {
+  const progress = useSharedValue(0)
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, {
+        easing: Easing.inOut(Easing.ease),
+        duration: 2500,
+      }),
+      -1,
+      false,
+    )
+  }, [])
+
+  const positions = useDerivedValue(() => {
     return [
-      interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0, 0.5, 1]),
-      interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0.5, 1, 1]),
-      interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1, 1]),
+      interpolate(progress.value, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0, 0.5, 1]),
+      interpolate(progress.value, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0.5, 1, 1]),
+      interpolate(progress.value, [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1, 1]),
     ]
-  }, [progress])
+  }, [])
 
   return (
     <Canvas style={styles.canvas}>

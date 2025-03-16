@@ -4,12 +4,13 @@ import {
   Group,
   interpolate,
   Oval,
-  Paint,
-  runTiming,
-  useComputedValue,
-  usePaintRef,
-  useValue,
 } from "@shopify/react-native-skia"
+import {
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated"
 import { useCallback, useEffect } from "react"
 import { wait } from "../../../utils/wait"
 
@@ -24,30 +25,46 @@ const ovalRect = {
 }
 
 export default function ReactLogo01() {
-  const ovalPaint = usePaintRef()
-  const circleOpacity = useValue(0)
-  const ovalOpacity = useValue(0)
-  const ovalRotation = useValue(0)
+  const circleOpacity = useSharedValue(0)
+  const ovalOpacity = useSharedValue(0)
+  const ovalRotation = useSharedValue(0)
 
   const animate = useCallback(async () => {
-    circleOpacity.current = 0
-    ovalOpacity.current = 0
-    ovalRotation.current = 0
+    circleOpacity.value = 0
+    ovalOpacity.value = 0
+    ovalRotation.value = 0
 
-    runTiming(circleOpacity, 1, { duration: 700 })
+    circleOpacity.value = withTiming(1, { duration: 700 })
     await wait(1500)
-    runTiming(ovalOpacity, 1, { duration: 2000 })
+    ovalOpacity.value = withTiming(1, { duration: 2000 })
     await wait(2000)
-    runTiming(ovalRotation, 1, { duration: 2000 })
+    ovalRotation.value = withTiming(1, { duration: 2000 })
   }, [])
 
   useEffect(() => {
     animate()
-    setInterval(() => animate(), 9000)
+    const interval = setInterval(() => animate(), 9000)
+    return () => clearInterval(interval)
+  }, [animate])
+
+  const ovalTransform1 = useDerivedValue(() => {
+    return [
+      {
+        rotate: interpolate(ovalRotation.value, [0, 1], [0, Math.PI / 3]),
+      },
+    ]
+  }, [])
+
+  const ovalTransform2 = useDerivedValue(() => {
+    return [
+      {
+        rotate: interpolate(ovalRotation.value, [0, 1], [0, -Math.PI / 3]),
+      },
+    ]
   }, [])
 
   return (
-    <Canvas style={[canvasSize]}>
+    <Canvas style={canvasSize}>
       <Circle
         cx={center.x}
         cy={center.y}
@@ -55,50 +72,34 @@ export default function ReactLogo01() {
         color="lightblue"
         opacity={circleOpacity}
       />
-      <Paint
-        ref={ovalPaint}
-        color="lightblue"
-        style="stroke"
-        strokeWidth={4}
-        opacity={ovalOpacity}
-      />
-      <Group>
-        <Oval rect={ovalRect} paint={ovalPaint} />
+      <Group opacity={ovalOpacity}>
+        <Oval
+          rect={ovalRect}
+          color="lightblue"
+          style="stroke"
+          strokeWidth={4}
+        />
       </Group>
-      <Group
-        origin={center}
-        transform={useComputedValue(
-          () => [
-            {
-              rotate: interpolate(
-                ovalRotation.current,
-                [0, 1],
-                [0, Math.PI / 3],
-              ),
-            },
-          ],
-          [ovalRotation],
-        )}
-      >
-        <Oval rect={ovalRect} paint={ovalPaint} />
+      <Group origin={center} transform={ovalTransform1} opacity={ovalOpacity}>
+        <Oval
+          rect={ovalRect}
+          color="lightblue"
+          style="stroke"
+          strokeWidth={4}
+        />
       </Group>
       <Group
         strokeWidth={8}
         origin={center}
-        transform={useComputedValue(
-          () => [
-            {
-              rotate: interpolate(
-                ovalRotation.current,
-                [0, 1],
-                [0, -Math.PI / 3],
-              ),
-            },
-          ],
-          [ovalRotation],
-        )}
+        transform={ovalTransform2}
+        opacity={ovalOpacity}
       >
-        <Oval rect={ovalRect} paint={ovalPaint} />
+        <Oval
+          rect={ovalRect}
+          color="lightblue"
+          style="stroke"
+          strokeWidth={4}
+        />
       </Group>
     </Canvas>
   )

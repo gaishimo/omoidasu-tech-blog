@@ -40,36 +40,40 @@ Material UIでも使われているRipple Effectのボタンをreact-native-skia
 
 仕組みとしてはボタン上でタップした座標を取得し、そこを中心として円を描画し拡大していけばよさそうです。
 
-Canvas内でタップした座標は`useTouchHandler`で取得できます。取得した座標をSkiaValueに保持しその座標を中心に円を描画してみます。
+Canvas内でタップした座標は`react-native-gesture-handler`の`Gesture.Pan()`を使用して取得できます。取得した座標をReanimatedの`useSharedValue`に保持しその座標を中心に円を描画してみます。
 
 ```tsx
-const cx = useValue<number>(canvasSize.width / 2)
-const cy = useValue<number>(canvasSize.height / 2 + buttonSize.height / 3)
+import { useSharedValue } from "react-native-reanimated"
+import { Gesture, GestureDetector } from "react-native-gesture-handler"
 
-const touchHandler = useTouchHandler({
-  onStart: ({ x, y }) => {
-    cx.current = x
-    cy.current = y
-  },
-})
+const cx = useSharedValue<number>(canvasSize.width / 2)
+const cy = useSharedValue<number>(canvasSize.height / 2 + buttonSize.height / 3)
+
+const panGesture = Gesture.Pan()
+  .onBegin(({ x, y }) => {
+    cx.value = x
+    cy.value = y
+  })
 
 return (
-  <Canvas style={[canvasSize]} onTouch={touchHandler}>
-    <RoundedRect
-      {...buttonSize}
-      {...buttonPos}
-      r={buttonRadius}
-      color="lightblue"
-      style="fill"
-    />
-    <Circle
-      cx={cx || 0}
-      cy={cy || 0}
-      r={30}
-      opacity={0.2}
-      color={rippleColor}
-    />
-  </Canvas>
+  <GestureDetector gesture={panGesture}>
+    <Canvas style={canvasSize}>
+      <RoundedRect
+        {...buttonSize}
+        {...buttonPos}
+        r={buttonRadius}
+        color="lightblue"
+        style="fill"
+      />
+      <Circle
+        cx={cx}
+        cy={cy}
+        r={30}
+        opacity={0.2}
+        color={rippleColor}
+      />
+    </Canvas>
+  </GestureDetector>
 )
 ```
 
@@ -119,29 +123,39 @@ return (
 次は波紋の円が拡がっていくアニメーションを作成します。タップ後に半径のサイズをアニメーションで大きくしていきます。
 
 ```tsx
-const rippleProgress = useValue<number>(0)
+import {
+  interpolate,
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  runOnJS,
+} from "react-native-reanimated"
 
-const touchHandler = useTouchHandler({
-  onStart: ({ x, y }) => {
-    ...
-    cy.current = y
-    rippleProgress.animation?.cancel()
-    rippleProgress.current = 0
-    runTiming(
-      rippleProgress,
-      1,
-      { duration: 1000 },
-      () => {
-        setTimeout(() => {
-          rippleProgress.current = 0
-        }, 0)
-      },
-    )
-  },
-})
-const rippleRadius = useComputedValue(() => {
-  return interpolate(rippleProgress.current, [0, 1], [0, 300])
-}, [rippleProgress])
+const rippleProgress = useSharedValue<number>(0)
+
+const startRipple = () => {
+  rippleProgress.value = 0
+  rippleProgress.value = withTiming(
+    1,
+    { duration: 1000 },
+    () => {
+      runOnJS(setTimeout)(() => {
+        rippleProgress.value = 0
+      }, 0)
+    }
+  )
+}
+
+const panGesture = Gesture.Pan()
+  .onBegin(({ x, y }) => {
+    cx.value = x
+    cy.value = y
+    runOnJS(startRipple)()
+  })
+
+const rippleRadius = useDerivedValue(() => {
+  return interpolate(rippleProgress.value, [0, 1], [0, 300])
+}, [])
 
 
 <Circle
@@ -166,11 +180,12 @@ const rippleRadius = useComputedValue(() => {
 
 ## easing関数の変更
 
-より自然なアニメーションになるようにイージング関数を変更してみます。skiaの`runTiming`(または`useTiming`)のオプションでeasing関数を指定できます(何も指定していない場合は`linear`が使われます)。
+より自然なアニメーションになるようにイージング関数を変更してみます。Reanimatedの`withTiming`のオプションでeasing関数を指定できます(何も指定していない場合は`linear`が使われます)。
 
 ```js
-runTiming(
-  rippleProgress,
+import { Easing } from "react-native-reanimated"
+
+withTiming(
   1,
   { duration: 1000, easing: Easing.out(Easing.quad) }
 )

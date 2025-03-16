@@ -23,7 +23,7 @@ export default function CircleProgress() {
 
   return (
     <View style={[styles.container, canvasSize]}>
-      <Canvas style={[canvasSize]}>
+      <Canvas style={canvasSize}>
         <Path
           path={checkMarkPath}
           color="#0091FF"

@@ -4,7 +4,6 @@ import {
   LinearGradient,
   RoundedRect,
   useFont,
-  useTiming,
   vec,
 } from "@shopify/react-native-skia"
 import { useMemo, useState } from "react"
@@ -12,6 +11,12 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { range } from "../../../../utils/arrayUtils"
 import { Constants } from "./Constants"
 import { Row } from "./Row"
+import {
+  useSharedValue,
+  useDerivedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated"
 
 const windowSize = { width: 320, height: 640 }
 
@@ -32,13 +37,26 @@ export default function AgletLikeAnimation() {
     return Math.floor(windowSize.height / Constants.rowHeight) + 2
   }, [])
 
-  const progress = useTiming({ loop: true, yoyo: false }, { duration: 5000 })
+  // Reanimatedを使用したアニメーション
+  const progress = useSharedValue(0)
+
+  // アニメーションの開始/停止を制御
+  useMemo(() => {
+    if (!paused) {
+      progress.value = 0
+      progress.value = withRepeat(
+        withTiming(1, { duration: 5000 }),
+        -1, // 無限ループ
+        false, // yoyo効果なし
+      )
+    }
+  }, [paused, progress])
 
   if (font == null) return null
 
   return (
     <View style={{ ...windowSize }}>
-      <Canvas style={[StyleSheet.absoluteFill, windowSize]}>
+      <Canvas style={{ ...StyleSheet.absoluteFillObject, ...windowSize }}>
         <RoundedRect
           x={0}
           y={0}

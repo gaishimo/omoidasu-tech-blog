@@ -1,4 +1,3 @@
-
 import { parse, parseISO } from "date-fns"
 import Image from "next/image"
 import { ScrollView, StyleSheet, Text, View } from "react-native"
@@ -7,6 +6,14 @@ import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { WithSkia } from "../../components/WithSkia"
 import { LoadingRect } from "../../components/LoadingRect"
 import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+import { Canvas, Path, Skia } from "@shopify/react-native-skia"
+import {
+  useSharedValue,
+  useDerivedValue,
+  withTiming,
+  withRepeat,
+  useEffect,
+} from "react-native-reanimated"
 
 import { meta } from "../../posts-meta/2022-09-18-quadratic-bezier-curve"
 
@@ -184,43 +191,50 @@ subPath.quadTo(control.x, control.y, end.x, end.y)
 
 
 export default function AnimatedQuadCurve() {
-  const progress = useTiming({ loop: true }, { duration: 4000 })
-  const curvePath = useComputedValue(() => {
+  const progress = useSharedValue(0)
+
+  useEffect(() => {
+    progress.value = withRepeat(withTiming(1, { duration: 4000 }), -1, false)
+  }, [])
+
+  const curvePath = useDerivedValue(() => {
     const vector1 = getVector(start, control)
     const vector2 = getVector(control, end)
     const point1 = {
-      x: start.x + vector1.x * progress.current,
-      y: start.y + vector1.y * progress.current,
+      x: start.x + vector1.x * progress.value,
+      y: start.y + vector1.y * progress.value,
     }
     const point2 = {
-      x: control.x + vector2.x * progress.current,
-      y: control.y + vector2.y * progress.current,
+      x: control.x + vector2.x * progress.value,
+      y: control.y + vector2.y * progress.value,
     }
     const vector3 = getVector(point1, point2)
     const point3 = {
-      x: point1.x + vector3.x * progress.current,
-      y: point1.y + vector3.y * progress.current,
+      x: point1.x + vector3.x * progress.value,
+      y: point1.y + vector3.y * progress.value,
     }
     const path = Skia.Path.Make()
     path.moveTo(start.x, start.y)
     path.quadTo(point1.x, point1.y, point3.x, point3.y)
     return path
-  }, [progress])
+  }, [])
 
-  <Canvas>
-    <Path
-      path={subPath}
-      style="stroke"
-      color="rgb(230, 230, 230)"
-      strokeWidth={1.5}
-    />
-    <Path
-      path={curvePath}
-      style="stroke"
-      color="lightblue"
-      strokeWidth={2.5}
-    />
-  </Canvas>
+  return (
+    <Canvas>
+      <Path
+        path={subPath}
+        style="stroke"
+        color="rgb(230, 230, 230)"
+        strokeWidth={1.5}
+      />
+      <Path
+        path={curvePath}
+        style="stroke"
+        color="lightblue"
+        strokeWidth={2.5}
+      />
+    </Canvas>
+  )
 }
 
 ```

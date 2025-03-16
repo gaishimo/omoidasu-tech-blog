@@ -16,7 +16,7 @@ for (const i of [0, 1, 2, 3, 4, 5, 6]) {
 
 export default function QuadCurve3() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path path={path} style="stroke" color="lightblue" strokeWidth={3} />
     </Canvas>
   )

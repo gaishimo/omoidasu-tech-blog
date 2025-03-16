@@ -21,23 +21,24 @@ const blurredCircles = [
 export default function DimlyGrowingLight() {
   return (
     <Canvas
-      style={[
-        canvasSize,
-        { backgroundColor: "rgb(0, 0, 70)", borderRadius: 8 },
-      ]}
+      style={{
+        ...canvasSize,
+        backgroundColor: "rgb(0, 0, 70)",
+        borderRadius: 8,
+      }}
     >
       {blurredCircles.map((c, i) => (
-        <Circle cx={center.x} cy={center.y} r={c.radius}>
+        <Circle key={i} cx={center.x} cy={center.y} r={c.radius}>
           <RadialGradient
             c={center}
             r={c.radius}
             colors={[color, colorAlpha]}
           />
-          <Blur blur={c.blur} />
+          <Blur blur={c.blur} mode="decal" />
         </Circle>
       ))}
       <Circle cx={center.x} cy={center.y} r={30} color={color}>
-        <Blur blur={0.7} />
+        <Blur blur={0.7} mode="decal" />
       </Circle>
     </Canvas>
   )

@@ -39,32 +39,31 @@ React Nativeで実装する場合 [react-content-loader](https://github.com/dani
 />
 ```
 
-これをアニメーションで動的にグラデーションが移動するようにしていきます。実装の仕方は[前回の記事](/posts/2022-08-28-text-gradient#%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%8A%B9%E6%9E%9C%E3%82%92%E3%81%A4%E3%81%91%E3%82%8B) と同じですが、繰り返しアニメーションを指定した`SkiaValue`を用意し(`progress`)、この値に応じて`useComputedValue`で`<LinearGradient />`のポイント位置を動的に変化させます。
+これをアニメーションで動的にグラデーションが移動するようにしていきます。実装の仕方は[前回の記事](/posts/2022-08-28-text-gradient#%E3%82%A2%E3%83%8B%E3%83%A1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E5%8A%B9%E6%9E%9C%E3%82%92%E3%81%A4%E3%81%91%E3%82%8B) と同じですが、繰り返しアニメーションを指定した`sharedValue`を用意し(`progress`)、この値に応じて`useComputedValue`で`<LinearGradient />`のポイント位置を動的に変化させます。
 
 
 ```tsx
-const progress = useTiming(
-  { loop: true, yoyo: false },
-  { easing: Easing.inOut(Easing.ease), duration: 2500 },
-)
+const progress = useSharedValue(0)
 
-const positions = useComputedValue(() => {
+useEffect(() => {
+  progress.value = withRepeat(
+    withTiming(1, {
+      easing: Easing.inOut(Easing.ease),
+      duration: 2300,
+    }),
+    -1,
+    false,
+  )
+}, [])
+
+const positions = useDerivedValue(() => {
   return [
-    interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0, 0.5, 1]),
-    interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0.5, 1, 1]),
-    interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1, 1]),
+    interpolate(progress.value, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0, 0.5, 1]),
+    interpolate(progress.value, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0.5, 1, 1]),
+    interpolate(progress.value, [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1, 1]),
   ]
-}, [progress])
-
-
-<LinearGradient
-  ...
-  colors={color1, color2, color1]}
-  positions={positions}
-/>
+}, [])
 ```
-
-`<LinearGradient />`は`<Paint>`で囲み、Paintのrefを`<Group>`に指定します。こうすることで、`<Group />`配下すべてにグラデーションを適用できます。その下に`props.children`を渡し、`children`を外側のcomponentから渡せるようにすることで、Skeleton Screenの中身を自由に外から指定できるようにします。
 
 
 ```jsx
@@ -76,32 +75,42 @@ type Props = {
 }
 
 export function SkeletonViewContainer(props: Props) {
-  const paintRef = usePaintRef()
-  const progress = useTiming(
-    { loop: true, yoyo: false },
-    { easing: Easing.inOut(Easing.ease), duration: 2300 },
-  )
-  const positions = useComputedValue(() => {
+  const progress = useSharedValue(0)
+
+  useEffect(() => {
+    progress.value = withRepeat(
+      withTiming(1, {
+        easing: Easing.inOut(Easing.ease),
+        duration: 2300,
+      }),
+      -1,
+      false,
+    )
+  }, [])
+
+  const positions = useDerivedValue(() => {
     return [
-      interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0, 0.5, 1]),
-      interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0.5, 1, 1]),
-      interpolate(progress.current, [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1, 1]),
+      interpolate(progress.value, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0, 0.5, 1]),
+      interpolate(progress.value, [0, 0.25, 0.5, 0.75, 1], [0, 0, 0.5, 1, 1]),
+      interpolate(progress.value, [0, 0.25, 0.5, 0.75, 1], [0, 0.5, 1, 1, 1]),
     ]
-  }, [progress])
+  }, [])
+
   return (
     <Canvas style={props.canvasSize}>
-      <Paint ref={paintRef}>
+      <Group>
         <LinearGradient
           start={{ x: 0, y: props.canvasSize.height % 2 }}
           end={{ x: props.canvasSize.width, y: props.canvasSize.height % 2 }}
           colors={[props.basicColor, props.accentColor, props.basicColor]}
           positions={positions}
         />
-      </Paint>
-      <Group paint={paintRef}>{props.children}</Group>
+        {props.children}
+      </Group>
     </Canvas>
   )
 }
+
 ```
 
 外側からは以下のようにコンテンツの中身をchildrenに指定してrenderさせます。

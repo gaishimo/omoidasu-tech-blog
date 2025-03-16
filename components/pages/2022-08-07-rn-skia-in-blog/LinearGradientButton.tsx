@@ -7,10 +7,6 @@ import {
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 export default function LinearGradientButton() {
-  // const font = useFont(require("../../../fonts/tsukushi-marugo-std-b.otf"), 28)
-  // if (font == null) {
-  //   return null
-  // }
   return (
     <TouchableOpacity>
       <View
@@ -21,9 +17,7 @@ export default function LinearGradientButton() {
           height: 48,
         }}
       >
-        <Canvas
-          style={[StyleSheet.absoluteFill, { width: "100%", height: "100%" }]}
-        >
+        <Canvas style={StyleSheet.absoluteFill}>
           <RoundedRect x={0} y={0} width={256} height={48} r={8}>
             <LinearGradient
               start={vec(0, 10)}
@@ -31,14 +25,6 @@ export default function LinearGradientButton() {
               colors={["#10408E", "#11A4FF"]}
             />
           </RoundedRect>
-          {/* <Text
-            x={100}
-            y={28}
-            text="SIGN IN"
-            font={font}
-            size={10}
-            color="white"
-          /> */}
         </Canvas>
         <View
           style={[

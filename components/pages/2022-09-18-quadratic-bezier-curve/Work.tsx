@@ -9,7 +9,7 @@ path.quadTo(180, 20, 280, 170)
 
 export default function Work() {
   return (
-    <Canvas style={[styles.canvas, canvasSize]}>
+    <Canvas style={{ ...styles.canvas, ...canvasSize }}>
       <Path path={path} style="stroke" color="lightblue" strokeWidth={3} />
     </Canvas>
   )
