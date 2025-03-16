@@ -77,7 +77,6 @@ function updateMetaFile(postId, commitDate) {
     )
     return true
   } else {
-    console.log(`Metadata is up to date: ${cleanPostId}`)
     return false
   }
 }
