@@ -19,7 +19,7 @@ exports.meta = {
     "2022-09-21-cubic-bezier-curve",
   ],
   lastUpdatedAt: parse(
-    "2022-08-16 15:16:06 +09:00",
+    "2025-03-16 16:39:22 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

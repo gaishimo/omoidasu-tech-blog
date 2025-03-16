@@ -21,7 +21,7 @@ exports.meta = {
   description:
     "スニーカーを集めるアプリAgletで使われているアニメーションをreact-native-skiaで再現してみます。",
   lastUpdatedAt: parse(
-    "2022-08-23 10:07:00 +09:00",
+    "2025-03-16 16:39:22 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

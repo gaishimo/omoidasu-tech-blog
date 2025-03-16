@@ -30,7 +30,7 @@ exports.meta = {
     "2022-08-10-parabola-move",
   ],
   lastUpdatedAt: parse(
-    "2025-03-16 14:48:05 +09:00",
+    "2025-03-16 16:39:22 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
