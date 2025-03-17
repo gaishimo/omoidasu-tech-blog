@@ -1,0 +1,233 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2025-03-16-blog-system-update"
+
+export const headlines = [
+  { title: "ブログシステムを更新しました" },
+  {
+    title: "変更点",
+    children: [
+      { title: "アニメーションの記述" },
+      { title: "Canvasへのstyle指定" },
+      { title: "gesture-handlerの利用" },
+      { title: "最新でアニメーションが動作しない問題" },
+    ]
+  },
+  { title: "MDXの記事をCursorで更新" },
+  { title: "今後" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+## ブログシステムを更新しました
+
+
+しばらく更新が滞っており最後に書いた記事が1年程前になっていました。このブログの構成が古くなってしまっていたので、ついでにフレームワークやライブラリをアップデートしました。
+
+このブログはNext.jsで構築されているのですが、React Nativeのコードを記事に直接埋め込むことができる点が特徴です。React Native Webを使っており、記事のMDXファイルに以下のようにReact Nativeのコンポーネントを書くと直接表示することができます。
+
+```tsx
+<Text style={{ fontWeight: "bold", fontSize: 32 }}>Hello</Text>
+```
+
+<Text style={{ fontWeight: "bold", fontSize: 32 }}>Hello</Text>
+
+
+また、react-native-reanimatedやReact Native Skiaを使って、2Dグラフィックやアニメーションを表示することも可能です。
+
+例えば、以下のようなコンポーネントも直接表示できます。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-03-16-blog-system-update/TextAnimationExample")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+コードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/blob/main/components/pages/2025-03-16-blog-system-update/TextAnimationExample.tsx)です。
+
+
+
+ただ、1年程更新していなかったためライブラリがかなり古くなっており、これらを諸々アップデートしました。
+
+- Next.js: 12.2 -> 15.2
+- react-native-web: 0.17 -> 0.19
+- React Native Skia: 0.1.176 -> 1.7.6
+- react-native-reanimated: 2.10 -> 3.17.1
+
+更新時に気づいた点やメモ(主にSkiaについて)を残しておきます。
+
+## 変更点
+
+### アニメーションの記述
+
+Skiaの0.1.176から1.7.6への更新で、かなりAPIが変更されていました。
+
+その内の大きな変更点の一つが、アニメーションがSkia独自の記述(useValueやuseComputedValue等)が使えなくなり、react-native-reanimatedと連携して作成する形になった点です。
+
+
+例えば以下のようなSkiaで完結していたアニメーションの記述は使えなくなり
+
+```ts
+  const progress = useValue(0)
+  const activeArcPath = useComputedValue(() => {
+    const path = Skia.Path.Make()
+    const arcRect = {
+      x: center.x - radius,
+      y: center.y - radius,
+      width: radius * 2,
+      height: radius * 2,
+    }
+    path.addArc(arcRect, progress.current * 360, 300)
+
+    return path
+  }, [progress])
+
+  const runAnimation = useCallback(() => {
+    runTiming(progress, { loop: true, yoyo: false }, { duration: 2000 })
+  }, [progress])
+```
+
+Reanimatedと連携して実現するようになりました。
+
+```ts
+  const progress = useSharedValue(0)
+  const activeArcPath = useDerivedValue(() => {
+    const path = Skia.Path.Make()
+    const arcRect = {
+      x: center.x - radius,
+      y: center.y - radius,
+      width: radius * 2,
+      height: radius * 2,
+    }
+    path.addArc(arcRect, progress.value * 360, 300)
+
+    return path
+  }, [])
+
+  const runAnimation = useCallback(() => {
+    progress.value = withRepeat(withTiming(1, { duration: 2000 }), -1, false)
+  }, [])
+```
+
+ブログの記事内にはアニメーションの内容が多く、かなりの箇所を修正する必要があったのですが、修正の方法はほぼ同じパターンだったので、Cursorさんの力を借りて更新しました。
+
+
+### Canvasへのstyle指定
+
+SkiaのCanvasにstyleを配列で指定している箇所がなぜか動作しなくなりました。
+
+```tsx
+<Canvas style={[styles.canvas, { width: 200, height: 200 }]}>
+</Canvas>
+```
+
+原因は不明ですが、styleを一つのオブジェクトで指定する形に変更したところ動作しました。
+
+```tsx
+<Canvas style={{ ...styles.canvas, width: 200, height: 200 }}>
+</Canvas>
+```
+
+### gesture-handlerの利用
+
+Canvasをタップした場合に利用する`useTouchHandler`が使えなくなり、変わりにreact-native-gesture-handlerを利用するようになりました。
+
+
+以下の様にuseTouchHandlerを利用していたコードは
+```tsx
+  const onTouch = useTouchHandler({
+    onStart: () => {
+      runTiming(value, 10, {
+        duration: 600,
+      })
+    },
+    onEnd: () => {
+      runTiming(value, 0, {
+        duration: 1000,
+      })
+    },
+  })
+
+<Canvas onTouch={onTouch}>
+  ...
+</Canvas>
+```
+
+
+`<GestureDetector>`で囲む形になります。
+
+```tsx
+
+const gesture = Gesture.LongPress()
+  .onStart(() => {
+    progress.value = withTiming(10, { duration: 600 })
+  })
+  .onEnd(() => {
+    progress.value = withTiming(0, { duration: 1000 })
+  })
+
+<GestureDetector gesture={gesture}>
+  <Canvas>
+    ...
+  </Canvas>
+</GestureDetector>
+```
+
+### 最新でアニメーションが動作しない問題
+
+当初@shopify/react-native-skiaを最新(2025-03-16時点)の1.11.8にアップデートしたんですが、このバージョンだと以下のようなPathを動的に動作させるアニメーションが動作せず、1.7.6にダウングレードしました。
+
+
+```tsx
+const progress = useSharedValue(0)
+
+const path = useDerivedValue(() => {
+  const path = Skia.Path.Make()
+  path.moveTo(centerPos.x, centerPos.y)
+
+  const arcRect = {
+    x: centerPos.x - radius,
+    y: centerPos.y - radius,
+    width: radius * 2,
+    height: radius * 2,
+  }
+  const startDegree = -90
+  path.addArc(arcRect, startDegree, progress.value)
+  path.lineTo(centerPos.x, centerPos.y).close()
+  return path
+}, [progress])
+
+<Path path={path} color="lightblue" style="fill" strokeWidth={2} />
+```
+
+sharedValueが更新されpathが変更されて見た目も変化するはずが、変化しないという問題です。
+
+おそらく[こちらのIssue](https://github.com/Shopify/react-native-skia/issues/2943)で上がっている問題かと思うのですが、引き続き確認していきたいと思います。
+
+
+
+## MDXの記事をCursorで更新
+
+今回記事で参照しているComponentをかなり書き換えたのですが、それに伴いブログの記事内の説明のコード部分も合わせて修正が必要でした。これが手動で変更するのはかなり手間だったので、Cursorさんの力を借りて修正しました。
+
+対象のコンポーネントとMDXのファイルを共有し、"コンポーネントを更新したため、記事の内容をコンポーネントに合わせて変更してほしい" といったざっくりと指示を出して修正してもらいました。たまにmdxに余計なimportを追加してしまったり、フォーマットを壊したりしてしまうことはあったのですが、概ね問題なく修正してくれました。こういった、ある程度やることが明確な作業についてはかなり有用だなと感じました。
+
+## 今後
+
+土台が整ったので、またReact Nativeに関する記事を追加していきたいと思います!
+
