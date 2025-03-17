@@ -24,8 +24,7 @@ exports.meta = {
     new Date(),
   ),
   author: "@gaishimo",
-  description: "記事に関する概要を記載",
-  imagePath: null,
+  description: "当ブログのシステムを更新しました。",
   priority: 0.7,
   relatedPosts: [],
   lastUpdatedAt: parse(
