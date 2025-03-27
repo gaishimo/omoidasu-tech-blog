@@ -30,8 +30,10 @@ async function main(argv) {
     console.error("Must pass id")
     exit(1)
   }
-  const id = argv[2]
-  console.log("id:", id)
+  const idRaw = argv[2]
+  console.log("idRaw:", idRaw)
+
+  const id = `${format(Date.now(), "yyyy-MM-dd")}-${idRaw}`
 
   await createMetaFile(id)
   await createMdxFile(id)
