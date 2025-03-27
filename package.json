@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "dev": "next",
+    "dev": "yarn generate-data-json && next",
     "build": "next build",
     "start": "next start",
     "postinstall": "patch-package && yarn generate-data-json",
