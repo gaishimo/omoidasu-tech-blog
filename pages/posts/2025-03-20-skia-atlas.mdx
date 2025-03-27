@@ -36,6 +36,17 @@ export default props => (
 
 2DグラフィックライブラリのReact Native Skiaのドキュメントに[Atlas](https://shopify.github.io/react-native-skia/docs/shapes/atlas) というページが追加されていました。ライブラリが出来た当初は無かった気がするので、後から追加された機能と思われます。これがどのようなものなのか調べてみました。
 
+ひとまず今回学んだ内容を活かした成果物を貼っております。
+
+<View style={{ marginTop: 16, marginBottom: 24 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-03-20-skia-atlas/MyAtlasAnimation")
+    }
+    fallback={() => <LoadingRect width={360} height={360} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
 
 
 ## そもそもAtlasとは
