@@ -1,0 +1,335 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2025-03-20-skia-atlas"
+
+export const headlines = [
+  { title: "SkiaのAtlasについて" },
+  { title: "そもそもAtlasとは" },
+  {
+    title: "ドキュメントのサンプルコードの実行",
+    children: [
+      { title: "HelloWorld" },
+      { title: "HelloWorld スケール変更" },
+      { title: "アニメーションサンプル" },
+    ]
+  },
+  { title: "タピオカAtlasアニメーション" },
+  { title: "Atlasを使っている実例" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+
+## SkiaのAtlasについて
+
+2DグラフィックライブラリのReact Native Skiaのドキュメントに[Atlas](https://shopify.github.io/react-native-skia/docs/shapes/atlas) というページが追加されていました。ライブラリが出来た当初は無かった気がするので、後から追加された機能と思われます。これがどのようなものなのか調べてみました。
+
+最初に今回の成果物を載せておきます。タップした箇所の近くの円が動きます。
+
+<View style={{ marginTop: 24, marginBottom: 240 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-03-20-skia-atlas/MyAtlasAnimation")
+    }
+    fallback={() => <LoadingRect width={360} height={360} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+
+## そもそもAtlasとは
+
+全般的にAtlasとはそもそも何でしょうか?
+
+Atlasという言葉が使われている実例でいうと、ゲームエンジンのUnityでは[スプライトアトラス(SpriteAtlas)](https://docs.unity3d.com/ja/2021.3/Manual/class-SpriteAtlas.html)という機能があります。これは複数のテクスチャ(画像素材)を1枚のテクスチャに統合してくれる機能です。画像を一つにまとめておくことによりテクスチャの読み込みを減らすことができるため、パフォーマンスの向上に繋がります。
+
+また2Dイラストを立体的に動かすツールであるLive2Dでは、[テクスチャアトラス(Texture Atlas)](https://docs.live2d.com/cubism-editor-manual/texture-atlas-edit/) という機能があります。これも、部品となる画像を配置しまとめてくれる機能のようです。
+
+これらは固有の名称ですが、全般的にAtlasという言葉は"複数の画像を1枚の画像に統合する"、または"統合した画像をソースとして複数の要素を描画する"という意味合いで使われているようです。英単語だと"地図帳"を意味する単語のため、そこから来ている思われます。
+
+## ドキュメントのサンプルコードの実行
+
+### HelloWorld
+
+ではまずドキュメントの[サンプルコード(Hello World)](https://shopify.github.io/react-native-skia/docs/shapes/atlas#hello-world)をこのページ上で実際に実行してみます。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-03-20-skia-atlas/AtlasHelloWorld")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+上記は、以下のコードをWeb上で実行したものです。Webでも問題なく動作しているのがわかります。
+
+```tsx
+const size = { width: 25, height: 11.25 }
+const strokeWidth = 2
+const imageSize = {
+  width: size.width + strokeWidth,
+  height: size.height + strokeWidth,
+}
+const image = drawAsImage(
+  <Group>
+    <Rect
+      rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+      color="cyan"
+    />
+    <Rect
+      rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+      color="blue"
+      style="stroke"
+      strokeWidth={strokeWidth}
+    />
+  </Group>,
+  imageSize,
+)
+
+export default function AtlasHelloWorld() {
+  const numberOfBoxes = 200
+  const pos = { x: 128, y: 128 }
+  const width = 256
+  const sprites = new Array(numberOfBoxes)
+    .fill(0)
+    .map(() => rect(0, 0, imageSize.width, imageSize.height))
+  const transforms = new Array(numberOfBoxes).fill(0).map((_, i) => {
+    const tx = 5 + ((i * size.width) % width)
+    const ty = 25 + Math.floor(i / (width / size.width)) * size.width
+    const r = Math.atan2(pos.y - ty, pos.x - tx)
+    return Skia.RSXform(Math.cos(r), Math.sin(r), tx, ty)
+  })
+
+  return (
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Atlas image={image} sprites={sprites} transforms={transforms} />
+    </Canvas>
+  )
+}
+```
+
+最初の部分では`drawAsImage`で矩形をAtlas用の画像として生成しています。`drawAsImage`はSkiaのエレメントを`SkImage`として生成してくれます。
+
+```tsx
+const image = drawAsImage(
+  <Group>
+    ...
+  </Group>,
+  imageSize,
+)
+```
+
+
+JSXのCanvas内でこの画像を元に`Atlas`コンポーネントを使用して描画しています。
+
+```tsx
+<Atlas image={image} sprites={sprites} transforms={transforms} />
+```
+
+`sprites`はAtlas画像からどの領域を利用するかを指定する配列です。このサンプルではAtlas画像全体を利用するため、すべてのスプライトで画像全体の領域が指定されています。
+
+
+```tsx
+const sprites = new Array(numberOfBoxes)
+  .fill(0)
+  .map(() => rect(0, 0, imageSize.width, imageSize.height))
+```
+
+
+`transforms`はスプライトの配置位置と回転角度を指定するものです。配列サイズは`sprites`と同じになる必要があります。この例では矩形の中心点に向かって回転しながら配置されるよう、`Skia.RSXform`の配列を生成しています。RSXformには回転行列を `cons`, `sin`, 配置位置`x`, 配置位置`y`の順で指定します。
+
+```tsx
+const transforms = new Array(numberOfBoxes).fill(0).map((_, i) => {
+  // 矩形の配置位置をiを元に計算
+  const tx = 5 + ((i * size.width) % width)
+  const ty = 25 + Math.floor(i / (width / size.width)) * size.width
+  // 矩形と中心点posとの向き(角度)を計算
+  const r = Math.atan2(pos.y - ty, pos.x - tx)
+  // 回転行列を作成
+  return Skia.RSXform(
+    Math.cos(r),  // 角度を元にしたx方向の向き
+    Math.sin(r),  // 角度を元にしたy方向の向き
+    tx,
+    ty
+  )
+})
+```
+
+`Skia.RSXform`の引数は`cos`、`sin`でなく単純な角度を指定すれば直感的でわかりやすいと思ってしまうのですが、角度を渡すとそこから内部で都度`cons`と`sin`を計算しないといけなくなり、その分計算負荷がかかることになってしまうためだと思います。また、この形式であればscale(後述)も反映させることができます。
+
+### HelloWorld スケール変更
+
+試しに`transforms`にスケールを反映させてみます。0.7を適用してみます。
+
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-03-20-skia-atlas/AtlasHelloWorldWithScale")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+それぞれの矩形のサイズが小さくなっていることがわかります。`transforms`の生成の際に、`cos`と`sin`に対してそれぞれ`scale`を掛けることでスケールを反映させることができます。
+
+```ts
+const scale = 0.7
+const transforms = new Array(numberOfBoxes).fill(0).map((_, i) => {
+  const tx = 5 + ((i * size.width) % width)
+  const ty = 25 + Math.floor(i / (width / size.width)) * size.width
+  const r = Math.atan2(pos.y - ty, pos.x - tx)
+  const scos = Math.cos(r) * scale
+  const ssin = Math.sin(r) * scale
+  return Skia.RSXform(scos, ssin, tx, ty)
+})
+```
+
+### アニメーションサンプル
+
+次にドキュメントに乗っている[アニメーションのサンプル](https://shopify.github.io/react-native-skia/docs/shapes/atlas#animations)を実行してみます。ドラッグすると中心点が変化します。
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-03-20-skia-atlas/AtlasAnimation")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+コードは以下です。
+
+```tsx
+const pos = useSharedValue({ x: 0, y: 0 })
+const texture = useTexture(
+  <Group>
+    <Rect
+      rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+      color="cyan"
+    />
+    <Rect
+      rect={rect(strokeWidth / 2, strokeWidth / 2, size.width, size.height)}
+      color="blue"
+      style="stroke"
+      strokeWidth={strokeWidth}
+    />
+  </Group>,
+  textureSize,
+)
+const gesture = Gesture.Pan().onChange(e => (pos.value = e))
+const numberOfBoxes = 150
+const width = 256
+const sprites = new Array(numberOfBoxes)
+  .fill(0)
+  .map(() => rect(0, 0, textureSize.width, textureSize.height))
+
+const transforms = useRSXformBuffer(numberOfBoxes, (val, i) => {
+  "worklet"
+  const tx = 5 + ((i * size.width) % width)
+  const ty = 25 + Math.floor(i / (width / size.width)) * size.width
+  const r = Math.atan2(pos.value.y - ty, pos.value.x - tx)
+  val.set(Math.cos(r), Math.sin(r), tx, ty)
+})
+
+return (
+  <GestureDetector gesture={gesture}>
+    <Canvas style={{ width: 256, height: 256 }}>
+      <Atlas image={texture} sprites={sprites} transforms={transforms} />
+    </Canvas>
+  </GestureDetector>
+)
+```
+
+Reanimatedと連携してアニメーションを実現していることがわかります。
+
+Atlas画像を生成する箇所で[useTexture](https://shopify.github.io/react-native-skia/docs/animations/textures/#usetexture)が使われています。
+
+```tsx
+const texture = useTexture(
+  <Group>
+    ...
+  </Group>,
+  textureSize,
+)
+```
+
+HelloWorldのサンプルでは`drawAsImage`が使われていましたが、この違いはなんでしょうか?
+
+ドキュメントには以下のように記述があり`useTexture`を使うとテクスチャをUIスレッド上で直接生成できるとあります。
+
+> First, the useTexture hook will enable you to create a texture on the UI thread directly without needing to make any copies.
+
+
+`drawAsImage`だとJSスレッド上で実行されますが、Reanimatedの`SharedValue`を元に見た目を変化させる処理はUIスレッド上で行われます。そのため、都度テクスチャデータをコピーする処理が発生しパフォーマンスに問題が出てしまうということだと思います。`useTexture`であればUIスレッド上でテクスチャを生成してくれるため、コピーするオーバーヘッドが発生しません。
+
+
+
+`transforms`の生成には[useRSXformBuffer](https://shopify.github.io/react-native-skia/docs/animations/hooks/#usersxformbuffer)を使っています。
+
+```tsx
+const transforms = useRSXformBuffer(numberOfBoxes, (val, i) => {
+  "worklet"
+  const tx = 5 + ((i * size.width) % width)
+  const ty = 25 + Math.floor(i / (width / size.width)) * size.width
+  const r = Math.atan2(pos.value.y - ty, pos.value.x - tx)
+  val.set(Math.cos(r), Math.sin(r), tx, ty)
+})
+```
+
+`useRSXformBuffer`は以下のように説明がありますが、
+
+> Secondly, we provide you with hooks such as useRectBuffer and useRSXformBuffer to efficiently animates on the sprites and transformations.
+
+> Creates an array for rotate scale transforms to be animated. Can be used by any component that takes an array of rotate scale transforms as property, like the Atlas API.
+
+`useRSXformBuffer`を使うことで各スプライトに対しての位置移動・回転・スケール等の変化を設定することができます。2つ目の引数のコールバック関数の引数`val`の型は`SkRSXform`で、HelloWorldの時に`Skia.RSXform()`で生成していた値と同等のものです。ここでアニメーションの`SharedValue`であるposの値を反映することができます。また、このコールバック関数をUIスレッド上で実行されるため、`"worklet"`の記述が必要です。
+
+
+## タピオカAtlasアニメーション
+
+
+今回得た知識を元にAtlasを使ったアニメーションを自作してみました。タピオカのような小さなボールをAtlasで多数描画しています。特定の箇所をドラッグ(クリック)すると、その点を中心として円が僅かに中心から離れます。
+
+
+<View style={{ marginTop: 24, marginBottom: 40 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-03-20-skia-atlas/MyAtlasAnimation")
+    }
+    fallback={() => <LoadingRect width={360} height={360} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+コードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2025-03-20-skia-atlas/MyAtlasAnimation.tsx)を参照してください。
+
+
+タップしたエリアの近くの円が動く部分は、タップ位置を`SharedValue`で保存し`useRSXformBuffer`のコールバック関数内で、対象スプライトがその座標の近くにいた場合移動しています。
+
+また、今回カラーを4色用意したかったため、4つ分`useTexture`を使ってテクスチャ画像を生成しています。そのため`<Atlas />`コンポーネントも４つレンダリングしています。`transforms`の設定では、位置や角度は変更させられますが、カラーについては変更させられないためです。別途Reanimatedの`SharedValue`でカラーを渡して外から変更させれば一つの`<Atlas />`コンポーネントでも複数カラーは実現可能な気はしますがそれは試していません。
+
+また、テクスチャ画像を4つ生成するのではなく、1つのテクスチャに4つ対象配置しておきそこから切り取る形であればテクスチャは一つで済みそうです。ただ、この形式を取ると統合された画像内の各テクスチャがどの位置にあるのかを把握しないといけなくなるため、その分管理の手間が増えそうです。大量の種類のテクスチャをまとめて扱うような場合や、Atlas画像を外部から生成して渡したりするようなケースでは有効な気がします。
+
+Atlasの機能はあくまでアトラス画像から領域を切り取って描画するというもので、そのオブジェクトの性質そのものを変化させてくれるわけでないので、その特徴を念頭においておくと、自身がしたい表現を実現するのにAtlasを使うべきかどうかの判断がしやすそうです。
+
+## Atlasを使っている実例
+
+最後にAtlasを使っている実例となるReact Nativeのライブラリを上げておきます。
+
+- [react-native-fast-confetti](https://github.com/AlirezaHadjar/react-native-fast-confetti) 紙吹雪を表現してくれるライブラリです。
+- [react-native-crafty-animations](https://github.com/AlirezaHadjar/react-native-crafty-animations) 星空や花火等、様々なアニメーション表現を提供してくれるライブラリです。
