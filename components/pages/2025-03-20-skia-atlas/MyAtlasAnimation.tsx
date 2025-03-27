@@ -51,7 +51,7 @@ const config = {
   numberOfShapes: 50,
   canvasSize: 360,
   maxPushDistance: 50,
-  pushRadius: 100,
+  pushRadius: 50,
   positionAdjustment: 6,
 } as const
 

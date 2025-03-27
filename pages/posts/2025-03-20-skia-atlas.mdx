@@ -36,17 +36,6 @@ export default props => (
 
 2DグラフィックライブラリのReact Native Skiaのドキュメントに[Atlas](https://shopify.github.io/react-native-skia/docs/shapes/atlas) というページが追加されていました。ライブラリが出来た当初は無かった気がするので、後から追加された機能と思われます。これがどのようなものなのか調べてみました。
 
-最初に今回の成果物を載せておきます。タップした箇所の近くの円が動きます。
-
-<View style={{ marginTop: 24, marginBottom: 240 }}>
-  <WithSkia
-    getComponent={
-      () => import("../../components/pages/2025-03-20-skia-atlas/MyAtlasAnimation")
-    }
-    fallback={() => <LoadingRect width={360} height={360} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
-  />
-</View>
-
 
 
 ## そもそもAtlasとは
@@ -303,7 +292,7 @@ const transforms = useRSXformBuffer(numberOfBoxes, (val, i) => {
 ## タピオカAtlasアニメーション
 
 
-今回得た知識を元にAtlasを使ったアニメーションを自作してみました。タピオカのような小さなボールをAtlasで多数描画しています。特定の箇所をドラッグ(クリック)すると、その点を中心として円が僅かに中心から離れます。
+今回得た知識を元にAtlasを使ったアニメーションを自作してみました。タピオカのような小さなボールをAtlasで多数描画しています。特定の箇所をドラッグ(クリック)すると、ボールが動きます。
 
 
 <View style={{ marginTop: 24, marginBottom: 40 }}>
