@@ -2351,17 +2351,12 @@ caniuse-lite@^1.0.30001579, caniuse-lite@^1.0.30001688:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001704.tgz#6644fe909d924ac3a7125e8a0ab6af95b1f32990"
   integrity sha512-+L2IgBbV6gXB4ETf0keSvLr7JUrRVbIaB/lrQ1+z8mRcQiisG5k+lG6O4n6Y5q6f5EuNfaYXKgymucphlEXQew==
 
-canvaskit-wasm@0.39.1:
+canvaskit-wasm@0.39.1, canvaskit-wasm@~0.39.1:
   version "0.39.1"
   resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.39.1.tgz#c3c8f3962cbabbedf246f7bcf90e859013c7eae9"
   integrity sha512-Gy3lCmhUdKq+8bvDrs9t8+qf7RvcjuQn+we7vTVVyqgOVO1UVfHpsnBxkTZw+R4ApEJ3D5fKySl9TU11hmjl/A==
   dependencies:
     "@webgpu/types" "0.1.21"
-
-canvaskit-wasm@~0.37.0:
-  version "0.37.0"
-  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.37.0.tgz#fb3ac6794829123a7a132f8b4a646a91b0d7322c"
-  integrity sha512-hegK3gdVQJwgOre02kFHJDEo9b+VHY/bA/N+12C7fECSosGL9Q7gwcz4vnDdOnzSoeLCRH26oTNK3gEO+dm+dg==
 
 ccount@^2.0.0:
   version "2.0.1"

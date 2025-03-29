@@ -30,6 +30,7 @@ Reactのロゴをreact-native-skiaでアニメーションさせて遊んでみ�
       () => import("../../components/pages/2022-09-11-dynamic-react-logo/DynamicReactLogo/index.tsx")
     }
     fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={100}
   />
 </View>
 
@@ -49,6 +50,7 @@ Reactのロゴの描画は[react-native-skiaの紹介動画](https://youtu.be/EH
       () => import("../../components/pages/2022-09-11-dynamic-react-logo/ReactLogo01")
     }
     fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={300}
   />
 </View>
 
@@ -92,6 +94,7 @@ return (
       () => import("../../components/pages/2022-09-11-dynamic-react-logo/CircleMoving")
     }
     fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={500}
   />
 </View>
 
@@ -138,6 +141,7 @@ const cy = useDerivedValue(() => {
       () => import("../../components/pages/2022-09-11-dynamic-react-logo/OvalMoving")
     }
     fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={700}
   />
 </View>
 
@@ -228,6 +232,7 @@ useEffect(() => {
       () => import("../../components/pages/2022-09-11-dynamic-react-logo/DynamicReactLogo02")
     }
     fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={900}
   />
 </View>
 
@@ -273,6 +278,7 @@ useAnimatedReaction(
       () => import("../../components/pages/2022-09-11-dynamic-react-logo/DynamicReactLogo/index.tsx")
     }
     fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={1100}
   />
 </View>
 

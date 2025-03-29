@@ -1,4 +1,3 @@
-
 import { parse, parseISO } from "date-fns"
 import Image from "next/image"
 import { ScrollView, StyleSheet, Text, View } from "react-native"
@@ -35,6 +34,7 @@ React Native Skiaで以下のように、テキストを背景色に合わせて
       () => import("../../components/pages/2023-03-19-inverted-text/InvertedTextExample")
     }
     fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={100}
   />
 </View>
 
@@ -68,6 +68,7 @@ React Native Skiaで以下のように、テキストを背景色に合わせて
       () => import("../../components/pages/2023-03-19-inverted-text/InvertedTextExample2")
     }
     fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={300}
   />
 </View>
 
