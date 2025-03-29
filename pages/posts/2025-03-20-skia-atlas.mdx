@@ -67,6 +67,7 @@ Atlasという言葉が使われている実例でいうと、ゲームエンジ
 
 <View style={{ marginTop: 24, marginBottom: 40 }}>
   <WithSkia
+    delay={1000}
     getComponent={
       () => import("../../components/pages/2025-03-20-skia-atlas/AtlasHelloWorld")
     }
@@ -177,6 +178,7 @@ const transforms = new Array(numberOfBoxes).fill(0).map((_, i) => {
 
 <View style={{ marginTop: 24, marginBottom: 40 }}>
   <WithSkia
+    delay={2000}
     getComponent={
       () => import("../../components/pages/2025-03-20-skia-atlas/AtlasHelloWorldWithScale")
     }
@@ -205,6 +207,7 @@ const transforms = new Array(numberOfBoxes).fill(0).map((_, i) => {
 
 <View style={{ marginTop: 24, marginBottom: 40 }}>
   <WithSkia
+    delay={3000}
     getComponent={
       () => import("../../components/pages/2025-03-20-skia-atlas/AtlasAnimation")
     }
@@ -308,6 +311,7 @@ const transforms = useRSXformBuffer(numberOfBoxes, (val, i) => {
 
 <View style={{ marginTop: 24, marginBottom: 40 }}>
   <WithSkia
+    delay={4000}
     getComponent={
       () => import("../../components/pages/2025-03-20-skia-atlas/MyAtlasAnimation")
     }
