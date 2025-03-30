@@ -1,0 +1,55 @@
+name: Update Last Updated At
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'pages/posts/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  update-last-updated:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run update-last-updated script
+        run: yarn update-last-updated
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          git diff --exit-code || echo "changes=true" >> $GITHUB_OUTPUT
+
+      - name: Commit changes if needed
+        if: steps.git-check.outputs.changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { repo, owner } = context.repo;
+            const fs = require('fs');
+            const exec = require('child_process').execSync;
+
+            exec('git config --local user.email "github-actions[bot]@users.noreply.github.com"');
+            exec('git config --local user.name "github-actions[bot]"');
+            exec('git add posts-meta/');
+            exec('git commit -m "Auto update: lastUpdatedAt"');
+            exec(`git push origin ${process.env.GITHUB_HEAD_REF}`);
