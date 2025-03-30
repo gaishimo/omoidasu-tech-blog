@@ -3,9 +3,11 @@ const fs = require("fs")
 const path = require("path")
 const { execSync } = require("child_process")
 const { parse, format } = require("date-fns")
+const { utcToZonedTime } = require("date-fns-tz")
 
 const POSTS_META_DIR = path.resolve(__dirname, "../posts-meta")
 const PAGES_DIR = path.resolve(__dirname, "../pages/posts")
+const JST_TIMEZONE = "Asia/Tokyo"
 
 function getAllPostIds() {
   try {
@@ -30,8 +32,10 @@ function getLastCommitDate(postId) {
       .trim()
     if (!output) return null
 
-    const date = new Date(output)
-    return date
+    const utcDate = new Date(output)
+    // UTC日時を日本時間（JST）に変換
+    const jstDate = utcToZonedTime(utcDate, JST_TIMEZONE)
+    return jstDate
   } catch (error) {
     console.error(`Error getting last commit date for post ${postId}:`, error)
     return null
