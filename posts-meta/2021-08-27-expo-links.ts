@@ -20,7 +20,7 @@ exports.meta = {
     "2022-07-25-eas-widget",
   ],
   lastUpdatedAt: parse(
-    "2022-09-30 08:40:00 +09:00",
+    "2022-09-30 08:39:59 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

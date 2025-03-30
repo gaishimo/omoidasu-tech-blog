@@ -23,7 +23,7 @@ exports.meta = {
     "2021-06-04-hello-eas-build-managed",
   ],
   lastUpdatedAt: parse(
-    "2022-08-25 10:05:00 +09:00",
+    "2022-08-25 10:03:05 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),

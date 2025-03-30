@@ -19,7 +19,7 @@ exports.meta = {
   priority: 0.7,
   relatedPosts: ["2020-08-04-custom-font-line-gap"],
   lastUpdatedAt: parse(
-    "2022-08-23 10:05:00 +09:00",
+    "2022-08-23 10:03:53 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
