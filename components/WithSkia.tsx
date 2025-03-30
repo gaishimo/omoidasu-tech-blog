@@ -23,7 +23,10 @@ export function WithSkia(props: Props) {
             await new Promise(resolve => setTimeout(resolve, props.delay))
           }
 
-          await LoadSkiaWeb(props.opts)
+          await LoadSkiaWeb({
+            locateFile: file => `/_next/static/chunks/${file}`,
+            ...props.opts,
+          })
           return props.getComponent()
         } catch (err) {
           console.error("Failed to load Skia component:", err)
