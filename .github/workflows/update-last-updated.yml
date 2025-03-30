@@ -45,11 +45,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { repo, owner } = context.repo;
-            const fs = require('fs');
-            const exec = require('child_process').execSync;
+            const { execSync } = require('child_process');
 
-            exec('git config --local user.email "github-actions[bot]@users.noreply.github.com"');
-            exec('git config --local user.name "github-actions[bot]"');
-            exec('git add posts-meta/');
-            exec('git commit -m "Auto update: lastUpdatedAt"');
-            exec(`git push origin ${process.env.GITHUB_HEAD_REF}`);
+            execSync('git config --local user.email "github-actions[bot]@users.noreply.github.com"');
+            execSync('git config --local user.name "github-actions[bot]"');
+            execSync('git add posts-meta/');
+            execSync('git commit -m "Auto update: lastUpdatedAt"');
+            execSync(`git push origin ${process.env.GITHUB_HEAD_REF || github.event.pull_request.head.ref}`);
+
