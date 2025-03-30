@@ -86,7 +86,7 @@ const nextConfig = {
         patterns: [
           {
             from: "node_modules/canvaskit-wasm/bin/full/canvaskit.wasm",
-            to: "static/chunks/pages/posts/canvaskit.wasm",
+            to: "static/chunks/canvaskit.wasm",
           },
         ],
       }),
