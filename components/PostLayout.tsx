@@ -85,7 +85,9 @@ export function PostLayout(props: Props) {
                   >
                     @gaishimo
                   </Text>
-                  {"\n"}主にReact Nativeでのアプリ開発を行っています。
+                  {"\n"}主にReact Nativeでのアプリ開発を専門に行っています。
+                  {"\n"}React
+                  Nativeのお仕事お受けいたしますのでお気軽にご相談ください。
                 </Text>
               </View>
               <View style={styles.footerRow}>
