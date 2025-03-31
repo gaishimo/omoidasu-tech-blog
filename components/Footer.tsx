@@ -6,7 +6,7 @@ export function Footer() {
       <View style={styles.container}>
         <View style={styles.copyRight}>
           <Text style={styles.copyRightText}>
-            &copy; 2021 Omoidasu, Inc. All rights reserved.
+            &copy; 2025 Omoidasu, Inc. All rights reserved.
           </Text>
         </View>
       </View>
