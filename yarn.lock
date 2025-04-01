@@ -1602,11 +1602,11 @@
     nullthrows "^1.1.1"
 
 "@shopify/react-native-skia@^1.12.2":
-  version "1.12.2"
-  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-1.12.2.tgz#b5cbd415d33e620c012ba943557faafc87156b38"
-  integrity sha512-rpBZzcini01vub0WVMUYNcM4k0bcM99tGIvtsnlFZO10mm1DUv8L9Zl20uiNCT9soAPZITCTgBENQ050u1QWTA==
+  version "1.12.3"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-1.12.3.tgz#b153df5e46c92676e490f1c4e286e029a72b0bdf"
+  integrity sha512-QTJ/pliXWzFgrafM0r8QJ8+W8WgRkvBfcVmdKX5BfAIEujm0uGKamu1h8w2/fY6nIfnl7wLaMINhTWUPPBd+cw==
   dependencies:
-    canvaskit-wasm "0.39.1"
+    canvaskit-wasm "0.40.0"
     react-reconciler "0.27.0"
 
 "@sinclair/typebox@^0.27.8":
@@ -2374,7 +2374,14 @@ caniuse-lite@^1.0.30001579, caniuse-lite@^1.0.30001688:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001704.tgz#6644fe909d924ac3a7125e8a0ab6af95b1f32990"
   integrity sha512-+L2IgBbV6gXB4ETf0keSvLr7JUrRVbIaB/lrQ1+z8mRcQiisG5k+lG6O4n6Y5q6f5EuNfaYXKgymucphlEXQew==
 
-canvaskit-wasm@0.39.1, canvaskit-wasm@~0.39.1:
+canvaskit-wasm@0.40.0:
+  version "0.40.0"
+  resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.40.0.tgz#61a77657259fddfc0025ad1c3f57ac8d4d5850ff"
+  integrity sha512-Od2o+ZmoEw9PBdN/yCGvzfu0WVqlufBPEWNG452wY7E9aT8RBE+ChpZF526doOlg7zumO4iCS+RAeht4P0Gbpw==
+  dependencies:
+    "@webgpu/types" "0.1.21"
+
+canvaskit-wasm@~0.39.1:
   version "0.39.1"
   resolved "https://registry.yarnpkg.com/canvaskit-wasm/-/canvaskit-wasm-0.39.1.tgz#c3c8f3962cbabbedf246f7bcf90e859013c7eae9"
   integrity sha512-Gy3lCmhUdKq+8bvDrs9t8+qf7RvcjuQn+we7vTVVyqgOVO1UVfHpsnBxkTZw+R4ApEJ3D5fKySl9TU11hmjl/A==
