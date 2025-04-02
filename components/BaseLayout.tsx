@@ -5,6 +5,7 @@ import { Constants } from "../libs/Constants"
 import { isBrowser } from "../utils/domUtils"
 import { Footer } from "./Footer"
 import { Header } from "./Header"
+import { Background } from "./Background"
 
 type Props = {
   children: ReactNode
@@ -77,6 +78,9 @@ export function BaseLayout(props: Props) {
       {/* <div css={styles.background}>
           <BackgroundShapes />
         </div> */}
+
+      <Background />
+
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.contentContainer}
