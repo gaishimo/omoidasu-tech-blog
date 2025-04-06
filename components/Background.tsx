@@ -6,7 +6,7 @@ export function Background() {
     <View style={{ ...StyleSheet.absoluteFillObject }}>
       <WithSkia
         delay={1150}
-        getComponent={() => import("./SakuraFluttering/index")}
+        getComponent={() => import("./SakuraFluttering/SakuraFluttering")}
         fallback={() => <View />}
       />
     </View>

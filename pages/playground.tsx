@@ -2,12 +2,12 @@ import { StyleSheet, View } from "react-native"
 import { WithSkia } from "../components/WithSkia"
 import { LoadingRect } from "../components/LoadingRect"
 
-export default function SamplePage() {
+export default function () {
   return (
     <View>
-      {/* <WithSkia
+      <WithSkia
         delay={1000}
-        getComponent={() => import("../components/SakuraFluttering/PlayGround")}
+        getComponent={() => import("../components/SkiaPlayground")}
         fallback={() => (
           <LoadingRect
             width={320}
@@ -16,7 +16,7 @@ export default function SamplePage() {
             bgColor={"rgb(240, 240, 240)"}
           />
         )}
-      /> */}
+      />
     </View>
   )
 }

@@ -67,6 +67,10 @@ export default function SakuraFluttering() {
           (Math.random() > 0.5 ? 1 : -1) * (0.2 + Math.random() * 0.3), // 回転速度（正負の方向に0.2〜0.5の間）- 速度を下げる
         flutterAmplitude: 0,
         flutterFrequency: 0,
+        // Y軸回転のための初期位相と速度を追加
+        rotateYPhase: Math.random() * Math.PI * 2,
+        rotateYSpeed:
+          (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.5), // 回転速度を上げる
       }
     }),
   )
@@ -78,6 +82,9 @@ export default function SakuraFluttering() {
 
   // 空気抵抗による震えのためのアニメーション値
   const flutterProgress = useSharedValue(0)
+
+  // Y軸回転のためのアニメーション値を追加
+  const rotateYProgress = useSharedValue(0)
 
   useEffect(() => {
     // 落下アニメーション - かなり長い時間のアニメーションにして切れ目の頻度を減らす
@@ -123,6 +130,17 @@ export default function SakuraFluttering() {
       -1,
       false,
     )
+
+    // Y軸回転のアニメーション - 無限に回転
+    rotateYProgress.value = 0
+    rotateYProgress.value = withRepeat(
+      withTiming(Math.PI * 2, {
+        duration: 8000, // 8秒で一周（回転速度を上げる）
+        easing: Easing.linear,
+      }),
+      -1,
+      false,
+    )
   }, [])
 
   // 落下速度を調整（長いアニメーション時間に合わせて調整）
@@ -143,6 +161,8 @@ export default function SakuraFluttering() {
       rotationSpeed,
       flutterAmplitude,
       flutterFrequency,
+      rotateYPhase,
+      rotateYSpeed,
     } = initialPositions.value[i]
 
     // progressの値に応じてY座標を下に移動させる
