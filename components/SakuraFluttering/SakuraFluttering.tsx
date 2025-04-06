@@ -88,7 +88,7 @@ export default function SakuraFluttering() {
           key={i}
           position={item.position}
           colorId={Math.floor(i % 3) as 0 | 1 | 2}
-          opacity={0.8}
+          opacity={0.6}
           size={item.size}
           animation={{
             fallProgress: animations.falling,
