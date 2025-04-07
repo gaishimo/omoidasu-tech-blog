@@ -8,6 +8,7 @@ export default function SkiaPlayground() {
         colorId={0}
         position={{ x: 100, y: 100 }}
         size={{ width: 100, height: 140 }}
+        opacity={0.7}
       />
     </Canvas>
   )
