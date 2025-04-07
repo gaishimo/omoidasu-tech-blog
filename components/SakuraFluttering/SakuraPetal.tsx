@@ -1,4 +1,5 @@
 import {
+  Blur,
   Group,
   LinearGradient,
   Path,
@@ -6,10 +7,14 @@ import {
   vec,
   type Transforms3d,
 } from "@shopify/react-native-skia"
+import { useEffect, useState, useRef } from "react"
 import {
   SharedValue,
   useDerivedValue,
   useSharedValue,
+  withRepeat,
+  withTiming,
+  Easing,
 } from "react-native-reanimated"
 
 type Props = {
@@ -32,15 +37,24 @@ type Props = {
   }
 }
 
+const SHINING_CONFIG = {
+  probability: 0.008,
+  durationMs: 20000,
+  checkIntervalMs: 3000,
+}
+
 const COLORS = [
   [`rgba(250, 210, 220, 0.8)`, "rgba(255, 200, 220, 0.7)"],
   ["rgba(255, 240, 240, 0.9)", "rgba(255, 240, 245, 0.9)"],
   ["rgba(245, 220, 230, 0.7)", "rgba(255, 230, 240, 0.7)"],
 ]
 
+const SHINING_COLOR = ["rgba(255, 235, 235, 1)", "rgba(255, 235, 235, 1)"]
+
 export function SakuraPetal(props: Props) {
   const { size, position } = props
   const centerX = size.width * 0.5
+  const [isShining, setIsShining] = useState(false)
 
   const path = usePathValue(p => {
     p.moveTo(centerX + position.x, size.height + position.y)
@@ -64,6 +78,9 @@ export function SakuraPetal(props: Props) {
   console.log(props.animation)
 
   const transform = useDerivedValue<Transforms3d>(() => {
+    if (props.animation == null) {
+      return []
+    }
     const {
       fallProgress,
       fallMaxDistance,
@@ -77,7 +94,6 @@ export function SakuraPetal(props: Props) {
       rotation3dProgress,
       rotation3dSpeed,
     } = props.animation
-
     // 縦方向の移動（落下）
     let fallingTranslateY = fallProgress.value * fallSpeed
     const actualY = position.y + fallingTranslateY
@@ -122,13 +138,40 @@ export function SakuraPetal(props: Props) {
     ]
   }, [props.animation])
 
+  useEffect(() => {
+    const checkSpecialState = () => {
+      const random = Math.random()
+      if (random < SHINING_CONFIG.probability) {
+        setIsShining(true)
+
+        setTimeout(() => {
+          setIsShining(false)
+        }, SHINING_CONFIG.durationMs)
+      }
+    }
+
+    checkSpecialState()
+
+    const intervalId = setInterval(
+      checkSpecialState,
+      SHINING_CONFIG.checkIntervalMs,
+    )
+
+    return () => clearInterval(intervalId)
+  }, [])
+
   return (
     <Group transform={transform}>
+      {isShining && (
+        <Path path={path} style="fill" color="rgba(255, 255, 150, 1)">
+          <Blur blur={8} />
+        </Path>
+      )}
       <Path path={path} style="fill" opacity={props.opacity}>
         <LinearGradient
           start={vec(centerX * 0.8 + position.x, 0 + position.y)}
           end={vec(centerX * 1.2 + position.x, size.height * 1.2 + position.y)}
-          colors={COLORS[props.colorId]}
+          colors={isShining ? SHINING_COLOR : COLORS[props.colorId]}
         />
       </Path>
     </Group>
