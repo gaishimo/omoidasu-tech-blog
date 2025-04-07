@@ -38,7 +38,7 @@ type Props = {
 }
 
 const SHINING_CONFIG = {
-  probability: 0.008,
+  probability: 0.005,
   durationMs: 20000,
   checkIntervalMs: 3000,
 }
