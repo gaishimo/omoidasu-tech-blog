@@ -7,15 +7,8 @@ import {
   vec,
   type Transforms3d,
 } from "@shopify/react-native-skia"
-import { useEffect, useState, useRef } from "react"
-import {
-  SharedValue,
-  useDerivedValue,
-  useSharedValue,
-  withRepeat,
-  withTiming,
-  Easing,
-} from "react-native-reanimated"
+import { useEffect, useState } from "react"
+import { SharedValue, useDerivedValue } from "react-native-reanimated"
 
 type Props = {
   colorId: 0 | 1 | 2
@@ -74,8 +67,6 @@ export function SakuraPetal(props: Props) {
     )
     p.close()
   })
-
-  console.log(props.animation)
 
   const transform = useDerivedValue<Transforms3d>(() => {
     if (props.animation == null) {
