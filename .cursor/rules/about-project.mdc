@@ -1,0 +1,75 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## プロジェクト構成
+
+このプロジェクトはOmoidasu, IncのTechブログ用のプロジェクトです。主にReact NativeやSkiaに関する記事を投稿しています。
+
+主に以下の技術を利用しています。
+- Next.js
+- React Native Web
+- React Native Skia
+
+記事は主にMDXで記述します。MDXにReact Nativeのコンポーネントを埋め込むことができます。
+
+Githubのmainブランチにpushすることで本番のページが更新されます。
+
+
+## 主なディレクトリ
+
+- pages/posts: mdxファイルをYYYY-MM-DD-id.mdxのファイル名で格納
+- posts-meta: 各ポストのメタ情報をjsonで格納
+- components: 共通componentや各ページから利用するcomponent
+- libs: 汎用的な共通処理や定義
+
+## 記事の作成
+
+記事の雛形の作成を`yarn create-post $ARTICLE_ID` で行えます。
+
+実行すると、各ファイルが生成されます。
+
+## MDXの構成
+
+headlinesという定数に見出しを設定します。この見出しデータがサイドバーで利用されます。
+
+
+
+mdxの内容が以下だった場合、
+
+```mdx
+## Expo Modulesとはなにか?
+
+## Expo Modulesの特徴
+
+### SwiftとKotlinで記述できる
+
+### 新アーキテクチャへの対応
+
+## まとめ
+
+```
+
+headlinesは以下のような形式になります。
+
+```ts
+export const headlines = [
+  { title: "Expo Modulesとは何か" },
+  {
+    title: "Expo Modulesの特徴",
+    children: [
+      { title: "SwiftとKotlinで記述ができる" },
+      { title: "新アーキテクチャへの対応" },
+    ]
+  },
+  { title: "まとめ" },
+]
+```
+
+また、MDXを変数する際は、コードブロックにかかれているコードに関するimport文は追加しないように注意してください。
+
+
+
+
+
