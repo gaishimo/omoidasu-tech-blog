@@ -100,7 +100,7 @@ JSIによって構築されており、素のJSIを直接利用する場合はC+
 
 Expo ModulesはTurbo Modulesそれ自体を利用しているわけではなく、それと同様の方法で独自にJSIによって構築されているようです。
 
-https://twitter.com/JI/status/1629242602590715904
+[https://twitter.com/JI/status/1629242602590715904](https://twitter.com/JI/status/1629242602590715904)
 > Correction: Expo modules use JSI, the JS–native interface underlying Turbomodules but not codegen-based Turbomodules themselves
 
 
@@ -115,7 +115,7 @@ https://twitter.com/JI/status/1629242602590715904
 
 React Nativeの旧APIを使ってネイティブモジュールを作成した場合、問題になりやすいのはJavaScript側からネイティブメソッドに渡される引数の形式です。
 
-これについてはExpoブログの以下の記事で記載があります。https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492
+これについてはExpoブログの以下の記事で記載があります。[https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492](https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492)
 
 > One of the big pain points that we’ve encountered over the years is validation of arguments passed from JavaScript to native methods. This is especially painful when it comes to NSDictionary or ReadableMap, where the type of values is unknown and each property needs to be validated separately.
 
@@ -141,7 +141,7 @@ RCT_EXPORT_METHOD(exampleMethod:(NSDictionary *)params)
 この場合、paramsの中身が様々なキー・値形式を取り得るため、検証処理を行わないと予期せぬ値が渡ってきた時にエラーとなってしまいます。
 
 私も以前expo-in-app-purchasesの不具合に遭遇したことがありPull Requestを送ったことがあるのですが、これもネイティブメソッドの引数に関するものでした。
-https://github.com/expo/expo/pull/18272
+[https://github.com/expo/expo/pull/18272](https://github.com/expo/expo/pull/18272)
 
 Expo ModuleのAPIでは自身で引数の検証を行う必要はなく、以下のように型を指定することができるため、ネイティブメソッドが引数の型を完全に把握できます。
 
@@ -206,22 +206,22 @@ AsyncFunction(非同期)の場合はJSスレッドとは別のスレッドでネ
 - UI関連の処理などをMain UIスレッドで実行させたい場合
 - 広範囲・長期間にわたる処理で、JSスレッドをブロックする処理
 
-https://docs.expo.dev/modules/module-api/#function
-https://docs.expo.dev/modules/module-api/#asyncfunction
+[https://docs.expo.dev/modules/module-api/#function](https://docs.expo.dev/modules/module-api/#function)
+[https://docs.expo.dev/modules/module-api/#asyncfunction](https://docs.expo.dev/modules/module-api/#asyncfunction)
 
 
 ### ネイティブからJSへのイベント通知
 
 sendEventを使ってネイティブ側の情報をJS側にイベントとして送信することができます。
 
-公式Docのサンプルコード: https://docs.expo.dev/modules/module-api/#sending-events
+公式Docのサンプルコード: [https://docs.expo.dev/modules/module-api/#sending-events](https://docs.expo.dev/modules/module-api/#sending-events)
 
 
 ### View Callbacks
 
 ViewをタップしたときのようなViewに紐づくイベントを送信したいときView callbacksという仕組みを利用します。前述したsendEventはその目的で利用することはできません。
 
-公式Docのサンプルコード: https://docs.expo.dev/modules/module-api/#view-callbacks
+公式Docのサンプルコード: [https://docs.expo.dev/modules/module-api/#view-callbacks](https://docs.expo.dev/modules/module-api/#view-callbacks)
 
 
 ### Managed Workflowで利用可能
@@ -244,17 +244,17 @@ ExampleとなるReact Nativeプロジェクトを含めた状態でModuleを作�
 Expo Modulesについて見ていきましたが、Expoの知見が詰まった結晶という感じがします。Native Moduleの作成が必要になった時に一つの大きな選択肢となりそうです。
 
 より詳細は公式ドキュメントを参照ください。
-https://docs.expo.dev/modules/overview/
+[https://docs.expo.dev/modules/overview/](https://docs.expo.dev/modules/overview/)
 
 また、以下で実際にexpoが作成したExpo Modulesの一覧を確認することが可能ですので、より実践的なサンプルコードを確認したい時参考になると思います。
-https://docs.expo.dev/modules/module-api/#examples
+[https://docs.expo.dev/modules/module-api/#examples](https://docs.expo.dev/modules/module-api/#examples)
 
 
 ## 参考資料
 
-- [Expo Modules API: Overview - Expo Documentation](https://docs.expo.dev/modules/overview/)
+- [Expo Modules API: Overview - Expo Documentation]([https://docs.expo.dev/modules/overview/](https://docs.expo.dev/modules/overview/))
 - [Expo Modules API: Get started - Expo Documentation](https://docs.expo.dev/modules/get-started/)
-- [Module API Reference - Expo Documentation](https://docs.expo.dev/modules/module-api/)
+- [Module API Reference - Expo Documentation]([https://docs.expo.dev/modules/module-api/](https://docs.expo.dev/modules/module-api/))
 - [A peek into the upcoming “sweet” Expo module API | by Tomasz Sapeta | Exposition](https://blog.expo.dev/a-peek-into-the-upcoming-sweet-expo-module-api-6de6b9aca492)
 - [React Nativeの Re-architecture について。 #react-native - Qiita](https://qiita.com/Naturalclar/items/30a07ff86acc7a1ea03c)
 - [Expo Modules APIを使ってFeliCaの読み取りを実装する](https://tech.fusic.co.jp/posts/2023-08-03-expo-modules-api-felica-reader/)
