@@ -1,0 +1,456 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2025-04-09-sakura-fluttering"
+
+export const ID = "2025-04-09-sakura-fluttering"
+
+export const headlines = [
+  { title: "実装の流れ",
+    children: [
+      { title: "桜の花びらを作成する" },
+      { title: "Atlasでの実装" },
+      { title: "Atlasでの実装で気付いた点" },
+      { title: "Atlas無しでの実装" }
+    ]
+  },
+  { title: "まとめ" }
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+
+春なので当ブログの背景に桜を舞い散らせてみました。[React Native Skia](https://shopify.github.io/react-native-skia)で実現しています。[Atlas](https://shopify.github.io/react-native-skia/docs/shapes/atlas)を使った場合と使わない場合の2パターンを試してみました。
+
+## 実装の流れ
+
+### 桜の花びらを作成する
+
+まず、部品となる桜の花びらとなるコンポーネントを作成します。
+
+<View style={{ marginTop: 16, marginBottom: 24 }}>
+<WithSkia
+  getComponent={
+    () => import(`../../components/pages/${ID}/SakuraPetals`)
+  }
+  fallback={() => <LoadingRect width={360} height={360} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+/>
+</View>
+
+pathでベジェ曲線と直線を使って花びらの形を実現してます。
+
+```ts
+const path = usePathValue(p => {
+  p.moveTo(centerX + position.x, size.height + position.y)
+  p.quadTo(
+    -size.width * 0.2 + position.x,
+    size.height * 0.6 + position.y,
+    size.width * 0.35 + position.x,
+    0 + position.y,
+  )
+  p.lineTo(centerX + position.x, size.height * 0.15 + position.y)
+  p.lineTo(centerX + size.width * 0.15 + position.x, 0 + position.y)
+  p.quadTo(
+    centerX + size.width * 0.7 + position.x,
+    size.height * 0.6 + position.y,
+    centerX + position.x,
+    size.height + position.y,
+  )
+  p.close()
+})
+```
+
+Skiaでベジェ曲線を描く方法については[react-native-skiaで二次ベジェ曲線を描く](https://blog.omoidasu.dev/posts/2022-09-18-quadratic-bezier-curve)の記事を参考にしてください。
+
+
+更にLinearGradientを使ってわずかにグラデーションを設定しています。
+
+```tsx
+<Path path={path} style="fill" opacity={props.opacity}>
+  <LinearGradient
+    start={vec(centerX * 0.8 + position.x, 0 + position.y)}
+    end={vec(centerX * 1.2 + position.x, size.height * 1.2 + position.y)}
+    colors={COLORS[props.colorId]}
+  />
+</Path>
+```
+
+カラーを3パターン用意し見た目のバリエーションを増やしておきます。
+
+<View style={{ marginTop: 16, marginBottom: 24 }}>
+<WithSkia
+  getComponent={
+    () => import(`../../components/pages/${ID}/SakuraPetals2`)
+  }
+  fallback={() => <LoadingRect width={360} height={360} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  delay={300}
+/>
+</View>
+
+
+### Atlasでの実装
+
+花びらを描画する処理ですが、前回[React Native SkiaのAtlasについて](https://omoidasu-tech-blog.com/posts/2025-03-20-skia-atlas)でAtlasについて学んだので、早速使って実装してみました。
+
+まず3つの画像をアトラスとして一つの画像にまとめておきます。3つの花びらを横並びにしています。それぞれの画像を使う際はrectを指定して切り取って使います。
+
+```tsx
+const texture = useTexture(
+  <Group>
+    {Array.from({ length: 3 }).map((_, i) => (
+      <SakuraPetal
+        key={i}
+        colorId={(i % 3) as 0 | 1 | 2}
+        size={elementSize}
+        position={{ x: elementSize.width * i, y: 0 }}
+        opacity={window.width < 500 ? 0.5 : 0.7}
+      />
+    ))}
+  </Group>,
+  { width: elementSize.width * 3, height: elementSize.height },
+)
+```
+
+次にそれぞれのspriteがアトラスのどの領域を利用するかを指定を指定します。
+
+```tsx
+const sprites = Array.from({ length: numOfSprites }).map((_, i) =>
+  rect(elementSize.width * (i % 3), 0, elementSize.width, elementSize.height),
+)
+```
+
+インデックスを3で割って3つの花びらを均等に利用するようにしています。3つ並んだ画像のうちの一つを領域として指定します。
+
+更に各アイテムの動きや処理位置がランダムになるように、設定値を事前に用意しておきます。`SharedValue`を使っているのは、`useRSXformBuffer`はUIスレッドで実行されるため、通常の変数だとJSスレッドとの値で値のコピーが発生してしまうためです。
+
+```ts
+const itemConfigList = useSharedValue(
+  Array.from({ length: numOfSprites }).map(() => {
+    return {
+      x: Math.random() * canvasSize.width,
+      y: Math.random() * canvasSize.height,
+      scale: 0.2 + Math.random() * 0.3,
+      rotation: Math.random() * Math.PI * 2,
+      swayAmplitude: 15 + Math.random() * 70,
+      swayFrequency: 0.6 + Math.random() * 0.7,
+      fallSpeed: 0.8 + Math.random() * 1,
+      initialPhase: Math.random() * Math.PI * 2,
+      rotationSpeed:
+        (Math.random() > 0.5 ? 1 : -1) * (0.2 + Math.random() * 0.3),
+      flutterAmplitude: 0,
+      flutterFrequency: 0,
+    }
+  }),
+)
+```
+
+アニメーション値を`SharedValue`で管理します。この値を変化させて、落下・揺れ・回転のアニメーションを個別に実現します。
+
+```ts
+const progresses = {
+  falling: useSharedValue(0),
+  sway: useSharedValue(0),
+  rotation: useSharedValue(0),
+}
+
+useEffect(() => {
+  progresses.falling.value = 0
+  progresses.falling.value = withRepeat(
+    withTiming(100, {
+      duration: 1000 * 60 * 5,
+      easing: Easing.linear,
+    }),
+    -1,
+    false,
+  )
+
+  progresses.sway.value = 0
+  progresses.sway.value = withRepeat(
+    withTiming(Math.PI * 2, {
+      duration: 20000,
+      easing: Easing.linear,
+    }),
+    -1,
+    true,
+  )
+
+  progresses.rotation.value = 0
+  progresses.rotation.value = withRepeat(
+    withTiming(Math.PI * 2, {
+      duration: 25000,
+      easing: Easing.linear,
+    }),
+    -1,
+    false,
+  )
+}, [])
+```
+
+最後に`useRSXformBuffer`で各spriteの位置・大きさ・角度を指定します。各アイテムの初期値とアニメーション値を利用して計算します。
+
+縦位置(オフセット)は一番下まで行ったらまた上から再開するようにしています。
+
+```tsx
+const transforms = useRSXformBuffer(numOfSprites, (val, i) => {
+  "worklet"
+
+  const {
+    x,
+    y,
+    scale,
+    rotation,
+    swayAmplitude,
+    swayFrequency,
+    fallSpeed,
+    initialPhase,
+    rotationSpeed,
+  } = itemConfigList.value[i]
+
+  const fallOffset =
+    (progresses.falling.value / 100) * canvasSize.height * fallSpeed * 15
+
+  const currentY = (y + fallOffset) % canvasSize.height
+
+  const swayOffset =
+    Math.sin(progresses.sway.value * swayFrequency + initialPhase) *
+    swayAmplitude
+
+  const currentX = x + swayOffset
+
+  const continuousRotation = progresses.rotation.value * rotationSpeed
+
+  const swayRotationOffset =
+    Math.sin(progresses.sway.value * 0.5 + initialPhase) * 0.2
+
+  const currentRotation = rotation + continuousRotation + swayRotationOffset
+  const sn = Math.sin(currentRotation)
+  const cs = Math.cos(currentRotation)
+
+  val.set(scale * cs, scale * sn, currentX, currentY)
+})
+```
+
+
+これらの用意した値をAtlasに渡すと完成です。
+```tsx
+<Atlas image={texture} sprites={sprites} transforms={transforms} />
+```
+
+以下は実際の動作です。
+
+<View style={{ marginTop: 0, marginBottom: 24 }}>
+  <WithSkia
+    getComponent={
+      () => import(`../../components/pages/${ID}/AtlasExample`)
+    }
+    fallback={() => <LoadingRect width={360} height={360} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={1500}
+  />
+</View>
+
+
+### Atlasでの実装で気付いた点
+
+Atlasで実装してみて気付いた点です。
+
+- spriteの形状や色は後から動的に変更することはできない
+- 個別のspriteに対してアニメーション値(`SharedValue`)を設定しても値の変化は反映させることができない
+- 3Dローテーションが困難
+
+これらは仕組みから考えると当たり前のことなのですが、Atlasは基本的に画像を用意してそれを元に描画させるため、その画像自体を後から変更することはできません。仮に`useTexture`に渡すコンポーネントに`SharedValue`を渡しても、値の変化を反映させることは不可能です。
+
+角度や大きさ、位置については変更可能ですが、もしもそれ以外の見た目を動的に変更したい場合はAtlasでなく個別で描画する必要があります。例えばタップしたら形状を変えたり色を変えたりするような場合です。
+
+またAltasは基本的に2D専用であり3Dローテーションを行うのが困難です。例えば`rotateX`や`rotateY`のような指定はできません。
+
+これらのAtlasの制限を踏まえて、次はAtlas無しで実装してみます。
+
+### Atlas無しでの実装
+
+Atlas無しで個別で各spriteを描画してみたいと思います。Atlasではできないこととして以下を追加してみます。
+- 3D回転 (rotateY)
+- ランダムで一定期間花びらを光らせてみる
+
+新たに`rotation3d`という`SharedValue`を追加します。
+
+```ts
+const animations = {
+  ...
+  rotation3d: useSharedValue(0),
+}
+
+progresses.rotation3d.value = withRepeat(
+  withTiming(Math.PI * 2 * 40, { duration: 100000, easing: Easing.linear }),
+  -1,
+  false,
+)
+```
+
+Atlasの場合は`useRSXformBuffer`で位置や角度を計算していましたが、今度はパラメータとアニメーション値を各花びらのコンポーネントに渡し、それを元に位置計算する形にします。
+
+
+```tsx
+{initialValues.map((item, i) => (
+  <SakuraPetal
+    key={i}
+    position={item.position}
+    colorId={Math.floor(i % 3) as 0 | 1 | 2}
+    opacity={0.6}
+    size={item.size}
+    animation={{
+      fallProgress: progresses.falling,
+      fallSpeed: item.fallSpeed,
+      fallMaxDistance: canvasSize.height,
+      initialPhase: Math.random() * Math.PI * 2,
+      swayProgress: progresses.sway,
+      swayAmplitude: item.swayAmplitude,
+      swayFrequency: item.swayFrequency,
+      rotationProgress: progresses.rotation,
+      rotationSpeed: item.rotationSpeed,
+      rotation3dProgress: progresses.rotation3d,
+      rotation3dSpeed: item.rotation3dSpeed,
+    }}
+  />
+))}
+```
+
+
+花びらコンポーネントで以下のように`transform`を生成し、`<Group>`に渡します。
+
+
+```tsx
+const transform = useDerivedValue<Transforms3d>(() => {
+  if (props.animation == null) {
+    return []
+  }
+  const {
+    fallProgress,
+    fallMaxDistance,
+    fallSpeed,
+    swayProgress,
+    swayAmplitude,
+    swayFrequency,
+    initialPhase,
+    rotationProgress,
+    rotationSpeed,
+    rotation3dProgress,
+    rotation3dSpeed,
+  } = props.animation
+  // 縦方向の移動（落下）
+  let fallingTranslateY = fallProgress.value * fallSpeed
+  const actualY = position.y + fallingTranslateY
+  if (actualY > fallMaxDistance) {
+    fallingTranslateY = (actualY % fallMaxDistance) - props.position.y
+  }
+
+  const swayingTranslateX =
+    Math.sin(swayProgress.value * swayFrequency + initialPhase) *
+    swayAmplitude
+
+  const rotate =
+    Math.sin(rotationProgress.value + initialPhase) * Math.PI * rotationSpeed
+
+  const rotation3dAngle =
+    rotation3dProgress.value * rotation3dSpeed + initialPhase
+
+  const rotateX3d = 0.1
+  const rotateY3d = Math.sin(rotation3dAngle)
+
+  const scaleX = 0.4 + Math.abs(Math.cos(rotation3dAngle)) * 0.6
+
+  return [
+    { translateY: fallingTranslateY },
+    { translateX: swayingTranslateX },
+    { translateX: centerX + position.x },
+    { translateY: size.height / 2 + position.y },
+    { rotate },
+    { rotateX: rotateX3d },
+    { rotateY: rotateY3d },
+    { scaleX: scaleX },
+    { translateX: -(centerX + position.x) },
+    { translateY: -(size.height / 2 + position.y) },
+  ]
+}, [props.animation])
+
+
+<Group transform={transform}>
+  <Path path={path} style="fill" opacity={props.opacity}>
+    <LinearGradient
+      start={vec(centerX * 0.8 + position.x, 0 + position.y)}
+      end={vec(centerX * 1.2 + position.x, size.height * 1.2 + position.y)}
+      colors={isShining ? SHINING_COLOR : COLORS[props.colorId]}
+    />
+  </Path>
+</Group>
+```
+
+更に、花びらがランダムで一定期間光るようにしてみます。
+
+```tsx
+const [isShining, setIsShining] = useState(false)
+
+useEffect(() => {
+  const checkSpecialState = () => {
+    if (props.shiningEnabled !== true) return
+    const random = Math.random()
+    if (random < SHINING_CONFIG.probability) {
+      setIsShining(true)
+
+      setTimeout(() => {
+        setIsShining(false)
+      }, SHINING_CONFIG.durationMs)
+    }
+  }
+
+  const intervalId = setInterval(
+    checkSpecialState,
+    SHINING_CONFIG.checkIntervalMs,
+  )
+
+  return () => clearInterval(intervalId)
+}, [props.shiningEnabled])
+```
+
+ランダムで`isShining`が一定の期間`true`になり、`true`の場合以下の描画を追加して光らせています。
+
+```tsx
+{isShining && (
+  <Path path={path} style="fill" color="rgba(255, 255, 150, 1)">
+    <Blur blur={8} />
+  </Path>
+)}
+```
+
+以下が完成品です。花びらが3D回転していること、またランダムで光ることが確認できます。
+
+<View style={{ marginTop: 0, marginBottom: 24 }}>
+  <WithSkia
+    getComponent={
+      () => import(`../../components/pages/${ID}/NoAtlasExample`)
+    }
+    fallback={() => <LoadingRect width={360} height={360} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+    delay={2500}
+  />
+</View>
+
+
+## まとめ
+
+今回Atlasでできることとできないことがある程度明確になった気がします。Atlasでは3D回転や各スプライトの見た目を後から動的に変化させることができないため、固定のアニメーションを流し続けたりするようなケースで使うのが適切だと思いました。また背景でダイナミックなノイズを表示したい場合とか有効そうです。
+
+今回の実装するのに一部AI(Cursor)の力を借りましたが、アニメーションを実装するのにかなり有用だと思います。数学的な計算が強いため、ある程度複雑なアニメーションでも実装してくれます。通常複雑なアニメーションを実装するのにAfter Effects等のツールを使うのが一般的だと思いますが、AIを使うことでコーディングを用いた場合でもそれに近い体験で実装できるようになってきたかなと思います。ツールではなくプログラミングでアニメーションを作成する一番のメリットは、ユーザのインタラクションに応じて動きを変化させたり、動的な条件によって描写を変化させられる点だと思います。
+
+ただ、アニメーションや2D描画はコードが複雑で読みにくくなってしまいやすいです。指示を出す時に一度のお願いの範囲をあまり拡げず、指示を限定的にし、都度コードを整理しながら一個ずつ進めることでコードの複雑性を抑えることができるのではないかと感じます。
+
+今回のコードは[こちら](https://github.com/gaishimo/omoidasu-tech-blog/tree/main/components/pages/2025-04-09-sakura-fluttering)を参照してください。
+
