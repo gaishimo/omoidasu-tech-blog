@@ -33,7 +33,7 @@ exports.meta = {
     "2022-08-28-text-gradient",
   ],
   lastUpdatedAt: parse(
-    "2025-04-09 09:38:41 +09:00",
+    "2025-04-13 13:33:04 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
