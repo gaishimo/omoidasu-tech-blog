@@ -15,6 +15,7 @@ type Props = {
   position: { x: number; y: number }
   size: { width: number; height: number }
   opacity?: number
+  shiningEnabled?: boolean
   animation?: {
     fallSpeed: number
     fallProgress: SharedValue<number>
@@ -92,37 +93,29 @@ export function SakuraPetal(props: Props) {
       fallingTranslateY = (actualY % fallMaxDistance) - props.position.y
     }
 
-    // 横方向の揺れ
     const swayingTranslateX =
       Math.sin(swayProgress.value * swayFrequency + initialPhase) *
       swayAmplitude
 
-    // 平面上の回転
     const rotate =
       Math.sin(rotationProgress.value + initialPhase) * Math.PI * rotationSpeed
 
-    // 3D回転（連続回転するためにsin関数を使わず単純に進行）
-    // initialPhaseを使って花びらごとにタイミングをずらす
     const rotation3dAngle =
       rotation3dProgress.value * rotation3dSpeed + initialPhase
 
-    // 回転軸を少し傾ける（Y軸だけでなくX軸も少し回転させる）
-    const rotateX3d = Math.sin(rotation3dAngle) * 0.2 // 少しだけX軸回転を加える
+    const rotateX3d = 0.1
     const rotateY3d = Math.sin(rotation3dAngle)
 
-    // スケールの計算（3D効果を強調するため）
-    // 回転時に完全に平面にならないよう、最小スケールを制限
     const scaleX = 0.4 + Math.abs(Math.cos(rotation3dAngle)) * 0.6
 
     return [
       { translateY: fallingTranslateY },
       { translateX: swayingTranslateX },
-      // 3D回転のための変換を追加
       { translateX: centerX + position.x },
       { translateY: size.height / 2 + position.y },
-      { rotate }, // 平面上の回転
-      { rotateY: rotateY3d },
+      { rotate },
       { rotateX: rotateX3d },
+      { rotateY: rotateY3d },
       { scaleX: scaleX },
       { translateX: -(centerX + position.x) },
       { translateY: -(size.height / 2 + position.y) },
@@ -131,6 +124,7 @@ export function SakuraPetal(props: Props) {
 
   useEffect(() => {
     const checkSpecialState = () => {
+      if (props.shiningEnabled !== true) return
       const random = Math.random()
       if (random < SHINING_CONFIG.probability) {
         setIsShining(true)
@@ -141,15 +135,13 @@ export function SakuraPetal(props: Props) {
       }
     }
 
-    checkSpecialState()
-
     const intervalId = setInterval(
       checkSpecialState,
       SHINING_CONFIG.checkIntervalMs,
     )
 
     return () => clearInterval(intervalId)
-  }, [])
+  }, [props.shiningEnabled])
 
   return (
     <Group transform={transform}>

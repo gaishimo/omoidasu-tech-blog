@@ -1,5 +1,5 @@
 import { Canvas } from "@shopify/react-native-skia"
-import { useWindowDimensions } from "react-native"
+import { StyleProp, useWindowDimensions, ViewStyle } from "react-native"
 import {
   Easing,
   useSharedValue,
@@ -11,12 +11,20 @@ import { useEffect, useMemo } from "react"
 
 const elementBaseSize = { width: 18, height: 24 }
 
-export default function SakuraFluttering() {
+type Props = {
+  canvasSize: { width: number; height: number }
+  canvasStyle?: StyleProp<ViewStyle>
+}
+
+export default function SakuraFluttering(props: Props) {
   const window = useWindowDimensions()
-  const canvasSize = { width: window.width, height: window.height + 40 }
+  const canvasSize = props.canvasSize ?? {
+    width: window.width,
+    height: window.height + 40,
+  }
   const numOfSprites = window.width < 500 ? 30 : 70
 
-  const animations = {
+  const progresses = {
     falling: useSharedValue(0),
     sway: useSharedValue(0),
     rotation: useSharedValue(0),
@@ -37,8 +45,8 @@ export default function SakuraFluttering() {
             height: elementBaseSize.height * scale,
           },
           fallSpeed: (100 + Math.random() * 100) * (0.5 + scale * 0.8),
-          swayAmplitude: 15 + Math.random() * 60, // 揺れの振幅
-          swayFrequency: 0.6 + Math.random() * 1.2, // 揺れの周波数
+          swayAmplitude: 15 + Math.random() * 70, // 揺れの振幅
+          swayFrequency: 0.6 + Math.random() * 1.3, // 揺れの周波数
           // 回転速度（正負の方向に0.2〜0.5の間）
           rotationSpeed:
             (Math.random() > 0.5 ? 1 : -1) * (0.2 + Math.random() * 0.3),
@@ -50,25 +58,25 @@ export default function SakuraFluttering() {
   )
 
   useEffect(() => {
-    animations.falling.value = withRepeat(
+    progresses.falling.value = withRepeat(
       withTiming(100, { duration: 1000 * 60 * 5, easing: Easing.linear }),
       -1,
       false,
     )
 
-    animations.sway.value = withRepeat(
+    progresses.sway.value = withRepeat(
       withTiming(Math.PI * 2, { duration: 20000, easing: Easing.linear }),
       -1,
       true,
     )
 
-    animations.rotation.value = withRepeat(
+    progresses.rotation.value = withRepeat(
       withTiming(Math.PI * 2, { duration: 20000, easing: Easing.linear }),
       -1,
       false,
     )
 
-    animations.rotation3d.value = withRepeat(
+    progresses.rotation3d.value = withRepeat(
       withTiming(Math.PI * 2 * 40, { duration: 100000, easing: Easing.linear }),
       -1,
       false,
@@ -81,6 +89,7 @@ export default function SakuraFluttering() {
         bottom: 40,
         borderColor: "rgb(255, 230, 245)",
         ...canvasSize,
+        ...(props.canvasStyle as ViewStyle),
       }}
     >
       {initialValues.map((item, i) => (
@@ -90,17 +99,18 @@ export default function SakuraFluttering() {
           colorId={Math.floor(i % 3) as 0 | 1 | 2}
           opacity={0.6}
           size={item.size}
+          shiningEnabled
           animation={{
-            fallProgress: animations.falling,
+            fallProgress: progresses.falling,
             fallSpeed: item.fallSpeed,
             fallMaxDistance: canvasSize.height,
             initialPhase: Math.random() * Math.PI * 2,
-            swayProgress: animations.sway,
+            swayProgress: progresses.sway,
             swayAmplitude: item.swayAmplitude,
             swayFrequency: item.swayFrequency,
-            rotationProgress: animations.rotation,
+            rotationProgress: progresses.rotation,
             rotationSpeed: item.rotationSpeed,
-            rotation3dProgress: animations.rotation3d,
+            rotation3dProgress: progresses.rotation3d,
             rotation3dSpeed: item.rotation3dSpeed,
           }}
         />
