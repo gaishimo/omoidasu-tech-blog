@@ -19,7 +19,9 @@ type Props = {
   animation?: {
     fallSpeed: number
     fallProgress: SharedValue<number>
-    fallMaxDistance: number
+    fallMaxDistance?: number
+    fallMaxDistanceX?: number
+    areaSize?: { x: number; y: number }
     initialPhase: number
     swayProgress: SharedValue<number>
     swayAmplitude: number
@@ -32,7 +34,7 @@ type Props = {
 }
 
 const SHINING_CONFIG = {
-  probability: 0.005,
+  probability: 0.003,
   durationMs: 20000,
   checkIntervalMs: 3000,
 }
@@ -76,7 +78,9 @@ export function SakuraPetal(props: Props) {
     const {
       fallProgress,
       fallMaxDistance,
+      fallMaxDistanceX,
       fallSpeed,
+      areaSize,
       swayProgress,
       swayAmplitude,
       swayFrequency,
@@ -86,11 +90,21 @@ export function SakuraPetal(props: Props) {
       rotation3dProgress,
       rotation3dSpeed,
     } = props.animation
-    // 縦方向の移動（落下）
     let fallingTranslateY = fallProgress.value * fallSpeed
+    const fallingTranslateX = fallProgress.value * fallSpeed * 0.5
+
+    const maxDistanceY = areaSize?.y ?? fallMaxDistance ?? 0
+    const maxDistanceX = areaSize?.x ?? fallMaxDistanceX ?? maxDistanceY
+
     const actualY = position.y + fallingTranslateY
-    if (actualY > fallMaxDistance) {
-      fallingTranslateY = (actualY % fallMaxDistance) - props.position.y
+    if (actualY > maxDistanceY && maxDistanceY > 0) {
+      fallingTranslateY = (actualY % maxDistanceY) - props.position.y
+    }
+
+    let actualFallingTranslateX = fallingTranslateX
+    const actualX = position.x + fallingTranslateX
+    if (actualX > maxDistanceX && maxDistanceX > 0) {
+      actualFallingTranslateX = (actualX % maxDistanceX) - props.position.x
     }
 
     const swayingTranslateX =
@@ -110,7 +124,7 @@ export function SakuraPetal(props: Props) {
 
     return [
       { translateY: fallingTranslateY },
-      { translateX: swayingTranslateX },
+      { translateX: swayingTranslateX + actualFallingTranslateX },
       { translateX: centerX + position.x },
       { translateY: size.height / 2 + position.y },
       { rotate },

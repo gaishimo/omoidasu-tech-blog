@@ -45,9 +45,8 @@ export default function SakuraFluttering(props: Props) {
             height: elementBaseSize.height * scale,
           },
           fallSpeed: (100 + Math.random() * 100) * (0.5 + scale * 0.8),
-          swayAmplitude: 15 + Math.random() * 70, // 揺れの振幅
-          swayFrequency: 0.6 + Math.random() * 1.3, // 揺れの周波数
-          // 回転速度（正負の方向に0.2〜0.5の間）
+          swayAmplitude: 15 + Math.random() * 70,
+          swayFrequency: 0.6 + Math.random() * 1.3,
           rotationSpeed:
             (Math.random() > 0.5 ? 1 : -1) * (0.2 + Math.random() * 0.3),
           rotation3dSpeed:
@@ -103,7 +102,10 @@ export default function SakuraFluttering(props: Props) {
           animation={{
             fallProgress: progresses.falling,
             fallSpeed: item.fallSpeed,
-            fallMaxDistance: canvasSize.height,
+            areaSize: {
+              x: canvasSize.width,
+              y: canvasSize.height,
+            },
             initialPhase: Math.random() * Math.PI * 2,
             swayProgress: progresses.sway,
             swayAmplitude: item.swayAmplitude,
