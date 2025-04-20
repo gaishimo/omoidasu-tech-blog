@@ -46,19 +46,12 @@ const nextConfig = {
     config.entry = async () => {
       const entryConfig = await originEntry()
       return {
-        // ["babel-polyfill"]: [],
         ...entryConfig,
       }
     }
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
-      // Transform all direct `react-native` imports to `react-native-web`
       "react-native$": "react-native-web",
-      // The next line is to be able to correctly resolve react dependencies
-      // in the library (package folder) avoiding the dreaded error
-      // "Hooks can only be called inside the body of a function component"
-      // where we end up with two different react modules. This should
-      // NOT be necessary in production when installing from NPM.
       react: path.resolve(__dirname, "./node_modules/react"),
     }
     config.resolve.extensions = [
