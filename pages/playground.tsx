@@ -7,7 +7,7 @@ export default function () {
     <View>
       <WithSkia
         delay={1000}
-        getComponent={() => import("../components/SkiaPlayground")}
+        getComponent={() => import("../components/LikeButton")}
         fallback={() => (
           <LoadingRect
             width={320}
