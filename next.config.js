@@ -5,6 +5,35 @@ const CopyPlugin = require("copy-webpack-plugin")
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 const path = require("path")
 const webpack = require("webpack")
+const dotenv = require("dotenv")
+
+// Load environment variables
+let envVars = {}
+
+// Try to load from .env.local in development
+if (process.env.NODE_ENV !== "production") {
+  try {
+    const result = dotenv.config({ path: ".env.local" })
+
+    if (result.error) {
+      console.error("Error loading .env.local:", result.error)
+    } else {
+      console.log("Loaded environment variables from .env.local")
+
+      if (result.parsed) {
+        envVars = { ...result.parsed }
+      }
+
+      console.log("Loaded environment variable keys:", Object.keys(envVars))
+    }
+  } catch (error) {
+    console.error("Error loading environment variables:", error)
+  }
+} else {
+  envVars = {
+    LIKE_SLACK_WEBHOOK_URL: process.env.LIKE_SLACK_WEBHOOK_URL,
+  }
+}
 
 const withMDX = require("@next/mdx")({
   extension: /\.mdx$/,
@@ -41,6 +70,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Always include environment variables in Next.js config
+  env: {
+    ...envVars,
+  },
   webpack: config => {
     const originEntry = config.entry
     config.entry = async () => {
@@ -60,6 +93,8 @@ const nextConfig = {
       ".web.tsx",
       ...config.resolve.extensions,
     ]
+
+    // Required for canvaskit-wasm
     config.resolve.fallback = {
       fs: false,
       path: false,
@@ -73,6 +108,16 @@ const nextConfig = {
       },
     })
 
+    // Define plugin options for environment variables
+    const definePluginOptions = {
+      __DEV__: JSON.stringify(true),
+    }
+
+    // Add environment variables to webpack define plugin
+    Object.keys(envVars).forEach(key => {
+      definePluginOptions[`process.env.${key}`] = JSON.stringify(envVars[key])
+    })
+
     config.plugins = [
       ...config.plugins,
       new CopyPlugin({
@@ -83,11 +128,7 @@ const nextConfig = {
           },
         ],
       }),
-      /* for reanimated */
-      new webpack.DefinePlugin({
-        // See: <https://github.com/necolas/react-native-web/issues/349>
-        __DEV__: JSON.stringify(true),
-      }),
+      new webpack.DefinePlugin(definePluginOptions),
       new NodePolyfillPlugin(),
     ]
     return config

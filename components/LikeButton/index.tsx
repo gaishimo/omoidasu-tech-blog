@@ -16,7 +16,11 @@ const heartPos = { x: 0, y: 0 }
 
 const colors = ["#FF4276", "#FFDE43", "#5CE9D9", "#A258B1"]
 
-export default function LikeButton() {
+type Props = {
+  onPress?: () => void
+}
+
+export default function LikeButton(props: Props) {
   const heartScale = useSharedValue(1)
   const pressProgress = useSharedValue(0)
   const heartOpacity = useSharedValue(1)
@@ -51,6 +55,8 @@ export default function LikeButton() {
       damping: 5,
       velocity: 0.7,
     })
+
+    props.onPress?.()
   }
 
   useAnimatedReaction(
