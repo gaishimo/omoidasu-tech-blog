@@ -1,5 +1,5 @@
 import { format } from "date-fns"
-import { Fragment, ReactNode } from "react"
+import { Fragment, ReactNode, useCallback } from "react"
 import { StyleSheet, Text, View } from "react-native"
 import useMedia from "use-media"
 import { Colors } from "../libs/colors"
@@ -9,6 +9,7 @@ import { PostHeader } from "./PostHeader"
 import { RecentPostsPanel } from "./RecentPostsPanel"
 import { RelatedPostsPanel } from "./RelatedPostsPanel"
 import { TagsPanel } from "./TagsPanel"
+import { WithSkia } from "./WithSkia"
 
 type Headline = { title: string; children: Headline[] }
 
@@ -22,6 +23,7 @@ type Props = {
 export function PostLayout(props: Props) {
   const isSmallScreen = useMedia({ maxWidth: 700 })
   const isMediumScreen = useMedia({ minWidth: 700, maxWidth: 1200 })
+
   const renderHeadline = (headline: Headline) => (
     <Fragment key={headline.title}>
       <View style={styles.headlineItem}>
@@ -58,6 +60,13 @@ export function PostLayout(props: Props) {
           <View style={styles.articleBody}>
             <PostHeader {...props.meta} />
             {props.children}
+            <View style={styles.likeButton}>
+              <WithSkia
+                delay={1700}
+                getComponent={() => import("./LikeButtonWithAction")}
+                fallback={() => null}
+              />
+            </View>
             <View style={styles.subPanels}>
               <RelatedPostsPanel
                 id={props.meta.id}
@@ -135,6 +144,11 @@ const styles = StyleSheet.create({
   articleSmall: {
     width: "100%",
     paddingHorizontal: 8,
+  },
+  likeButton: {
+    marginTop: 24,
+    right: 16,
+    height: 60,
   },
   footer: {
     marginTop: 56,
