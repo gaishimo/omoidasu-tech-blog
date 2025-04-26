@@ -1,9 +1,10 @@
 import { Canvas, Group } from "@shopify/react-native-skia"
-import { useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
-import {
-  useAnimatedReaction,
+import Animated, {
+  useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withSpring,
   withTiming,
 } from "react-native-reanimated"
@@ -11,8 +12,8 @@ import { wait } from "../../utils/wait"
 import { Heart } from "./Heart"
 import { Particle } from "./Particle"
 
-const heartSize = 80
-const heartPos = { x: 0, y: 0 }
+const heartSize = 60
+const heartPos = { x: 8, y: 24 }
 
 const colors = ["#FF4276", "#FFDE43", "#5CE9D9", "#A258B1"]
 
@@ -21,50 +22,74 @@ type Props = {
 }
 
 export default function LikeButton(props: Props) {
+  const buttonOpacity = useSharedValue(1)
   const heartScale = useSharedValue(1)
-  const pressProgress = useSharedValue(0)
   const heartOpacity = useSharedValue(1)
   const particleProgress = useSharedValue(0)
+  const pressStartedTime = useSharedValue<number | null>(null)
+  const pulseIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  const shrinkTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const handlePressIn = () => {
+    if (pulseIntervalRef.current) {
+      clearInterval(pulseIntervalRef.current)
+    }
+    pressStartedTime.value = Date.now()
+    heartScale.value = withTiming(0.9, { duration: 300 })
 
-  const handlePress = () => {
-    pressProgress.value = withTiming(1, { duration: 150 })
-  }
-
-  const handleLongPress = () => {
-    pressProgress.value = withTiming(1, { duration: 200 })
+    buttonOpacity.value = withTiming(0, { duration: 1000 })
   }
 
   const handlePressOut = async () => {
-    if (shrinkTimerRef.current) {
-      clearInterval(shrinkTimerRef.current)
-      shrinkTimerRef.current = null
-    }
+    const timeFromPressStarted =
+      Date.now() - (pressStartedTime.value ?? Date.now())
+
     particleProgress.value = withTiming(1, {
       duration: 2500,
     })
 
+    await wait(timeFromPressStarted + 300)
+
     heartOpacity.value = withTiming(0, { duration: 2500 })
-
-    await wait(200)
-
-    heartScale.value = withSpring(1.15, {
-      mass: 0.4,
-      stiffness: 700,
-      damping: 5,
-      velocity: 0.7,
-    })
+    heartScale.value = withSequence(
+      withSpring(1.3, {
+        mass: 0.4,
+        stiffness: 700,
+        damping: 2.5,
+        velocity: 0,
+      }),
+    )
 
     props.onPress?.()
   }
 
-  useAnimatedReaction(
-    () => pressProgress.value,
-    value => {
-      heartScale.value = value > 0 ? Math.max(0.9, 1 - 0.15 * value) : 1
-    },
-  )
+  const doPulseAnimation = useCallback(() => {
+    if (pressStartedTime.value != null) return
+
+    heartScale.value = withSpring(
+      1.175,
+      {
+        mass: 0.3,
+        stiffness: 600,
+        damping: 2,
+        velocity: 0.3,
+      },
+      () => {
+        if (!pressStartedTime.value) {
+          heartScale.value = withTiming(1, { duration: 200 })
+        }
+      },
+    )
+  }, [heartScale, pressStartedTime, heartOpacity])
+
+  useEffect(() => {
+    pulseIntervalRef.current = setInterval(doPulseAnimation, 3000)
+
+    return () => {
+      if (pulseIntervalRef.current) {
+        clearInterval(pulseIntervalRef.current)
+      }
+    }
+  }, [heartScale, pressStartedTime, heartOpacity])
 
   const center = {
     x: heartPos.x + heartSize / 2,
@@ -73,7 +98,7 @@ export default function LikeButton(props: Props) {
 
   const particleGroups = Array.from({ length: 6 }).map((_, index) => {
     const angle = (index * Math.PI * 2) / 6
-    const distance = 24
+    const distance = 28
 
     const particleAngleOffset = Math.PI / 15
 
@@ -94,13 +119,18 @@ export default function LikeButton(props: Props) {
   })
 
   return (
-    <View style={styles.container}>
-      <Pressable
-        delayLongPress={50}
-        onPress={handlePress}
-        onLongPress={handleLongPress}
-        onPressOut={handlePressOut}
-        style={({ pressed }) => [styles.pressable, pressed && styles.pressed]}
+    <Pressable
+      delayLongPress={50}
+      onPressIn={handlePressIn}
+      onPressOut={handlePressOut}
+    >
+      <Animated.View
+        style={[
+          styles.button,
+          useAnimatedStyle(() => ({
+            backgroundColor: `rgba(255, 100, 100, ${0.05 * buttonOpacity.value})`,
+          })),
+        ]}
       >
         <Canvas style={styles.canvas}>
           <Heart
@@ -125,18 +155,24 @@ export default function LikeButton(props: Props) {
             ))}
           </Group>
         </Canvas>
-      </Pressable>
-    </View>
+      </Animated.View>
+    </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  pressable: {},
+  button: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
   pressed: {
-    opacity: 1,
+    borderWidth: 0,
+    backgroundColor: "transparent",
   },
   canvas: {
+    bottom: 6,
+    left: 2,
     width: 200,
     height: 200,
   },

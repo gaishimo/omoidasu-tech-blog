@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   likeButton: {
-    marginTop: 24,
+    marginTop: 40,
     right: 16,
     height: 60,
   },
