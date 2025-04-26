@@ -147,7 +147,6 @@ const styles = StyleSheet.create({
   },
   likeButton: {
     marginTop: 40,
-    right: 16,
     height: 60,
   },
   footer: {

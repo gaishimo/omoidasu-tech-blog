@@ -121,6 +121,7 @@ export default function LikeButton(props: Props) {
   return (
     <Pressable
       delayLongPress={50}
+      style={styles.button}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}
     >
