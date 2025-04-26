@@ -17,10 +17,13 @@ export default async function likeHandler(
     }
 
     try {
+      const randomHeart = ["❤️", "💛", "💚"][Math.floor(Math.random() * 3)]
       const response = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: `いいねが押されました! ❤️💛💚 ${url}` }),
+        body: JSON.stringify({
+          text: `いいねが押されました! ${randomHeart}\n${url}`,
+        }),
       })
 
       if (!response.ok) {
