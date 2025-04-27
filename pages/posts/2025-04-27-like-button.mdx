@@ -45,6 +45,7 @@ export default props => (
 
 <View style={{ marginTop: 24, marginBottom: 0 }}>
   <WithSkia
+    delay={300}
     getComponent={
       () => import("../../components/pages/2025-04-27-like-button/HeartExample")
     }
@@ -89,6 +90,7 @@ const path = usePathValue(p => {
 
 <View style={{ marginTop: 24, marginBottom: 0 }}>
   <WithSkia
+    delay={500}
     getComponent={
       () => import("../../components/pages/2025-04-27-like-button/HeartWithPulseAnimation")
     }
@@ -127,6 +129,7 @@ heartScale.value = withSpring(
 
 <View style={{ marginTop: 8, marginBottom: 0 }}>
   <WithSkia
+    delay={1000}
     getComponent={
       () => import("../../components/pages/2025-04-27-like-button/HeartPressAnimation")
     }
@@ -165,6 +168,7 @@ const handlePressOut = useCallback(() => {
 
 <View style={{ marginTop: 8, marginBottom: 0 }}>
   <WithSkia
+    delay={1200}
     getComponent={
       () => import("../../components/pages/2025-04-27-like-button/ParticleAnimation")
     }
