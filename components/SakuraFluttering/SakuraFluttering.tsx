@@ -96,7 +96,7 @@ export default function SakuraFluttering(props: Props) {
           key={i}
           position={item.position}
           colorId={Math.floor(i % 3) as 0 | 1 | 2}
-          opacity={0.6}
+          opacity={0.3}
           size={item.size}
           shiningEnabled
           animation={{
