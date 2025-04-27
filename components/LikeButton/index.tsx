@@ -25,7 +25,7 @@ export default function LikeButton(props: Props) {
   const buttonOpacity = useSharedValue(1)
   const heartScale = useSharedValue(1)
   const heartOpacity = useSharedValue(1)
-  const particleProgress = useSharedValue(0)
+  const particleMoveProgress = useSharedValue(0)
   const pressStartedTime = useSharedValue<number | null>(null)
   const pulseIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -43,21 +43,19 @@ export default function LikeButton(props: Props) {
     const timeFromPressStarted =
       Date.now() - (pressStartedTime.value ?? Date.now())
 
-    particleProgress.value = withTiming(1, {
+    particleMoveProgress.value = withTiming(1, {
       duration: 2500,
     })
 
     await wait(timeFromPressStarted + 300)
 
     heartOpacity.value = withTiming(0, { duration: 2500 })
-    heartScale.value = withSequence(
-      withSpring(1.3, {
-        mass: 0.4,
-        stiffness: 700,
-        damping: 2.5,
-        velocity: 0,
-      }),
-    )
+    heartScale.value = withSpring(1.3, {
+      mass: 0.4,
+      stiffness: 700,
+      damping: 2.5,
+      velocity: 0,
+    })
 
     props.onPress?.()
   }
@@ -149,7 +147,7 @@ export default function LikeButton(props: Props) {
                     color={particle.color}
                     centerOrigin={center}
                     initialPosition={particle}
-                    progress={particleProgress}
+                    progress={particleMoveProgress}
                   />
                 ))}
               </Group>
