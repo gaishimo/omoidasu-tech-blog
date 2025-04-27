@@ -1,0 +1,225 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2025-04-27-like-button"
+
+export const headlines = [
+  { title: "実装",
+    children: [
+      { title: "ボタンの見た目" },
+      { title: "パルスアニメーション" },
+      { title: "プレス時のアニメーション" },
+      { title: "パーティクルアニメーション" },
+    ]
+  },
+  { title: "終わりに" },
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+当ブログにアニメーション付きのハートのLikeボタンを追加しました。
+
+累計をカウントしたり、誰が押したかをトラッキングする等はしていません。ただ押したら通知がいくという、筆者のモチベーションを上げるためだけのものです。
+
+各記事の下部に配置しているため、よいと感じた場合にぜひ押してみてください👍
+
+
+## 実装
+
+アニメーションの実装を簡単に説明します。
+
+### ボタンの見た目
+
+ボタンの形はシンプルなハートです。Skiaでベジェ曲線を使って描画しています。Pathの子要素に`Shadow`を配置し、ドロップシャドウを追加しています。
+
+
+<View style={{ marginTop: 24, marginBottom: 0 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-04-27-like-button/HeartExample")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+
+```tsx
+const path = usePathValue(p => {
+  p.moveTo(props.x + centerX, centerY * 0.5 + props.y)
+  // left
+  p.cubicTo(
+    centerX - props.size * 0.1 + props.x,
+    centerY * 0.1 + props.y,
+    centerX - props.size * 0.5 + props.x,
+    centerY * 0.5 + props.y,
+    centerX + props.x,
+    centerY * 1.2 + props.y,
+  )
+  // right
+  p.cubicTo(
+    centerX + props.size * 0.5 + props.x,
+    centerY * 0.5 + props.y,
+    centerX + props.size * 0.1 + props.x,
+    centerY * 0.1 + props.y,
+    centerX + props.x,
+    centerY * 0.5 + props.y,
+  )
+  p.close()
+})
+
+<Path path={path} style="fill">
+  <Shadow dx={0} dy={3} blur={0} color="rgba(235, 150, 50, 0.3)" />
+</Path>
+```
+
+### パルスアニメーション
+
+ボタンを押し待ちの時に軽くアピールするために、拡大縮小を小刻みに繰り返すアニメーションを設定します。
+
+<View style={{ marginTop: 24, marginBottom: 0 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-04-27-like-button/HeartWithPulseAnimation")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+
+`withSpring`を使いscaleの値を変化させます。
+
+```tsx
+const heartScale = useSharedValue(1)
+
+heartScale.value = withSpring(
+  1.175,
+  {
+    mass: 0.3,
+    stiffness: 600,
+    damping: 2,
+    velocity: 0.3,
+  }
+)
+```
+
+各パラメータの意味は以下です。
+- `mass`: 質量。重いほど遅くなる。
+- `stiffness`: 硬さ。大きいほど速くなる。
+- `damping`: 減衰。大きいほど速くなる。
+- `velocity`: 速度。大きいほど速くなる。
+
+
+### プレス時のアニメーション
+
+ボタンをプレスするとハートが少し小さくなり、離すとパルスした後にハートが消えていきます。
+
+<View style={{ marginTop: 8, marginBottom: 0 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-04-27-like-button/HeartPressAnimation")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+
+```tsx
+const heartScale = useSharedValue(1)
+const heartOpacity = useSharedValue(1)
+const handlePressIn = useCallback(() => {
+  heartScale.value = withTiming(0.9, { duration: 300 })
+}, [heartScale])
+
+const handlePressOut = useCallback(() => {
+  heartOpacity.value = withTiming(0, { duration: 2500 })
+  heartScale.value = withSpring(
+    1.3,
+    {
+      mass: 0.4,
+      stiffness: 700,
+      damping: 2.5,
+      velocity: 0,
+    }
+  )
+}, [heartScale])
+```
+
+
+### パーティクルアニメーション
+
+ハートが消えていくと同時に、パーティクル(小さな円)が散らばって消えます。
+
+
+
+<View style={{ marginTop: 8, marginBottom: 0 }}>
+  <WithSkia
+    getComponent={
+      () => import("../../components/pages/2025-04-27-like-button/ParticleAnimation")
+    }
+    fallback={() => <LoadingRect width={240} height={240} textColor="lightblue" bgColor={"rgb(240, 240, 240)"} />}
+  />
+</View>
+
+これは小さな円の`<Particle />`コンポーネントを用意し、各Particleにアニメーション進捗のSharedValueを渡します。各Particleでは中心からの角度と距離を元に、アニメーション進捗に応じて位置を変化させます。
+
+
+```tsx
+const particleMoveProgress = useSharedValue(0)
+
+const particleGroups = Array.from({ length: 6 }).map((_, index) => {
+  const angle = (index * Math.PI * 2) / 6
+  const distance = 28
+
+  const particleAngleOffset = Math.PI / 15
+
+  const particles = [
+    {
+      angleRadian: angle - particleAngleOffset / 2,
+      distanceFromCenter: distance,
+      color: colors[index % colors.length],
+    },
+    {
+      angleRadian: angle + particleAngleOffset / 2,
+      distanceFromCenter: distance,
+      color: colors[(index + 1) % colors.length],
+    },
+  ]
+
+  return { particles }
+})
+
+
+<Group>
+  {particleGroups.map((group, groupIndex) => (
+    <Group key={`group-${groupIndex}`}>
+      {group.particles.map((particle, particleIndex) => (
+        <Particle
+          key={`particle-${groupIndex}-${particleIndex}`}
+          color={particle.color}
+          centerOrigin={center}
+          initialPosition={particle}
+          progress={particleMoveProgress}
+        />
+      ))}
+    </Group>
+  ))}
+</Group>
+```
+
+## 終わりに
+
+これらを組み合わせた完成形がこの下に配置しているハートボタンです!
+
+今回の全コードは[こちら](https://github.com/omoidasu/omoidasu-tech-blog/blob/main/components/pages/2025-04-27-like-button/)を参照してください。
