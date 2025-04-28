@@ -36,11 +36,11 @@ export default props => (
 
 ## 実装
 
-アニメーションの実装を簡単に説明します。
+アニメーションの実装を簡単に説明します。React Native Skia、React Native Reanimatedで実装しています。
 
 ### ボタンの見た目
 
-ボタンの形はシンプルなハートです。Skiaでベジェ曲線を使って描画しています。Pathの子要素に`Shadow`を配置し、ドロップシャドウを追加しています。
+ボタンの形はシンプルなハートです。
 
 
 <View style={{ marginTop: 24, marginBottom: 0 }}>
@@ -53,7 +53,10 @@ export default props => (
   />
 </View>
 
+Skiaでベジェ曲線を使って描画しています。3次ベジェ曲線については以前の記事[react-native-skiaで三次ベジェ曲線を描く](http://blog.omoidasu.dev/posts/2022-09-21-cubic-bezier-curve)で解説しています。
 
+
+Pathの子要素に`Shadow`を配置し、ドロップシャドウを追加しています。
 
 ```tsx
 const path = usePathValue(p => {

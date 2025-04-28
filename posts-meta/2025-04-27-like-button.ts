@@ -25,9 +25,15 @@ exports.meta = {
     "ブログ記事にLikeボタンを追加して、React Native SkiaとNext.jsで実装した方法について解説します。",
   imagePath: "/posts/2025-04-27-like-button/like-button.png",
   priority: 0.7,
-  relatedPosts: ["2025-03-16-blog-system-update", "2022-09-06-done-animation"],
+  relatedPosts: [
+    "2022-09-21-cubic-bezier-curve",
+    "2022-09-06-done-animation",
+    "2022-09-02-ripple-effect-button",
+    "2022-08-07-rn-skia-in-blog",
+    "2025-03-16-blog-system-update",
+  ],
   lastUpdatedAt: parse(
-    "2025-04-27 14:51:05 +09:00",
+    "2025-04-28 09:07:06 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
