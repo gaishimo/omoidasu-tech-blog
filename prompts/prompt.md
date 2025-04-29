@@ -1,7 +1,7 @@
 
 ここからの指示では、以下の値は都度置き換えた上でお願いします。
-$ARTICLE_ID=skia-atlas
-$TITLE=React Native SkiaのAtlasについて
+$ARTICLE_ID=eas-devclient-testflight
+$TITLE=EAS DevClientのTestFlight配布を試してみた
 
 --
 
