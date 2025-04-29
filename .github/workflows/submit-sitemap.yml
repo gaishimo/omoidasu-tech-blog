@@ -1,0 +1,25 @@
+name: Submit Sitemap
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: latest
+
+      - name: Install Deps
+        run: yarn install
+
+      - name: Submit Sitemap
+        run: node scripts/submitSitemap.js
+        env:
+          SERVICE_ACCOUNT_BASE64: ${{ secrets.SERVICE_ACCOUNT_BASE64 }}
