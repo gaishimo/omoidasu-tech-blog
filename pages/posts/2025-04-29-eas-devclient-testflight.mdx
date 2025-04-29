@@ -1,0 +1,186 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2025-04-29-eas-devclient-testflight"
+
+export const headlines = [
+  { title: "TestFlightから配布可能になった" },
+  {
+    title: "実際に試す",
+    children: [
+      { title: "eas.jsonの設定" },
+      { title: "ビルドの実行" },
+      { title: "TestFlightで確認" }
+    ]
+  },
+  { title: "雑感" }
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+## TestFlightから配布可能になった
+
+[Expo SDK 53](https://expo.dev/changelog/sdk-53-beta)でEASの開発用ビルド(Development Build)がTestFlightを通して配布できるようになったとのことなので試してみました。
+
+改めて[Development Build](https://docs.expo.dev/develop/development-builds/introduction/)について説明すると、これはカスタム版の[Expo Goアプリ](https://expo.dev/go)だと思って貰えればよいです。Expo Goアプリは標準的なネイティブライブラリのパターンを事前に用意したアプリですが、それで足りない場合は独自にDevelopment Buildアプリをビルドする必要があります(以前の記事[EAS BuildのManagedビルドについて](https://blog.omoidasu.dev/posts/2021-06-04-hello-eas-build-managed)を参照)。
+
+
+今までiOS用の開発用ビルドを配布するには内部配布を利用するしかなく、実機にインストールするには都度UDIDの追加をする必要がありました(以前の[Hello EAS Build! (Managed Workflow)](/posts/2021-06-04-hello-eas-build-managed#ios%E3%81%AEad-hoc-provisioning-profile%E3%81%AE%E4%BD%9C%E6%88%90) の記事でもその手順を説明しています)。
+
+TestFlightから配布できるということは、Teamに登録しているアカウントであればTestFlightアプリを通してそのままインストールできることを意味します(DevClientを利用する開発者であれば通常AppleのTeamに参加していると思うので)。
+
+それでは実際にTestFlightからの配布を試してみます。
+
+## 実際に試す
+
+### eas.jsonの設定
+
+eas.jsonで`development`プロファイルに対して`"distribution": "store"`を設定すればOKです。合わせてsubmitにも`"development"`を追加しておきます。
+
+```json
+{
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "store",
+    }
+  },
+  "submit": {
+    "development": {}
+  }
+}
+```
+
+### ビルドの実行
+
+ドキュメントでは`npx testflight`コマンドで試せるとあります。この[testflightコマンド](https://github.com/expo/testflight)は実際は`eas build`コマンドのラッパーのため、直接eas-cliで`eas build --profile development --platform ios --auto-submit`を実行しても問題ありません。
+
+以下は実際に実行してみたログです。
+
+```bash
+$ npx testflight --profile development
+Resolved "production" environment for the build. Learn more
+No environment variables with visibility "Plain text" and "Sensitive" found for the "production" environment on EAS.
+
+✔ Incremented buildNumber from 1 to 2.
+✔ Using remote iOS credentials (Expo server)
+
+If you provide your Apple account credentials we will be able to generate all necessary build credentials and fully validate them.
+This is optional, but without Apple account access you will need to provide all the missing values manually and we can only run minimal validation on them.
+✔ Do you want to log in to your Apple account? … yes
+
+› Log in to your Apple Developer account to continue
+✔ Apple ID: … ****
+› Restoring session ****/.app-store/auth/****/cookie
+✔ Select a Team › **** - Company/Organization (****)
+› Provider **** (****)
+✔ Logged in Local session
+✔ Bundle identifier registered ****
+✔ Synced capabilities: No updates
+✔ Synced capability identifiers: No updates
+✔ Fetched Apple distribution certificates
+✔ Fetched Apple provisioning profiles
+
+Project Credentials Configuration
+
+Project                   ****
+Bundle Identifier         ****
+
+App Store Configuration
+
+Distribution Certificate
+Serial Number             ****
+Expiration Date           Sat, 23 Aug 2025 10:30:19 GMT+0900
+Apple Team                **** (****)
+Updated                   **** ago
+
+Provisioning Profile
+Developer Portal ID       ****
+Status                    active
+Expiration                Sat, 23 Aug 2025 10:30:19 GMT+0900
+Apple Team                **** (****)
+Updated                   **** ago
+
+All credentials are ready to build **** (****)
+
+
+Compressing project files and uploading to EAS Build. Learn more
+✔ Uploaded to EAS
+✔ Computed project fingerprint
+
+Build details: ****
+
+Ensuring your app exists on App Store Connect. This step can be skipped by providing ascAppId in the submit profile. Learn more
+
+✔ Bundle identifier registered ****
+✔ Prepared App Store Connect for example1 ****
+Looking up credentials configuration for ****...
+✔ App Store Connect API Key already set up.
+Using Api Key ID: **** ([Expo] EAS Submit ****)
+
+ASC App ID:                 ****
+Project ID:                 ****
+App Store Connect API Key:
+    Key Name  :  [Expo] EAS Submit ****
+    Key ID    :  ****
+    Key Source:  EAS servers
+Build:
+    Build ID    :  ****
+    Build Date  :  4/29/2025, 11:15:01 AM
+    App Version :  1.0.0
+    Build number:  2
+
+✔ Scheduled iOS submission
+
+Submission details: ****
+
+Waiting for build to complete. You can press Ctrl+C to exit.
+✔ Build finished
+
+🍏 iOS app:
+****
+
+Waiting for submission to complete. You can press Ctrl+C to exit.
+✔ Submitted your app to Apple App Store Connect!
+
+Your binary has been successfully uploaded to App Store Connect!
+- It is now being processed by Apple - you will receive an email when the processing finishes.
+- It usually takes about 5-10 minutes depending on how busy Apple servers are.
+- When it's done, you can see your build here: ****
+```
+
+### TestFlightで確認
+
+ビルドが完了ししばらく経つとTestFlightに配布されました!
+
+<NextImageWrapper
+  imageSize={{ width: 200, height: 400 }}
+  alt="TestFlightでDevClientビルドの配布を確認"
+  src="/posts/2025-04-29-eas-devclient-testflight/testflight-devclient-build.png"
+/>
+
+インストールしてDevClientアプリを起動すると問題なく立ち上がり、開発可能な状態であることが確認できます。
+
+<NextImageWrapper
+  imageSize={{ width: 200, height: 400 }}
+  alt="DevClientを起動"
+  src="/posts/2025-04-29-eas-devclient-testflight/devclient-run-ios.jpeg"
+/>
+
+## 雑感
+
+特に困ること無く、あっさりとビルド・配布ができました。開発用ビルドが更新されたらTestFlightアプリを通して開発者に通知が行くというのも嬉しい点だと思いました。
+
+TestFlightでの配布が可能になったことで内部配布を使うメリットはあまり無くなるかもしれません。通常のアプリのテストも基本的にはTestFlightを通せばよいと思います。ただTestFlightの内部テストはTeamに参加しているメンバーでないとできず、パブリックの外部テストは審査が必要になるため、配布したいユーザが多い場合は内部配布を使うメリットがありそうです。
+
+また、本番用の通常のアプリをTestFlightでテストする際に開発用ビルドと混在してしまうと困るため、開発用と本番用はbundleIdを分けて別アプリとしておいたほうが良さそうに思いました。
