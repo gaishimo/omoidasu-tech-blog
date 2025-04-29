@@ -31,7 +31,7 @@ exports.meta = {
     "2020-12-04-expo-client-apk",
   ],
   lastUpdatedAt: parse(
-    "2025-04-29 11:32:00 +09:00",
+    "2025-04-29 12:29:53 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
