@@ -20,6 +20,6 @@ jobs:
         run: yarn install
 
       - name: Submit Sitemap
-        run: node scripts/submitSitemap.js
+        run: node scripts/submitSitemap.mjs
         env:
           SERVICE_ACCOUNT_BASE64: ${{ secrets.SERVICE_ACCOUNT_BASE64 }}

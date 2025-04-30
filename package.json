@@ -6,9 +6,9 @@
     "start": "next start",
     "postinstall": "patch-package && yarn generate-data-json",
     "prebuild": "yarn generate-data-json && yarn update-last-updated",
-    "create-post": "node scripts/generateNewPost.js",
-    "generate-data-json": "node scripts/generatePostsAndTagsJson.js",
-    "update-last-updated": "node scripts/syncLastUpdatedAt.js"
+    "create-post": "node scripts/generateNewPost.cjs",
+    "generate-data-json": "node scripts/generatePostsAndTagsJson.cjs",
+    "update-last-updated": "node scripts/syncLastUpdatedAt.cjs"
   },
   "dependencies": {
     "@babel/core": "~7.26.9",
