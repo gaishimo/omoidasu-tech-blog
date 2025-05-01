@@ -33,7 +33,7 @@ exports.meta = {
     "2025-03-16-blog-system-update",
   ],
   lastUpdatedAt: parse(
-    "2025-04-28 09:07:06 +09:00",
+    "2025-05-01 11:19:24 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
