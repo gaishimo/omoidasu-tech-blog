@@ -1,0 +1,141 @@
+import { parse, parseISO } from "date-fns"
+import Image from "next/image"
+import { ScrollView, StyleSheet, Text, View } from "react-native"
+import { PostLayout } from "../../components/PostLayout"
+import { ImageWrapper } from "../../components/atoms/ImageWrapper"
+import { WithSkia } from "../../components/WithSkia"
+import { LoadingRect } from "../../components/LoadingRect"
+import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
+
+import { meta } from "../../posts-meta/2025-05-01-expo-apple-targets"
+
+export const headlines = [
+  { title: "iOSのTargetとは" },
+  {
+    title: "expo-apple-targets",
+    children: [
+      { title: "apple-targets pluginの概要" },
+      { title: "pbxprojファイルの更新処理" },
+      { title: "iosフォルダの外側のフォルダがリンクされる" },
+      { title: "内部的な仕組み" }
+    ]
+  }
+]
+
+export default props => (
+  <PostLayout headlines={headlines} meta={meta}>
+    {props.children}
+  </PostLayout>
+)
+
+ExpoのManaged WorkflowでiOSのターゲットを扱うためのConfig Pluginである[expo-apple-targets](https://github.com/EvanBacon/expo-apple-targets)の仕組みが凄かったのでそれについて書きます。
+
+
+## iOSのTargetとは
+
+その前にターゲットとはそもそも何かについて説明します。
+
+iOS開発においてターゲットとは、ビルドによって生成される成果物（サブプロジェクト）のことを指します。一つのプロジェクトには複数のターゲットを含めることができます。種類としてはアプリ本体のほか、ユニットテストや UI テスト用のテストバンドル、カスタムフレームワーク/ライブラリ、そして Widget、Share Extension、App Clipなどの各種エクステンション等があります。
+
+[Configuring a new target in your project | Apple Developer Documentation](https://developer.apple.com/documentation/xcode/configuring-a-new-target-in-your-project)
+
+通常React Nativeプロジェクトでエクステンションを作成するには、XCode上でターゲットの追加を行い、追加された構成に対してXCode上で開発を行います。XCodeを通してiosフォルダ配下の各ファイルが更新されます。
+
+
+
+## expo-apple-targets
+
+
+### apple-targets pluginの概要
+
+ExpoのManaged Workflowを利用している場合、iosフォルダはソースコード上で管理されません。そのためエクステンションをターゲットとして追加するには、Prebuild時に[Config Plugin](https://docs.expo.dev/config-plugins/introduction/)の仕組みを使ってiosフォルダの中身を自動で変更し、XCodeからターゲットを追加した時と同等になるようにする必要があります。
+
+これを行ってくれるのがexpo-apple-targetsの[apple-targets](https://github.com/EvanBacon/expo-apple-targets/tree/main/packages/apple-targets)というConfig Pluginです。このPluginがPrebuild時に実行され、ターゲットの追加を自動で行ってくれます。
+
+
+
+### pbxprojファイルの更新処理
+
+ターゲットの追加をConfig Pluginで行うにはiosフォルダ配下のファイルシステムを更新すればよいのですが、ただ単にswiftファイルやplistファイル等のソースコードをコピーするだけではターゲットがXCode上で認識されません。XCodeのプロジェクト構成ファイル(pbxproj)を更新しXCodeで追加した時と同じ状態になるようにする必要があります。ただこのpbxprojファイルというのが構造が独特で、更新の難易度が高いです。
+
+apple-targets pluginでは、この難易度の高い更新処理を内部的に[@bacon/xcode](https://github.com/EvanBacon/xcode) というライブラリを利用してpbxprojファイルの更新を行っています。元々[xcode](https://github.com/apache/cordova-node-xcode)というCordovaで使われていたライブラリが存在していましたが、このライブラリの問題点を解消したものという位置付けです。
+
+### iosフォルダの外側のフォルダがリンクされる
+
+更にこのConfig Pluginの凄い点が、ターゲットのソースコードをiosフォルダの外側に配置したままターゲットの開発ができるという点です。
+
+Managed Workflowでは`ios`フォルダはプロジェクトで管理されないため、ターゲットのソースコードはその外側のいずれかのフォルダに用意しておく形になります(expo-apple-targetsを使う場合は`targets`フォルダ)。これをPrebuild時に反映させるとなると、普通に考えたらそのフォルダの中身をiosフォルダ配下にコピーするやり方を考えると思います。確かにその方法でターゲットの追加は実現できるのですが、開発時に難点が出てきます。開発をするにはiosフォルダが存在する状態で行う必要があるため、一度Prebuildを行いそれをXCodeで開いて行う形になります。その場合に、開発が完了したら都度変更をまた元のフォルダにコピーしておく必要が出てきます。
+
+expo-apple-targetsは外側のソースフォルダを参照する仮想フォルダ(`expo:targets/`フォルダ)を作成することでこの問題を解決しています。一度Prebuildしたあと`expo:targets/`フォルダの下でそのまま開発を行えば、自動で外側の参照先(targetsフォルダ)に反映されるというわけです。
+
+
+### 内部的な仕組み
+
+この仮想フォルダは内部的にどう実現しているか、興味があったので調べてみました。
+
+apple-targets pluginで`expo:targets`フォルダを追加しているソースコード上の箇所が以下になります。
+[https://github.com/EvanBacon/expo-apple-targets/blob/2f4071ccce472be456c524984d76886e10e33608/packages/apple-targets/src/withXcodeChanges.ts#L1256-L1260](https://github.com/EvanBacon/expo-apple-targets/blob/2f4071ccce472be456c524984d76886e10e33608/packages/apple-targets/src/withXcodeChanges.ts#L1256-L1260)
+
+```ts
+const protectedGroup =
+  hasProtectedGroup ??
+  PBXGroup.create(project, {
+    name: PROTECTED_GROUP_NAME,
+    path: relativePath,
+    sourceTree: "<group>",
+  });
+```
+
+pbxprojファイルにおいて`PBXGroup`はフォルダ構造を表すオブジェクトで、簡単に言うとXcodeのナビゲーターに表示されるフォルダ（グループ）」の情報をまとめたものです。これは実際のファイルシステム上のフォルダと必ずしも一致するものではなく、見た目上で整理するためのものです。
+
+`PBXGroup.create()`のオプションで`path`に`relativePath`を指定していますが、ここで`../targets`を指定することにより、外側の`targets`フォルダを参照しています。
+
+
+apple-targetsが実行されたあとのpbxprojファイルの一部を確認すると、以下のようになっていました。
+```json
+/* Begin PBXGroup section */
+    ...
+		83CBB9F61A601CBA00E9B192 = {
+			isa = PBXGroup;
+			children = (
+				XX3E41C1850246162C0061XX /* expo:targets */,
+				13B07FAE1A68108700A75B9A /* expoappletargetexample */,
+				832341AE1AAA6A7D00B99B32 /* Libraries */,
+				83CBBA001A601CBA00E9B192 /* Products */,
+				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+				D65327D7A22EEC0BE12398D9 /* Pods */,
+				D7E4C46ADA2E9064B798F356 /* ExpoModulesProviders */,
+			);
+			indentWidth = 2;
+			sourceTree = "<group>";
+			tabWidth = 2;
+			usesTabs = 0;
+		};
+
+    ...
+
+		XX3E41C1850246162C0061XX /* expo:targets */ = {
+			isa = PBXGroup;
+			children = (
+				XX08DA6D6DA49836604740XX /* widget */,
+			);
+			name = "expo:targets";
+			path = ../targets;  /*
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+```
+
+`../targets`を参照する`expo:targets`PBXGroupが追加されており、それがメインのPBXGroupの子として追加されています。
+
+
+
+この`expo:targets`グループに対し、`targets`フォルダで用意しておいた各ターゲットが追加されます。[https://github.com/EvanBacon/expo-apple-targets/blob/2f4071ccce472be456c524984d76886e10e33608/packages/apple-targets/src/config-plugin.ts#L30-L66](https://github.com/EvanBacon/expo-apple-targets/blob/2f4071ccce472be456c524984d76886e10e33608/packages/apple-targets/src/config-plugin.ts#L30-L66)
+
+
+以下でPrebuildでapple-targets pluginが実行された時にpbxprojファイルに対して行う変更を差分として上げてみたので、興味ある方は参照してください(ターゲットはWidget Extensionが一つ存在する状態)。
+[https://github.com/gaishimo/expo-apple-target-example/commit/bfdc0d7c5c6d7efef31757c168913e21ee9c5054](https://github.com/gaishimo/expo-apple-target-example/commit/bfdc0d7c5c6d7efef31757c168913e21ee9c5054)
+
+
+
+
