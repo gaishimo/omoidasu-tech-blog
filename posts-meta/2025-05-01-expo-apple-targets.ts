@@ -31,7 +31,7 @@ exports.meta = {
     "2022-10-16-eas-config-plugin-podfile",
   ],
   lastUpdatedAt: parse(
-    "2025-05-01 14:26:37 +09:00",
+    "2025-05-03 13:48:30 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
