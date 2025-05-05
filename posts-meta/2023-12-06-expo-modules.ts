@@ -2,14 +2,9 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
-  id: "expo-modules",
+  id: "2023-12-06-expo-modules",
   title: "Expo Modulesとは?",
-  tagNames: [
-    "react-native",
-    "expo",
-    "expo-modules",
-    "react",
-  ],
+  tagNames: ["react-native", "expo", "expo-modules", "react"],
   color1: "#80CBC4",
   color2: "rgb(220, 220, 220)",
   createdAt: parse(
@@ -29,4 +24,3 @@ exports.meta = {
     new Date(),
   ),
 }
-

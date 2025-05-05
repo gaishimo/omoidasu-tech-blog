@@ -2,6 +2,7 @@
 const { parse } = require("date-fns")
 
 exports.meta = {
+  id: "2020-12-04-expo-client-apk",
   title: "AndroidのExpo ClientアプリをAPKで直接インストールする",
   tagNames: ["expo", "react-native"],
   color1: "#1364B1",
