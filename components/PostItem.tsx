@@ -37,7 +37,7 @@ export function PostItem(props: Props) {
                 key={i}
                 style={styles.tag}
                 accessibilityRole="link"
-                href={`/tags/${tagName}`}
+                href={`/tags/${tagName.toLowerCase()}`}
               >
                 <Tag name={tagName} />
               </View>
