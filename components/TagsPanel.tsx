@@ -30,7 +30,7 @@ export function TagsPanel(props: Props) {
           <View
             key={tag.id}
             accessibilityRole="link"
-            href={`/tags/${tag.id}`}
+            href={`/tags/${tag.id.toLowerCase()}`}
             style={styles.item}
           >
             <Text style={styles.itemText}>
