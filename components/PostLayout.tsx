@@ -62,7 +62,7 @@ export function PostLayout(props: Props) {
             {props.children}
             <View style={styles.likeButton}>
               <WithSkia
-                delay={1700}
+                delay={3500}
                 getComponent={() => import("./LikeButtonWithAction")}
                 fallback={() => null}
               />
