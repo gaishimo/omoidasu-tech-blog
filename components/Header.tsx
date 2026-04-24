@@ -1,13 +1,22 @@
 // import { useMediaQuery } from "react-responsive"
-import { Image, StyleSheet, Text, View } from "react-native"
+import { Image, Linking, StyleSheet, Text, View } from "react-native"
 import useMedia from "use-media"
 
 type Props = {
   useH1?: boolean
 }
 
+const DEVELOPMENT_URL = "https://omoidasu.co.jp/development"
+
 export function Header(props: Props) {
   const isSmallScreen = useMedia({ maxWidth: 700 })
+  const openDevelopmentPage = () => {
+    if (typeof window !== "undefined") {
+      window.open(DEVELOPMENT_URL, "_blank", "noopener,noreferrer")
+      return
+    }
+    Linking.openURL(DEVELOPMENT_URL)
+  }
 
   return (
     <header>
@@ -38,12 +47,11 @@ export function Header(props: Props) {
           </Text>
           <Text
             accessibilityRole="link"
-            href="https://omoidasu.co.jp/development"
-            rel="noopener noreferrer"
-            target="_blank"
+            onPress={openDevelopmentPage}
             style={styles.link}
           >
-            アプリ開発依頼
+            {"アプリ開発依頼 "}
+            <Text style={styles.externalLinkIcon}>↗</Text>
           </Text>
         </View>
       </View>
@@ -82,4 +90,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   link: { marginBottom: 4, marginHorizontal: 8, fontSize: 12 },
+  externalLinkIcon: {
+    color: "rgb(150, 150, 150)",
+    fontSize: 11,
+  },
 })

@@ -1,6 +1,6 @@
 import { format } from "date-fns"
 import { Fragment, ReactNode, useCallback } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { Linking, StyleSheet, Text, View } from "react-native"
 import useMedia from "use-media"
 import { Colors } from "../libs/colors"
 import { Post } from "../typings/Post"
@@ -20,9 +20,18 @@ type Props = {
   meta: Post
 }
 
+const DEVELOPMENT_URL = "https://omoidasu.co.jp/development"
+
 export function PostLayout(props: Props) {
   const isSmallScreen = useMedia({ maxWidth: 700 })
   const isMediumScreen = useMedia({ minWidth: 700, maxWidth: 1200 })
+  const openDevelopmentPage = useCallback(() => {
+    if (typeof window !== "undefined") {
+      window.open(DEVELOPMENT_URL, "_blank", "noopener,noreferrer")
+      return
+    }
+    Linking.openURL(DEVELOPMENT_URL)
+  }, [])
 
   const renderHeadline = (headline: Headline) => (
     <Fragment key={headline.title}>
@@ -104,11 +113,10 @@ export function PostLayout(props: Props) {
                   <Text
                     accessibilityRole="link"
                     style={styles.linkText}
-                    href="https://omoidasu.co.jp/ja/apps"
-                    rel="noopener noreferrer"
-                    target="_blank"
+                    onPress={openDevelopmentPage}
                   >
-                    アプリ一覧
+                    {"React Nativeアプリの開発依頼はこちら "}
+                    <Text style={styles.externalLinkIcon}>↗</Text>
                   </Text>
                 </Text>
               </View>
@@ -123,6 +131,16 @@ export function PostLayout(props: Props) {
                       renderHeadline(headline),
                     )}
                   </View>
+                </View>
+                <View style={styles.sidebarLinkContainer}>
+                  <Text
+                    accessibilityRole="link"
+                    style={styles.sidebarLink}
+                    onPress={openDevelopmentPage}
+                  >
+                    {"React Nativeアプリの\n開発依頼はこちら "}
+                    <Text style={styles.externalLinkIcon}>↗</Text>
+                  </Text>
                 </View>
               </View>
             </View>
@@ -182,6 +200,20 @@ const styles = StyleSheet.create({
   headlineLink: {
     color: Colors.textColor1,
     fontSize: 13,
+  },
+  sidebarLinkContainer: {
+    marginTop: 16,
+    alignItems: "center",
+  },
+  sidebarLink: {
+    color: "rgb(60, 26, 130)",
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: "center",
+  },
+  externalLinkIcon: {
+    color: "rgb(150, 150, 150)",
+    fontSize: 12,
   },
   subPanels: { marginTop: 100 },
   relatedPostsPanel: {},
