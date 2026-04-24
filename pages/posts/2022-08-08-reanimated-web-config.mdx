@@ -1,8 +1,8 @@
 import { parse, parseISO } from "date-fns"
 import { PostLayout } from "../../components/PostLayout"
 import { ImageWrapper } from "../../components/atoms/ImageWrapper"
-import { ReanimatedSample } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSample"
 import { View, Text, ActivityIndicator } from "react-native"
+import { ReanimatedSampleDemo } from "../../components/pages/2022-08-08-reanimated-web-config/ReanimatedSampleDemo"
 import { meta } from "../../posts-meta/2022-08-08-reanimated-web-config"
 
 
@@ -30,7 +30,7 @@ Next.js (React Native Web)でreact-native-reanimatedを使えるようにする�
 
 
 <View style={{ marginTop: 32, marginBottom: 40 }}>
-  <ReanimatedSample />
+  <ReanimatedSampleDemo />
 </View>
 
 ライブラリのバージョンは以下です。
@@ -221,7 +221,7 @@ Webpackの設定で以下を追加したら解決しました。
 
 
 <View style={{ marginTop: 32 }}>
-  <ReanimatedSample />
+  <ReanimatedSampleDemo />
 </View>
 
 ボタンを押すと横にランダムでSpringアニメーションします。

@@ -4,7 +4,7 @@
 
 Site: https://blog.omoidasu.dev
 Language: ja
-Last-Updated: 2025-05-03
+Last-Updated: 2026-04-24
 
 このファイルは、AIアシスタントやクローラがこのサイトの主要コンテンツを素早く把握できるようにするための案内です。
 記事本文は各URL先を参照してください。サイト全体の更新検知には sitemap.xml と feed.xml も利用できます。
@@ -26,7 +26,7 @@ Last-Updated: 2025-05-03
 - [Expo Modulesとは?](https://blog.omoidasu.dev/posts/2023-12-06-expo-modules): Updated: 2025-04-12 / Tags: react-native, expo, expo-modules, react / React Nativeのネイティブモジュールを作成する仕組みであるExpo Modulesの概要について説明します。
 - [React Native Skiaでテキストを背景色に合わせて反転させる](https://blog.omoidasu.dev/posts/2023-03-19-inverted-text): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia / React Native Skiaでテキストカラーを背景色に合わせて部分的に反転させる方法についてです。
 - [React Native Skiaで円の枠線に対してグラデーションをかける](https://blog.omoidasu.dev/posts/2022-12-04-circle-gradient): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, グラデーション / 最近様々なサイトやロゴでみかける、円の枠線にかかるグラデーションをReact Native Skiaで実装してみます。
-- [React Nativeでコインの裏表を回転させるアニメーション](https://blog.omoidasu.dev/posts/2022-10-30-coin-rotate-animation): Updated: 2022-10-30 / Tags: react-native, react-native-reanimated, react, アニメーション, 3D / react-native-reanimatedでコインの裏表が回転するアニメーションを表現してみます。
+- [React Nativeでコインの裏表を回転させるアニメーション](https://blog.omoidasu.dev/posts/2022-10-30-coin-rotate-animation): Updated: 2026-04-24 / Tags: react-native, react-native-reanimated, react, アニメーション, 3D / react-native-reanimatedでコインの裏表が回転するアニメーションを表現してみます。
 - [react-native-skiaで丸みのついた折れ線グラフを実現する](https://blog.omoidasu.dev/posts/2022-10-19-skia-curved-line-chart): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, react, アニメーション, d3-shape / React Native Skiaでカーブのついた折れ線グラフを実現したいと思います。d3-shapeを使います。
 - [ExpoのConfig PluginでPodfileを直接書き換える](https://blog.omoidasu.dev/posts/2022-10-16-eas-config-plugin-podfile): Updated: 2022-10-16 / Tags: react-native, expo, EAS Build, Config Plugin, CocoaPod / ExpoのConfig PluginでPodfileを直接書き換える方法です。
 
@@ -41,7 +41,7 @@ Last-Updated: 2025-05-03
 - [Expo Modulesとは?](https://blog.omoidasu.dev/posts/2023-12-06-expo-modules): Updated: 2025-04-12 / Tags: react-native, expo, expo-modules, react / React Nativeのネイティブモジュールを作成する仕組みであるExpo Modulesの概要について説明します。
 - [React Native Skiaでテキストを背景色に合わせて反転させる](https://blog.omoidasu.dev/posts/2023-03-19-inverted-text): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia / React Native Skiaでテキストカラーを背景色に合わせて部分的に反転させる方法についてです。
 - [React Native Skiaで円の枠線に対してグラデーションをかける](https://blog.omoidasu.dev/posts/2022-12-04-circle-gradient): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, グラデーション / 最近様々なサイトやロゴでみかける、円の枠線にかかるグラデーションをReact Native Skiaで実装してみます。
-- [React Nativeでコインの裏表を回転させるアニメーション](https://blog.omoidasu.dev/posts/2022-10-30-coin-rotate-animation): Updated: 2022-10-30 / Tags: react-native, react-native-reanimated, react, アニメーション, 3D / react-native-reanimatedでコインの裏表が回転するアニメーションを表現してみます。
+- [React Nativeでコインの裏表を回転させるアニメーション](https://blog.omoidasu.dev/posts/2022-10-30-coin-rotate-animation): Updated: 2026-04-24 / Tags: react-native, react-native-reanimated, react, アニメーション, 3D / react-native-reanimatedでコインの裏表が回転するアニメーションを表現してみます。
 - [react-native-skiaで丸みのついた折れ線グラフを実現する](https://blog.omoidasu.dev/posts/2022-10-19-skia-curved-line-chart): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, react, アニメーション, d3-shape / React Native Skiaでカーブのついた折れ線グラフを実現したいと思います。d3-shapeを使います。
 - [ExpoのConfig PluginでPodfileを直接書き換える](https://blog.omoidasu.dev/posts/2022-10-16-eas-config-plugin-podfile): Updated: 2022-10-16 / Tags: react-native, expo, EAS Build, Config Plugin, CocoaPod / ExpoのConfig PluginでPodfileを直接書き換える方法です。
 - [ExpoのManaged WorkflowでAndroid 13のThemed Iconsを設定する](https://blog.omoidasu.dev/posts/2022-10-12-android-13-themed-icon): Updated: 2022-10-12 / Tags: react-native, expo, EAS Build, Config Plugin, Android13, Themed Icons / ExpoのManaged WorkflowでAndroid 13のThemed Iconを設定する方法です。
