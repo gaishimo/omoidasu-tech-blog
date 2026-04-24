@@ -20,7 +20,7 @@ export async function getStaticProps() {
 
 export default function IndexPage(props: Props) {
   return (
-    <BaseLayout>
+    <BaseLayout path="/">
       <View style={styles.container}>
         <View style={styles.desc}>
           <Text style={styles.descText}>

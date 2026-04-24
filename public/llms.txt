@@ -1,0 +1,70 @@
+# Omoidasu Tech Blog
+
+> Omoidasu, Inc.の技術ブログです。React Native、Expo、Skia、iOS/Androidアプリ開発まわりの実装知見を中心に、日本語で公開しています。
+
+Site: https://blog.omoidasu.dev
+Language: ja
+Last-Updated: 2026-04-24
+
+このファイルは、AIアシスタントやクローラがこのサイトの主要コンテンツを素早く把握できるようにするための案内です。
+記事本文は各URL先を参照してください。サイト全体の更新検知には sitemap.xml と feed.xml も利用できます。
+
+## Key Pages
+
+- [Home](https://blog.omoidasu.dev/): 技術ブログのトップページ。新着記事一覧があります。
+- [Sitemap](https://blog.omoidasu.dev/sitemap.xml): すべての主要ページの一覧。
+- [Feed](https://blog.omoidasu.dev/feed.xml): 更新検知向けのAtomフィード。
+
+## Recent Posts
+
+- [expo-apple-targetsの凄さ](https://blog.omoidasu.dev/posts/2025-05-01-expo-apple-targets): Updated: 2025-05-03 / Tags: react-native, expo, config-plugin, ios, xcode, pbxproj / iOSのWidgetやApp Clip等のターゲットをManaged Workflowで利用するためのConfig Pluginであるexpo-apple-targetsが凄かったため、それについて書きます。
+- [ExpoのEASで開発ビルドのTestFlight配布を試してみた](https://blog.omoidasu.dev/posts/2025-04-29-eas-devclient-testflight): Updated: 2025-05-02 / Tags: react-native, expo, EAS Build, DevClient, TestFlight, iOS / Expo SDK 53からEAS DevClientがTestFlightで配布できるようなったため試してみました。
+- [ブログにLikeボタンを追加した](https://blog.omoidasu.dev/posts/2025-04-27-like-button): Updated: 2025-05-01 / Tags: react-native, skia, react-native-skia, react, react-native-reanimated, アニメーション, ベジェ曲線 / ブログ記事にLikeボタンを追加して、React Native SkiaとNext.jsで実装した方法について解説します。
+- [当ブログの背景に桜を舞い散らせた](https://blog.omoidasu.dev/posts/2025-04-09-sakura-fluttering): Updated: 2025-04-13 / Tags: react-native, skia, react-native-skia, react, atlas, アニメーション / React Native Skiaを使って当ブログの背景に桜の花びらを舞い散らせるエフェクトを実装しました。
+- [React Native SkiaのAtlasについて](https://blog.omoidasu.dev/posts/2025-03-20-skia-atlas): Updated: 2025-03-30 / Tags: react-native, skia, react-native-skia, react, アニメーション, atlas / React Native SkiaのAtlasでは大量の画像を効率的に描画することが可能です。
+- [当ブログのシステムを更新しました](https://blog.omoidasu.dev/posts/2025-03-16-blog-system-update): Updated: 2025-03-28 / Tags: react-native, skia, react-native-skia, react-native-reanimated, react, アニメーション, blog, Cursor, Next.js, react-native-web / 当ブログのシステムを更新しました。
+- [Expo Modulesとは?](https://blog.omoidasu.dev/posts/2023-12-06-expo-modules): Updated: 2025-04-12 / Tags: react-native, expo, expo-modules, react / React Nativeのネイティブモジュールを作成する仕組みであるExpo Modulesの概要について説明します。
+- [React Native Skiaでテキストを背景色に合わせて反転させる](https://blog.omoidasu.dev/posts/2023-03-19-inverted-text): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia / React Native Skiaでテキストカラーを背景色に合わせて部分的に反転させる方法についてです。
+- [React Native Skiaで円の枠線に対してグラデーションをかける](https://blog.omoidasu.dev/posts/2022-12-04-circle-gradient): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, グラデーション / 最近様々なサイトやロゴでみかける、円の枠線にかかるグラデーションをReact Native Skiaで実装してみます。
+- [React Nativeでコインの裏表を回転させるアニメーション](https://blog.omoidasu.dev/posts/2022-10-30-coin-rotate-animation): Updated: 2026-04-24 / Tags: react-native, react-native-reanimated, react, アニメーション, 3D / react-native-reanimatedでコインの裏表が回転するアニメーションを表現してみます。
+- [react-native-skiaで丸みのついた折れ線グラフを実現する](https://blog.omoidasu.dev/posts/2022-10-19-skia-curved-line-chart): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, react, アニメーション, d3-shape / React Native Skiaでカーブのついた折れ線グラフを実現したいと思います。d3-shapeを使います。
+- [ExpoのConfig PluginでPodfileを直接書き換える](https://blog.omoidasu.dev/posts/2022-10-16-eas-config-plugin-podfile): Updated: 2022-10-16 / Tags: react-native, expo, EAS Build, Config Plugin, CocoaPod / ExpoのConfig PluginでPodfileを直接書き換える方法です。
+
+## Featured Posts
+
+- [expo-apple-targetsの凄さ](https://blog.omoidasu.dev/posts/2025-05-01-expo-apple-targets): Updated: 2025-05-03 / Tags: react-native, expo, config-plugin, ios, xcode, pbxproj / iOSのWidgetやApp Clip等のターゲットをManaged Workflowで利用するためのConfig Pluginであるexpo-apple-targetsが凄かったため、それについて書きます。
+- [ExpoのEASで開発ビルドのTestFlight配布を試してみた](https://blog.omoidasu.dev/posts/2025-04-29-eas-devclient-testflight): Updated: 2025-05-02 / Tags: react-native, expo, EAS Build, DevClient, TestFlight, iOS / Expo SDK 53からEAS DevClientがTestFlightで配布できるようなったため試してみました。
+- [ブログにLikeボタンを追加した](https://blog.omoidasu.dev/posts/2025-04-27-like-button): Updated: 2025-05-01 / Tags: react-native, skia, react-native-skia, react, react-native-reanimated, アニメーション, ベジェ曲線 / ブログ記事にLikeボタンを追加して、React Native SkiaとNext.jsで実装した方法について解説します。
+- [当ブログの背景に桜を舞い散らせた](https://blog.omoidasu.dev/posts/2025-04-09-sakura-fluttering): Updated: 2025-04-13 / Tags: react-native, skia, react-native-skia, react, atlas, アニメーション / React Native Skiaを使って当ブログの背景に桜の花びらを舞い散らせるエフェクトを実装しました。
+- [React Native SkiaのAtlasについて](https://blog.omoidasu.dev/posts/2025-03-20-skia-atlas): Updated: 2025-03-30 / Tags: react-native, skia, react-native-skia, react, アニメーション, atlas / React Native SkiaのAtlasでは大量の画像を効率的に描画することが可能です。
+- [当ブログのシステムを更新しました](https://blog.omoidasu.dev/posts/2025-03-16-blog-system-update): Updated: 2025-03-28 / Tags: react-native, skia, react-native-skia, react-native-reanimated, react, アニメーション, blog, Cursor, Next.js, react-native-web / 当ブログのシステムを更新しました。
+- [Expo Modulesとは?](https://blog.omoidasu.dev/posts/2023-12-06-expo-modules): Updated: 2025-04-12 / Tags: react-native, expo, expo-modules, react / React Nativeのネイティブモジュールを作成する仕組みであるExpo Modulesの概要について説明します。
+- [React Native Skiaでテキストを背景色に合わせて反転させる](https://blog.omoidasu.dev/posts/2023-03-19-inverted-text): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia / React Native Skiaでテキストカラーを背景色に合わせて部分的に反転させる方法についてです。
+- [React Native Skiaで円の枠線に対してグラデーションをかける](https://blog.omoidasu.dev/posts/2022-12-04-circle-gradient): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, グラデーション / 最近様々なサイトやロゴでみかける、円の枠線にかかるグラデーションをReact Native Skiaで実装してみます。
+- [React Nativeでコインの裏表を回転させるアニメーション](https://blog.omoidasu.dev/posts/2022-10-30-coin-rotate-animation): Updated: 2026-04-24 / Tags: react-native, react-native-reanimated, react, アニメーション, 3D / react-native-reanimatedでコインの裏表が回転するアニメーションを表現してみます。
+- [react-native-skiaで丸みのついた折れ線グラフを実現する](https://blog.omoidasu.dev/posts/2022-10-19-skia-curved-line-chart): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, react, アニメーション, d3-shape / React Native Skiaでカーブのついた折れ線グラフを実現したいと思います。d3-shapeを使います。
+- [ExpoのConfig PluginでPodfileを直接書き換える](https://blog.omoidasu.dev/posts/2022-10-16-eas-config-plugin-podfile): Updated: 2022-10-16 / Tags: react-native, expo, EAS Build, Config Plugin, CocoaPod / ExpoのConfig PluginでPodfileを直接書き換える方法です。
+- [ExpoのManaged WorkflowでAndroid 13のThemed Iconsを設定する](https://blog.omoidasu.dev/posts/2022-10-12-android-13-themed-icon): Updated: 2022-10-12 / Tags: react-native, expo, EAS Build, Config Plugin, Android13, Themed Icons / ExpoのManaged WorkflowでAndroid 13のThemed Iconを設定する方法です。
+- [ExpoのConfig PluginをTypeScriptで開発する環境を整える](https://blog.omoidasu.dev/posts/2022-10-08-config-plugin-dev-settings): Updated: 2025-04-12 / Tags: react-native, expo, Config Plugin, EAS Build, typescript / ExpoのConfig PluginをTypeScriptで開発するための環境設定について説明します。
+- [ExpoのManaged Workflowでビルド時の設定値(ターゲットOSバージョン等)を変更する](https://blog.omoidasu.dev/posts/2022-10-05-eas-managed-os-versions): Updated: 2022-10-05 / Tags: react-native, expo, EAS Build, Config Plugin, Managed Workflow / ExpoのManaged Workflowにおいてexpo-build-propertiesでAndroidのminSdkVersionやiOSのターゲットバージョンを設定する方法です。
+- [React NativeでCustom Hapticsを使う (iOS)](https://blog.omoidasu.dev/posts/2022-10-02-custom-haptic-ios): Updated: 2022-10-03 / Tags: react-native, haptic, custom haptic / React Nativeで独自のCustom Hapticsを使う方法について説明します(iOS)。
+- [ExpoのManaged Workflowでreact-native-videoのExoPlayerを使う設定](https://blog.omoidasu.dev/posts/2022-09-27-eas-managed-exo-player): Updated: 2022-10-05 / Tags: react-native, expo, EAS Build, Config Plugin, react-native-video / react-native-videoのv5系でExoPlayerを使うための設定です。
+- [react-native-skiaで三次ベジェ曲線を描く](https://blog.omoidasu.dev/posts/2022-09-21-cubic-bezier-curve): Updated: 2025-03-30 / Tags: react-native, skia, react-native-skia, ベジェ曲線, アニメーション / react-native-skiaで三次ベジェ曲線を描く方法について説明します。
+- [react-native-skiaで二次ベジェ曲線を描く](https://blog.omoidasu.dev/posts/2022-09-18-quadratic-bezier-curve): Updated: 2025-03-30 / Tags: react-native, skia, react-native-skia, ベジェ曲線, アニメーション / React Native Skiaで二次ベジェ曲線を描く方法について説明します。アニメーションもしてみます。
+- [Skiaでぼんやり光るライトを表現する](https://blog.omoidasu.dev/posts/2022-09-14-skia-dimly-glowing-light): Updated: 2025-03-16 / Tags: react-native, skia, react-native-skia, アニメーション / react-native-skiaでぼんやり光るライトを表現してみたいと思います。
+- [Reactのロゴをreact-native-skiaでアニメーションさせてみる](https://blog.omoidasu.dev/posts/2022-09-11-dynamic-react-logo): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, react, アニメーション / Reactロゴをreact-native-skiaでアニメーションさせて遊んでみました。楕円上を小さな円が周ります。
+- [react-native-skiaでチェックマークアニメーションを実装する](https://blog.omoidasu.dev/posts/2022-09-06-done-animation): Updated: 2025-03-29 / Tags: react-native, skia, react-native-skia, アニメーション, アニメーション再現, 模倣してみる / iOSでの購入時等に表示される、チェックマークが描かれるアニメーションを再現してみたいと思います。
+- [react-nativeで絵文字を選択するためのライブラリrn-emoji-selector](https://blog.omoidasu.dev/posts/2022-09-04-rn-emoji-keyboard): Updated: 2022-09-08 / Tags: react-native, emoji, ライブラリ / 先日のReact Native EU 2022で絵文字を選択するためのライブラリrn-emoji-keyboardが紹介されていました。
+- [react-native-skiaでRipple Effectボタンを作成する](https://blog.omoidasu.dev/posts/2022-09-02-ripple-effect-button): Updated: 2025-03-29 / Tags: react-native, react-native-skia, アニメーション, ripple effect / Material UIでも使われているRipple Effectのボタンをreact-native-skiaで作成してみます。
+- [react-native-skiaでSkeleton Screenを作成する](https://blog.omoidasu.dev/posts/2022-08-30-skia-skeleton-screen): Updated: 2025-03-16 / Tags: react-native, react-native-skia, アニメーション, グラデーション, Skeleton Screen / react-native-skiaのグラデーションとアニメーションを使い、ロード中表示用のSkeleton Screenを実装します。
+- [react-native-skiaでテキストにグラデーションをかける](https://blog.omoidasu.dev/posts/2022-08-28-text-gradient): Updated: 2025-03-16 / Tags: react-native, react-native-skia, アニメーション, グラデーション / react-native-skiaでテキストにグラデーションをかける方法です。アニメーションも試してみます。
+- [react-native-skiaで収縮する円を表現する](https://blog.omoidasu.dev/posts/2022-08-24-shrinking-circle): Updated: 2025-04-12 / Tags: react-native, react-native-skia, アニメーション, 模倣してみる / 様々なアプリやサービスで見かける、収縮する小さな円（ライト)をreact-native-skiaで表現してみます。
+- [React Nativeでカスタムフォントのweight設定をする](https://blog.omoidasu.dev/posts/2022-08-22-custom-font-weight): Updated: 2022-08-23 / Tags: react-native, font, カスタムフォント / React Nativeでカスタムフォントを利用した時に、Textに指定したweightに応じて変化させる方法です。
+- [react-native-skiaでドロップシャドウをつける](https://blog.omoidasu.dev/posts/2022-08-20-rn-skia-shadow): Updated: 2022-09-02 / Tags: react-native-skia, シャドウ, react-native / react-native-skiaでドロップシャドウをつける方法です。
+- [ブログにreact-native-skiaを導入しました🎨](https://blog.omoidasu.dev/posts/2022-08-07-rn-skia-in-blog): Updated: 2025-03-16 / Tags: react-native-skia, next.js, react-native, skia, blog, react-native-web / 2DグラフィックライブラリをReact Nativeで扱うためのreact-native-skiaを当ブログに導入しました
+- [Expo (EAS Build)でAndroid・iOSのWidgetを作成した](https://blog.omoidasu.dev/posts/2022-07-25-eas-widget): Updated: 2025-04-12 / Tags: react-native, expo, EAS Build, widget, extension / ExpoのManaged WorkflowでWidget(iOS / Android)を作成する方法について説明します。
+- [ExpoのManaged Workflowでアプリ内課金を実装する](https://blog.omoidasu.dev/posts/2021-08-29-eas-iap): Updated: 2022-09-25 / Tags: expo, react-native, eas, EAS Build / ExpoのEAS Buildで、Managed Workflowプロジェクトに対してアプリ内課金を実装する手順について説明します。
+
+## Optional
+
+- [Tags index](https://blog.omoidasu.dev/): 各記事ページやタグページから関連記事を辿れます。
