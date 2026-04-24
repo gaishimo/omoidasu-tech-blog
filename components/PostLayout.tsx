@@ -76,6 +76,16 @@ export function PostLayout(props: Props) {
                 fallback={() => null}
               />
             </View>
+            <View style={styles.bottomLinkContainer}>
+              <Text
+                accessibilityRole="link"
+                style={styles.bottomLink}
+                onPress={openDevelopmentPage}
+              >
+                {"React Nativeアプリの開発依頼はこちら "}
+                <Text style={styles.externalLinkIcon}>↗</Text>
+              </Text>
+            </View>
             <View style={styles.subPanels}>
               <RelatedPostsPanel
                 id={props.meta.id}
@@ -166,6 +176,16 @@ const styles = StyleSheet.create({
   likeButton: {
     marginTop: 40,
     height: 60,
+  },
+  bottomLinkContainer: {
+    marginTop: 88,
+    alignItems: "flex-start",
+  },
+  bottomLink: {
+    color: "rgb(60, 26, 130)",
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: "left",
   },
   footer: {
     marginTop: 56,
