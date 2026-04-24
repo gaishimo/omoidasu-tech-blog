@@ -1,15 +1,16 @@
 {
   "private": true,
+  "packageManager": "bun@1.2.12",
   "scripts": {
-    "dev": "yarn generate-data-json && yarn generate-llms-txt && next",
+    "dev": "bun run generate-data-json && bun run generate-llms-txt && next",
     "build": "next build",
     "start": "next start",
-    "postinstall": "patch-package && yarn generate-data-json && yarn generate-llms-txt",
-    "prebuild": "yarn generate-data-json && yarn update-last-updated && yarn generate-llms-txt",
-    "create-post": "node scripts/generateNewPost.cjs",
-    "generate-data-json": "node scripts/generatePostsAndTagsJson.cjs",
-    "generate-llms-txt": "node scripts/generateLlmsTxt.cjs",
-    "update-last-updated": "node scripts/syncLastUpdatedAt.cjs"
+    "postinstall": "patch-package && bun run generate-data-json && bun run generate-llms-txt",
+    "prebuild": "bun run generate-data-json && bun run update-last-updated && bun run generate-llms-txt",
+    "create-post": "bun scripts/generateNewPost.cjs",
+    "generate-data-json": "bun scripts/generatePostsAndTagsJson.cjs",
+    "generate-llms-txt": "bun scripts/generateLlmsTxt.cjs",
+    "update-last-updated": "bun scripts/syncLastUpdatedAt.cjs"
   },
   "dependencies": {
     "@babel/core": "~7.26.9",

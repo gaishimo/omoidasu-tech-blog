@@ -15,12 +15,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: yarn
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.2.12
 
       - name: Install Deps
-        run: yarn install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Submit Sitemap
-        run: node scripts/submitSitemap.mjs
+        run: bun scripts/submitSitemap.mjs
         env:
           SERVICE_ACCOUNT_BASE64: ${{ secrets.SERVICE_ACCOUNT_BASE64 }}
