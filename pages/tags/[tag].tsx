@@ -44,7 +44,7 @@ export default function TagPage(props: Props) {
   )
 
   return (
-    <BaseLayout>
+    <BaseLayout path={tag ? `/tags/${tag}` : "/tags"}>
       <View style={styles.container}>
         <View style={styles.desc}>
           <Text style={styles.descText}>

@@ -57,6 +57,7 @@ export function PostLayout(props: Props) {
       title={`${props.meta.title} | Omoidasu Tech Blog`}
       description={props.meta.description}
       imagePath={props.meta.imagePath}
+      path={`/posts/${props.meta.id}`}
     >
       <View style={[styles.container, isSmallScreen && styles.containerSmall]}>
         <View

@@ -12,6 +12,7 @@ type Props = {
   description?: string
   title?: string
   imagePath?: string
+  path?: string
 }
 
 const DEFAULT_TITLE = "Omoidasu Tech Blog"
@@ -28,6 +29,7 @@ const currentHostName = isBrowser()
   : Constants.SITE_HOSTNAME
 
 export function BaseLayout(props: Props) {
+  const canonicalUrl = `https://${currentHostName}${props.path || ""}`
   const ogImageUrl = props.imagePath
     ? `https://${currentHostName}${props.imagePath}`
     : `https://${currentHostName}/ogImage.png`
@@ -49,7 +51,7 @@ export function BaseLayout(props: Props) {
         />
         <meta property="og:image" content={ogImageUrl} />
         <meta property="og:locale" content="ja_JP" />
-        <meta property="og:url" content={`https://${currentHostName}`} />
+        <meta property="og:url" content={canonicalUrl} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={props.title || DEFAULT_TITLE} />
         <meta
@@ -58,6 +60,10 @@ export function BaseLayout(props: Props) {
         />
         <meta name="twitter:image" content={ogImageUrl} />
         <meta name="theme-color" content="#00D5FF" />
+        <link rel="canonical" href={canonicalUrl} />
+        <link rel="alternate" type="text/plain" href="/llms.txt" />
+        <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
+        <link rel="alternate" type="application/atom+xml" href="/feed.xml" />
 
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/favicon.png" />

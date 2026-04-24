@@ -1,13 +1,14 @@
 {
   "private": true,
   "scripts": {
-    "dev": "yarn generate-data-json && next",
+    "dev": "yarn generate-data-json && yarn generate-llms-txt && next",
     "build": "next build",
     "start": "next start",
-    "postinstall": "patch-package && yarn generate-data-json",
-    "prebuild": "yarn generate-data-json && yarn update-last-updated",
+    "postinstall": "patch-package && yarn generate-data-json && yarn generate-llms-txt",
+    "prebuild": "yarn generate-data-json && yarn update-last-updated && yarn generate-llms-txt",
     "create-post": "node scripts/generateNewPost.cjs",
     "generate-data-json": "node scripts/generatePostsAndTagsJson.cjs",
+    "generate-llms-txt": "node scripts/generateLlmsTxt.cjs",
     "update-last-updated": "node scripts/syncLastUpdatedAt.cjs"
   },
   "dependencies": {
