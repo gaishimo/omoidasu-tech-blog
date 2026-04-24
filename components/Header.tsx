@@ -38,12 +38,12 @@ export function Header(props: Props) {
           </Text>
           <Text
             accessibilityRole="link"
-            href="https://omoidasu.co.jp/ja/apps"
+            href="https://omoidasu.co.jp/development"
             rel="noopener noreferrer"
             target="_blank"
             style={styles.link}
           >
-            アプリ
+            アプリ開発依頼
           </Text>
         </View>
       </View>
