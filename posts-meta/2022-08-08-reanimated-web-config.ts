@@ -17,7 +17,7 @@ exports.meta = {
     "React Native Web(Next.js)でreact-native-reanimatedの設定が意外と大変だったため、記録として残します。",
   relatedPosts: ["2021-09-24-blog-rn-web", "2022-08-07-rn-skia-in-blog"],
   lastUpdatedAt: parse(
-    "2025-04-12 23:11:32 +09:00",
+    "2026-04-24 10:25:44 +09:00",
     "yyyy-MM-dd HH:mm:ss XXX",
     new Date(),
   ),
