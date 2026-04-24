@@ -7,10 +7,11 @@ import { ImageWrapper } from "../../components/atoms/ImageWrapper"
 import { WithSkia } from "../../components/WithSkia"
 import { LoadingRect } from "../../components/LoadingRect"
 import { NextImageWrapper } from "../../components/atoms/NextImageWrapper"
-import { CoinRotateAnimation } from "../../components/pages/2022-10-30-coin-rotate-animation/CoinRotateAnimation"
-import { CoinRotate1 } from "../../components/pages/2022-10-30-coin-rotate-animation/CoinRotate1"
-import { CoinRotate2 } from "../../components/pages/2022-10-30-coin-rotate-animation/CoinRotate2"
-
+import {
+  CoinRotate1Demo,
+  CoinRotate2Demo,
+  CoinRotateAnimationDemo,
+} from "../../components/pages/2022-10-30-coin-rotate-animation/CoinRotateDemoComponents"
 
 import { meta } from "../../posts-meta/2022-10-30-coin-rotate-animation"
 
@@ -30,7 +31,7 @@ export default props => (
 React Nativeでコインの裏表を回転(3D)させるアニメーションを実装します。react-native-reanimatedを利用します。
 
 <View style={{ marginTop: 8, marginBottom: 8 }}>
-  <CoinRotateAnimation />
+  <CoinRotateAnimationDemo />
 </View>
 
 ## 表裏画像を用意
@@ -80,7 +81,7 @@ useEffect(() => {
 ```
 
 <View style={{ marginTop: 0, marginBottom: 16 }}>
-  <CoinRotate1 />
+  <CoinRotate1Demo />
 </View>
 
 ## 回転によって表裏の表示を切り替える
@@ -90,7 +91,7 @@ useEffect(() => {
 以下のスライダーで角度を変更してみるとわかりやすいです。
 
 <View style={{ marginTop: 32, marginBottom: 48 }}>
-  <CoinRotate2 />
+  <CoinRotate2Demo />
 </View>
 
 角度によって表示非表示を切り替えるには`opacity`を利用します。特定の角度のときは1で表示し、それ以外のときは0で非表示にします。また、裏面は表面に対して角度を-180度する必要があります。
@@ -118,7 +119,7 @@ const image2AnimatedStyle = useAnimatedStyle(
 あとは180度回転した後ディレイを入れるようにし、リピートさせれば完成です。
 
 <View style={{ marginTop: 8, marginBottom: 8 }}>
-  <CoinRotateAnimation />
+  <CoinRotateAnimationDemo />
 </View>
 
 全体のコードは以下です。
